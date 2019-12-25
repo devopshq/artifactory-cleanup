@@ -1,0 +1,2 @@
+class PolicyException(Exception):
+    pass
