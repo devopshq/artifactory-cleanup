@@ -21,6 +21,7 @@ setup(
         "prettytable",
         "plumbum",
         "dohq-artifactory",
+        "teamcity-messages",
     ],
     classifiers=[
         "Development Status :: 5 - Production/Stable",
