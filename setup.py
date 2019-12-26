@@ -14,8 +14,8 @@ setup(
     url="https://github.com/devopshq/artifactory-cleanup",
     keywords=["DevOpsHQ"],
     packages=find_packages(exclude=["tests"]),
-    # entry_points={'console_scripts': ['artifactory-cleanup=artifactory_cleanup.__main__:main']},
-    entry_points={'console_scripts': ['artifactory-cleanup=artifactory_cleanup.artifactorycleanup:ArtifactoryCleanup']},
+    entry_points={
+        'console_scripts': ['artifactory-cleanup=artifactory_cleanup.artifactorycleanup:ArtifactoryCleanup.run']},
     install_requires=[
         "hurry.filesize",
         "prettytable",
