@@ -15,7 +15,7 @@ setup(
     keywords=["DevOpsHQ"],
     packages=find_packages(exclude=["tests"]),
     entry_points={
-        'console_scripts': ['artifactory-cleanup=artifactory_cleanup.artifactorycleanup:ArtifactoryCleanup.run']},
+        'console_scripts': ['artifactory-cleanup=artifactory_cleanup.artifactorycleanup:ArtifactoryCleanup']},
     install_requires=[
         "hurry.filesize",
         "prettytable",

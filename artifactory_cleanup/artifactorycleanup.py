@@ -79,7 +79,7 @@ class ArtifactoryCleanup(cli.Application):
         else:
             try:
                 self._config = self._config.replace(".py", "")
-                sys.path.append("..")
+                sys.path.append(".")
                 rules = getattr(importlib.import_module(self._config), "RULES")
             except ImportError as error:
                 print("Error: {}".format(error))
