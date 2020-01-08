@@ -50,7 +50,7 @@ RULES = [
 ```
 3. Run the command to remove artifacts:
 ```bash
-artifactory-cleanup --destroy --auth user:password --artifactory-server https://repo.example.com/artifactory  --config reponame.py
+artifactory-cleanup --destroy --user user --password password --artifactory-server https://repo.example.com/artifactory --config reponame.py
 ```
 More advanced examples and rules see below.
 
@@ -59,19 +59,19 @@ More advanced examples and rules see below.
 ```bash
 # Debug
 # debug run - only print founded artifacts. it do not delete
-artifactory-cleanup --auth user:password --artifactory-server https://repo.example.com/artifactory --config reponame.py
+artifactory-cleanup --user user --password password --artifactory-server https://repo.example.com/artifactory --config reponame.py
 
 # Clean up empty folder
 # --remove-empty-folder
-artifactory-cleanup --remove-empty-folder --auth user:password --artifactory-server https://repo.example.com/artifactory
+artifactory-cleanup --remove-empty-folder --user user --password password --artifactory-server https://repo.example.com/artifactory
 
 # Debug run only for ruletestname. Find any *ruletestname*
 # debug run - only print founded artifacts. it do not delete
-artifactory-cleanup --rule-name ruletestname --auth user:password --artifactory-server https://repo.example.com/artifactory --config reponame.py
+artifactory-cleanup --rule-name ruletestname --user user --password password --artifactory-server https://repo.example.com/artifactory --config reponame.py
 
 # REMOVE
 # For remove artifacts use --destroy
-artifactory-cleanup --destroy --auth user:password --artifactory-server https://repo.example.com/artifactory  --config reponame.py
+artifactory-cleanup --destroy --user user --password password --artifactory-server https://repo.example.com/artifactory  --config reponame.py
 ```
 
 ## Available Rules ##
