@@ -63,6 +63,7 @@ artifactory-cleanup --user user --password password --artifactory-server https:/
 
 # Clean up empty folder
 # --remove-empty-folder
+# You need to use the plugin https://github.com/jfrog/artifactory-user-plugins/tree/master/cleanup/deleteEmptyDirs to delete empty folders
 artifactory-cleanup --remove-empty-folder --user user --password password --artifactory-server https://repo.example.com/artifactory
 
 # Debug run only for ruletestname. Find any *ruletestname*
