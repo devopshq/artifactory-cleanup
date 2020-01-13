@@ -39,7 +39,7 @@ class ArtifactoryCleanup(cli.Application):
     )
 
     _config = cli.SwitchAttr(
-        ["--config"], help="Name of config with list of policies", mandatory=True
+        ["--config"], help="Name of config with list of policies", mandatory=False
     )
 
     _artifactory_server = cli.SwitchAttr(
