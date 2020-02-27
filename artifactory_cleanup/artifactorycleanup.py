@@ -27,11 +27,17 @@ def init_logging():
 
 class ArtifactoryCleanup(cli.Application):
     _user = cli.SwitchAttr(
-        ["--user"], help="Login to access to the artifactory", mandatory=True, envname="ARTIFACTORY_USER"
+        ["--user"],
+        help="Login to access to the artifactory",
+        mandatory=True,
+        envname="ARTIFACTORY_USER",
     )
 
     _password = cli.SwitchAttr(
-        ["--password"], help="Password to access to the artifactory", mandatory=True, envname="ARTIFACTORY_PASSWORD"
+        ["--password"],
+        help="Password to access to the artifactory",
+        mandatory=True,
+        envname="ARTIFACTORY_PASSWORD",
     )
 
     _policy_name = cli.SwitchAttr(
@@ -46,7 +52,7 @@ class ArtifactoryCleanup(cli.Application):
         ["--artifactory-server"],
         help="URL to artifactory, e.g: https://arti.example.com/artifactory",
         mandatory=True,
-        envname="ARTIFACTORY_SERVER"
+        envname="ARTIFACTORY_SERVER",
     )
 
     _destroy = cli.Flag("--destroy", help="Remove artifacts", mandatory=False)
