@@ -93,3 +93,13 @@ class delete_empty_folder(Rule):
             r.raise_for_status()
 
         return []
+
+class delete_trash(Rule):
+    """
+    Empty the artifactory trashcan
+    """
+
+    def __init__(self):
+        r = self.artifactory_session.post("{}/api/trash/empty", timeout=2700)
+        r.raise_for_status()
+        print (r.content)
