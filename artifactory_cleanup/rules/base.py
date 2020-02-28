@@ -1,6 +1,7 @@
 import inspect
 import json
 import re
+from urllib.parse import quote
 from collections import namedtuple
 
 
@@ -196,7 +197,7 @@ class CleanupPolicy(object):
         return artifacts
 
     def delete(self, artifact, destroy):
-        artifact_path = "{repo}/{path}/{name}".format(**artifact)
+        artifact_path = quote("{repo}/{path}/{name}".format(**artifact))
         if destroy:
             print("DESTROY MODE - delete {}".format(artifact_path))
             delete_url = "{}/{}".format(self.artifactory_url, artifact_path)
