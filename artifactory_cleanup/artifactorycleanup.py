@@ -69,6 +69,8 @@ class ArtifactoryCleanup(cli.Application):
             print("Verbose MODE")
 
     def main(self):
+        # remove trailing slash
+        self._artifactory_server = self._artifactory_server.rstrip("/")
         if self._remove_empty_folder:
             rules = [
                 CleanupPolicy(
