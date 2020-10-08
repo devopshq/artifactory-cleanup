@@ -6,7 +6,7 @@
 
 <!-- toc -->
 
-- [Install](#install)
+- [Installation](#installation)
 - [Usage](#usage)
   * [Commands](#commands)
   * [Available Rules](#available-rules)
@@ -14,14 +14,16 @@
   
 <!-- tocstop -->
 
-# Install #
+# Installation
 Upgrade/install to the newest available version:
 ```bash
-python3 -mpip install artifactory-cleanup --upgrade
-```
-Or specify version, e.g.:
-```bash
-python3 -mpip install artifactory-cleanup==0.1
+# Directly from git
+python3 -mpip install git+https://github.com/devopshq/artifactory-cleanup.git
+
+# To be able to change files
+git clone https://github.com/devopshq/artifactory-cleanup.git
+cd artifactory-cleanup
+python3 -mpip intall -e .
 ```
 
 # Usage
@@ -30,9 +32,6 @@ Suppose you want to remove all artifacts older than N days from 'reponame'.
 You should take the following steps:
 
 1. Install `artifactory-cleanup`
-```bash
-python3 -mpip install artifactory-cleanup
-```
 2. Сreate a python file, for example, `reponame.py` with the following contents:
 ```python
 from artifactory_cleanup import rules
@@ -48,11 +47,14 @@ RULES = [
     ),
 ]
 ```
-3. Run the command to remove artifacts:
+3. Run the command to SHOW (not remove) artifacts that will be deleted:
+```bash
+artifactory-cleanup --user user --password password --artifactory-server https://repo.example.com/artifactory --config reponame.py
+```
+4. Add `--destroy` flag to REMOVE artifacts
 ```bash
 artifactory-cleanup --destroy --user user --password password --artifactory-server https://repo.example.com/artifactory --config reponame.py
 ```
-More advanced examples and rules see below.
 
 ## Commands ##
 
@@ -86,8 +88,6 @@ To add a cleaning policy you need:
 
 - Create a python file, for example, `reponame.py`. `artifacroty-cleanup` imports the variable `RULES`, so you can make a python package.
 - Add a cleanup rule from the [available cleanup rules](docs/RULES).
-
-Example
 
 ```python
 from artifactory_cleanup import rules
