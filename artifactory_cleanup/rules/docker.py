@@ -39,9 +39,13 @@ class RuleForDocker(Rule):
             args = ['items.find', {"$or": [{"repo": repo} for repo in docker_repos]}]
             artifacts_list = aql.aql(*args)
 
+            images_dict = defaultdict(int)
+            for docker_layer in artifacts_list:
+                images_dict[docker_layer['path']] += docker_layer['size']
+
             for artifact in new_result:
-                artifact['size'] = sum([docker_layer['size'] for docker_layer in artifacts_list if
-                                        docker_layer['path'] == '{}/{}'.format(artifact['path'], artifact['name'])])
+                image = f"{artifact['path']}/{artifact['name']}"
+                artifact['size'] = images_dict[image]
 
     def filter_result(self, result_artifacts):
         """ Determines the size of deleted images """
