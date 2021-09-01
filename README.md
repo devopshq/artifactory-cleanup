@@ -23,7 +23,7 @@ python3 -mpip install git+https://github.com/devopshq/artifactory-cleanup.git
 # To be able to change files
 git clone https://github.com/devopshq/artifactory-cleanup.git
 cd artifactory-cleanup
-python3 -mpip intall -e .
+python3 -mpip install -e .
 ```
 
 # Usage
