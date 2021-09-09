@@ -37,6 +37,29 @@ class delete_without_downloads(Rule):
         return aql_query_list
 
 
+class delete_older_than_n_days_without_downloads(Rule):
+    """
+    Deletes artifacts that are older than n days and have not been downloaded.
+    """
+    def __init__(self, *, days):
+        self.days = timedelta(days=days)
+
+    def _aql_add_filter(self, aql_query_list):
+        last_day = date.today() - self.days
+        update_dict = {
+            "$and": [
+                {
+                    "stat.downloads": {"$eq": None}
+                },
+                {
+                    "created": {"$lte": last_day.isoformat()}
+                },
+            ],
+        }
+        aql_query_list.append(update_dict)
+        return aql_query_list
+
+
 class delete_not_used_since(Rule):
     """
     Delete artifacts that were downloaded, but for a long time. N days passed.
