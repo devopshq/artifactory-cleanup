@@ -1,13 +1,20 @@
 import re
 from collections import defaultdict
 from datetime import date, timedelta
+from teamcity import is_running_under_teamcity
 
 from artifactory import ArtifactoryPath
-from teamcity.messages import TeamcityServiceMessages
-
 from artifactory_cleanup.rules.base import Rule
 
-TC = TeamcityServiceMessages()
+if is_running_under_teamcity():
+    from teamcity.messages import TeamcityServiceMessages
+    TC = TeamcityServiceMessages()
+    ctx_mgr_block = TC.block
+    ctx_mgr_test = TC.test
+else:
+    from artifactory_cleanup.context_managers import block, test
+    ctx_mgr_block = block
+    ctx_mgr_test = test
 
 
 class RuleForDocker(Rule):
@@ -258,23 +265,22 @@ class delete_docker_image_if_not_contained_in_properties_value(RuleForDocker):
 
             # For debag output all properties that begin as image
             values_with_image_name = [x for x in properties_values if x.startswith(image)]
-            TC.blockOpened('Values of properties with name as image {}'.format(image))
-            for value in values_with_image_name:
-                print(value)
-            TC.blockClosed('Values of properties with name as image {}'.format(image))
+
+            with ctx_mgr_block(f"Values of properties with name as image {image}"):
+                for value in values_with_image_name:
+                    print(value)
 
             tags = self.get_docker_tags_list(self.docker_repo, image)
 
-            TC.blockOpened('Checking image {}'.format(image))
-            for tag in tags:
-                docker_name = '{}:{}'.format(image, tag)
-                print('INFO - Checking docker with name {}'.format(docker_name))
-                # If this Docker tag is not found in the metadata properties, then add it to the list for deletion
-                if docker_name not in properties_values:
-                    result_docker_images.append({'repo': self.docker_repo,
-                                                 'path': image,
-                                                 'name': tag,
-                                                 })
-            TC.blockClosed('Checking image {}'.format(image))
+            with ctx_mgr_block(f"Checking image {image}"):
+                for tag in tags:
+                    docker_name = '{}:{}'.format(image, tag)
+                    print('INFO - Checking docker with name {}'.format(docker_name))
+                    # If this Docker tag is not found in the metadata properties, then add it to the list for deletion
+                    if docker_name not in properties_values:
+                        result_docker_images.append({'repo': self.docker_repo,
+                                                    'path': image,
+                                                    'name': tag,
+                                                    })
 
         return result_docker_images

@@ -11,9 +11,7 @@ from requests.auth import HTTPBasicAuth
 from artifactory_cleanup.rules.base import CleanupPolicy
 from artifactory_cleanup.rules.delete import delete_empty_folder
 from teamcity import is_running_under_teamcity
-from teamcity.messages import TeamcityServiceMessages
 
-TC = TeamcityServiceMessages()
 
 requests.packages.urllib3.disable_warnings()
 
@@ -118,16 +116,29 @@ class ArtifactoryCleanup(cli.Application):
         table.align["Cleanup Policy"] = "l"
         total_size = 0
 
+        if is_running_under_teamcity():
+            from teamcity.messages import TeamcityServiceMessages
+
+            TC = TeamcityServiceMessages()
+            ctx_mgr_block = TC.block
+            ctx_mgr_test = TC.test
+        else:
+            from artifactory_cleanup.context_managers import block, test
+
+            ctx_mgr_block = block
+            ctx_mgr_test = test
+
+
         for cleanup_rule in rules:  # type: CleanupPolicy
-            with TC.block(cleanup_rule.name):
+            with ctx_mgr_block(cleanup_rule.name):
                 cleanup_rule.init(artifactory_session, self._artifactory_server)
 
                 # prepare
-                with TC.block("AQL filter"):
+                with ctx_mgr_block("AQL filter"):
                     cleanup_rule.aql_filter()
 
                 # Get artifacts
-                with TC.block("Get artifacts"):
+                with ctx_mgr_block("Get artifacts"):
                     print("*" * 80)
                     print("AQL Query:")
                     print(cleanup_rule.aql_text)
@@ -136,7 +147,7 @@ class ArtifactoryCleanup(cli.Application):
                 print("Found {} artifacts".format(len(artifacts)))
 
                 # Filter
-                with TC.block("Filter results"):
+                with ctx_mgr_block("Filter results"):
                     artifacts_to_remove = cleanup_rule.filter(artifacts)
                 print(
                     "Found {} artifacts AFTER filtering".format(
@@ -160,13 +171,7 @@ class ArtifactoryCleanup(cli.Application):
                         repo_underscore, path_underscore, name_underscore
                     )
 
-                    # Use teamcity test for output all removed artifact. If local - use suppress output
-                    ctx_mgr = (
-                        TC.test(test_name)
-                        if is_running_under_teamcity()
-                        else contextlib.suppress()
-                    )
-                    with ctx_mgr:
+                    with ctx_mgr_test(test_name):
                         cleanup_rule.delete(artifact, destroy=self._destroy)
 
             # Info
