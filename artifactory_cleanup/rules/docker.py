@@ -85,6 +85,39 @@ class delete_docker_images_older_than(RuleForDocker):
         return result_artifact
 
 
+class delete_docker_images_older_than_n_days_without_downloads(RuleForDocker):
+    """
+    Deletes images that are older than n days and have not been downloaded.
+    """
+    def __init__(self, *, days):
+        self.days = timedelta(days=days)
+
+    def _aql_add_filter(self, aql_query_list):
+        last_day = date.today() - self.days
+        update_dict = {
+            "name": {
+                "$match": 'manifest.json',
+            },
+            "$and": [
+                {
+                    "stat.downloads": {"$eq": None}
+                },
+                {
+                    "created": {"$lte": last_day.isoformat()}
+                },
+            ],
+        }
+        aql_query_list.append(update_dict)
+        return aql_query_list
+
+    def _filter_result(self, result_artifact):
+        for artifact in result_artifact:
+            artifact['path'], docker_tag = artifact['path'].rsplit('/', 1)
+            artifact['name'] = docker_tag
+
+        return result_artifact
+
+
 class delete_docker_images_not_used(RuleForDocker):
     """ Removes Docker image not downloaded ``days`` days """
 
