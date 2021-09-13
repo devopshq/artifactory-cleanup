@@ -1,5 +1,6 @@
 from contextlib import contextmanager
-
+from teamcity import is_running_under_teamcity
+from teamcity.messages import TeamcityServiceMessages
 
 @contextmanager
 def block(name):
@@ -17,3 +18,14 @@ def test(testName):
     used directly
     """
     yield
+
+
+def get_context_managers():
+    if is_running_under_teamcity():
+        TC = TeamcityServiceMessages()
+        ctx_mgr_block = TC.block
+        ctx_mgr_test = TC.test
+    else:
+        ctx_mgr_block = block
+        ctx_mgr_test = test
+    return ctx_mgr_block, ctx_mgr_test

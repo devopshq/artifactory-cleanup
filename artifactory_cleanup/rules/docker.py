@@ -4,17 +4,10 @@ from datetime import date, timedelta
 from teamcity import is_running_under_teamcity
 
 from artifactory import ArtifactoryPath
+from artifactory_cleanup.context_managers import get_context_managers
 from artifactory_cleanup.rules.base import Rule
 
-if is_running_under_teamcity():
-    from teamcity.messages import TeamcityServiceMessages
-    TC = TeamcityServiceMessages()
-    ctx_mgr_block = TC.block
-    ctx_mgr_test = TC.test
-else:
-    from artifactory_cleanup.context_managers import block, test
-    ctx_mgr_block = block
-    ctx_mgr_test = test
+ctx_mgr_block, ctx_mgr_test = get_context_managers()
 
 
 class RuleForDocker(Rule):

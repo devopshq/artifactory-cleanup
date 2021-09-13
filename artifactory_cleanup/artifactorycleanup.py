@@ -8,9 +8,9 @@ from hurry.filesize import size
 from plumbum import cli
 from prettytable import PrettyTable
 from requests.auth import HTTPBasicAuth
+from artifactory_cleanup.context_managers import get_context_managers
 from artifactory_cleanup.rules.base import CleanupPolicy
 from artifactory_cleanup.rules.delete import delete_empty_folder
-from teamcity import is_running_under_teamcity
 
 
 requests.packages.urllib3.disable_warnings()
@@ -116,17 +116,7 @@ class ArtifactoryCleanup(cli.Application):
         table.align["Cleanup Policy"] = "l"
         total_size = 0
 
-        if is_running_under_teamcity():
-            from teamcity.messages import TeamcityServiceMessages
-
-            TC = TeamcityServiceMessages()
-            ctx_mgr_block = TC.block
-            ctx_mgr_test = TC.test
-        else:
-            from artifactory_cleanup.context_managers import block, test
-
-            ctx_mgr_block = block
-            ctx_mgr_test = test
+        ctx_mgr_block, ctx_mgr_test = get_context_managers()
 
 
         for cleanup_rule in rules:  # type: CleanupPolicy
