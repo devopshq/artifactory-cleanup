@@ -1,0 +1,51 @@
+{
+    "debug": true,
+    "branch": "master",
+    "branches": [
+      "+([0-9])?(.{+([0-9]),x}).x",
+      "main",
+      "master",
+      "next"
+    ],
+    "plugins": [
+        "@semantic-release/commit-analyzer",
+        [
+          "@google/semantic-release-replace-plugin",
+          {
+            "replacements": [{
+              "files": [
+                "setup.py"
+              ],
+              "from": "version=\".*\"",
+              "to": "version=\"${nextRelease.version}\"",
+              "results": [{
+                "file": "setup.py",
+                "hasChanged": true,
+                "numMatches": 1,
+                "numReplacements": 1
+              }],
+              "countMatches": true
+            }]
+          }
+        ],
+        "@semantic-release/release-notes-generator",
+        [
+            "@semantic-release/changelog",
+            {
+                "changelogFile": "CHANGELOG.md",
+                "changelogTitle": "# Changelog"
+            }
+        ],
+        [
+          "@semantic-release/github",
+          {
+              "assets": "CHANGELOG.md"
+          }
+        ],
+        [
+          "@semantic-release/git", {
+            "assets": ["setup.py", "CHANGELOG.md"]
+          }
+        ]
+    ]
+}

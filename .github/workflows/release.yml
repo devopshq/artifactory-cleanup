@@ -1,0 +1,46 @@
+---
+name: Release
+
+on:
+  workflow_run:
+    workflows: ["Build"]
+    branches:
+      - master
+    types:
+      - completed
+  workflow_dispatch:
+
+jobs:
+  release:
+    name: release
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Generate GitHub token
+        id: get_workflow_token
+        uses: peter-murray/workflow-application-token-action@v1
+        with:
+          application_id: ${{ secrets.SEMANTIC_RELEASE_APPLICATION_ID }}
+          application_private_key: ${{ secrets.SEMANTIC_RELEASE_APPLICATION_PRIVATE_KEY }}
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          token: ${{ steps.get_workflow_token.outputs.token }}
+      - name: Semantic Release
+        id: semantic
+        uses: cycjimmy/semantic-release-action@v2
+        with:
+          semantic_version: 18.0.0
+          extra_plugins: |
+            @google/semantic-release-replace-plugin@1.1.0
+            @semantic-release/changelog@6.0.0
+            @semantic-release/git
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Version released
+        if: steps.semantic.outputs.new_release_published == 'true'
+        run: |
+          echo ${{ steps.semantic.outputs.new_release_version }}
+          echo ${{ steps.semantic.outputs.new_release_major_version }}
+          echo ${{ steps.semantic.outputs.new_release_minor_version }}
+          echo ${{ steps.semantic.outputs.new_release_patch_version }}
