@@ -1,4 +1,4 @@
-from datetime import timedelta, date
+from datetime import timedelta
 
 from artifactory_cleanup.rules.base import Rule
 
@@ -10,8 +10,7 @@ class delete_older_than(Rule):
         self.days = timedelta(days=days)
 
     def _aql_add_filter(self, aql_query_list):
-        today = date.today()
-        older_than_date = today - self.days
+        older_than_date = self.today - self.days
         older_than_date_txt = older_than_date.isoformat()
         print('Delete artifacts older than {}'.format(older_than_date_txt))
         update_dict = {
@@ -45,7 +44,7 @@ class delete_older_than_n_days_without_downloads(Rule):
         self.days = timedelta(days=days)
 
     def _aql_add_filter(self, aql_query_list):
-        last_day = date.today() - self.days
+        last_day = self.today - self.days
         update_dict = {
             "$and": [
                 {
@@ -70,7 +69,7 @@ class delete_not_used_since(Rule):
         self.days = timedelta(days=days)
 
     def _aql_add_filter(self, aql_query_list):
-        last_day = date.today() - self.days
+        last_day = self.today - self.days
 
         update_dict = {
             "$or": [

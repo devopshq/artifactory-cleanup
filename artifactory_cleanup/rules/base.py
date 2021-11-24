@@ -11,9 +11,10 @@ class Rule(object):
     artifactory_session = None
     artifactory_server = None
 
-    def init(self, artifactory_session, artifactory_server):
+    def init(self, artifactory_session, artifactory_server, today):
         self.artifactory_session = artifactory_session
         self.artifactory_server = artifactory_server
+        self.today = today
 
     def _aql_add_filter(self, aql_query_list):
         """  Executed before an AQL query. Adds the required fields to the query """
@@ -137,11 +138,12 @@ class CleanupPolicy(object):
         # Defined in self.init() function
         self.artifactory_session = None
         self.artifactory_url = None
+        self.today = None
 
         # Defined in aql_filter
         self.aql_query_list = []
 
-    def init(self, artifactory_session, artifactory_url):
+    def init(self, artifactory_session, artifactory_url, today):
         """
         Set properties and set them to all rules
 
@@ -151,9 +153,10 @@ class CleanupPolicy(object):
         """
         self.artifactory_session = artifactory_session
         self.artifactory_url = artifactory_url
+        self.today = today
 
         for rule in self.rules:
-            rule.init(artifactory_session, artifactory_url)
+            rule.init(artifactory_session, artifactory_url, today)
 
     def aql_filter(self):
         """

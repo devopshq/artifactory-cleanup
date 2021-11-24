@@ -1,7 +1,6 @@
 import re
 from collections import defaultdict
-from datetime import date, timedelta
-from teamcity import is_running_under_teamcity
+from datetime import timedelta
 
 from artifactory import ArtifactoryPath
 from artifactory_cleanup.context_managers import get_context_managers
@@ -62,8 +61,7 @@ class delete_docker_images_older_than(RuleForDocker):
         self.days = timedelta(days=days)
 
     def _aql_add_filter(self, aql_query_list):
-        today = date.today()
-        older_than_date = today - self.days
+        older_than_date = self.today - self.days
         older_than_date_txt = older_than_date.isoformat()
         print('Delete docker images older than {}'.format(older_than_date_txt))
         update_dict = {
@@ -93,7 +91,7 @@ class delete_docker_images_older_than_n_days_without_downloads(RuleForDocker):
         self.days = timedelta(days=days)
 
     def _aql_add_filter(self, aql_query_list):
-        last_day = date.today() - self.days
+        last_day = self.today - self.days
         update_dict = {
             "name": {
                 "$match": 'manifest.json',
@@ -125,7 +123,7 @@ class delete_docker_images_not_used(RuleForDocker):
         self.days = timedelta(days=days)
 
     def _aql_add_filter(self, aql_query_list):
-        last_day = date.today() - self.days
+        last_day = self.today - self.days
         print('Delete docker images not used from {}'.format(last_day.isoformat()))
         update_dict = {
             "name": {
