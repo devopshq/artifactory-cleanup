@@ -2,6 +2,7 @@ import contextlib
 import importlib
 import logging
 import sys
+from datetime import timedelta, date
 
 import requests
 from hurry.filesize import size
@@ -65,6 +66,10 @@ class ArtifactoryCleanup(cli.Application):
         "--remove-empty-folder", help="Cleaning up empty folders in local repositories"
     )
 
+    _days_in_future = cli.SwitchAttr(
+        '--days-in-future', help="Simulate future behaviour", mandatory=False, excludes = ["--destroy"]
+    )
+
     def _destroy_or_verbose(self):
         if self._destroy:
             print("*" * 80)
@@ -94,6 +99,12 @@ class ArtifactoryCleanup(cli.Application):
 
         self._destroy_or_verbose()
 
+        if self._days_in_future:
+            self._today = date.today() + timedelta(days=int(self._days_in_future))
+            print(f'Simulating cleanup actions that will occur on {self._today}')
+        else:
+            self._today = date.today()
+
         artifactory_session = requests.Session()
         artifactory_session.auth = HTTPBasicAuth(self._user, self._password)
 
@@ -121,7 +132,7 @@ class ArtifactoryCleanup(cli.Application):
 
         for cleanup_rule in rules:  # type: CleanupPolicy
             with ctx_mgr_block(cleanup_rule.name):
-                cleanup_rule.init(artifactory_session, self._artifactory_server)
+                cleanup_rule.init(artifactory_session, self._artifactory_server, self._today)
 
                 # prepare
                 with ctx_mgr_block("AQL filter"):
