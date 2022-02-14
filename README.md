@@ -17,6 +17,8 @@
 # Installation
 Upgrade/install to the newest available version:
 ```bash
+python3 -mpip install artifactory-cleanup
+
 # Directly from git
 python3 -mpip install git+https://github.com/devopshq/artifactory-cleanup.git
 

@@ -6,7 +6,7 @@ from setuptools import setup, find_packages  # noqa: H301
 
 setup(
     name="artifactory-cleanup",
-    version="0.1",
+    version="0.2",
     description="Rules and cleanup policies for Artifactory",
     license="MIT",
     author="Alexey Burov",
@@ -32,5 +32,6 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
     ],
+python_requires=">=3.6",
     include_package_data=True,
 )
