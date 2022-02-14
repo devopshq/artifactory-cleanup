@@ -42,14 +42,14 @@ def test_parse_cross():
         "name/branch/1.2.123/os/compiler/arch/name-1.2.123.tar.gz"
     ) == CrossPackage("name", "branch", "1.2.123")
     assert (
-            parse_cross("name/branch/1.2.123/os/compiler/arch/name.1.2.123.nupkg") is None
+        parse_cross("name/branch/1.2.123/os/compiler/arch/name.1.2.123.nupkg") is None
     )
     assert (
-            parse_cross("name/branch/1.2.123/os/compiler/arch/name.1.2.456.tar.gz") is None
+        parse_cross("name/branch/1.2.123/os/compiler/arch/name.1.2.456.tar.gz") is None
     )
     assert (
-            parse_cross("name/branch/1.2.123/os/compiler/arch/name-feature.1.2.123.tar.gz")
-            is None
+        parse_cross("name/branch/1.2.123/os/compiler/arch/name-feature.1.2.123.tar.gz")
+        is None
     )
 
 

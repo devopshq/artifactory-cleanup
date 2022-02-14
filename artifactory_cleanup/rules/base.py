@@ -6,7 +6,7 @@ from collections import namedtuple
 
 
 class Rule(object):
-    """ Parent class. Other rules are inherited from this class. """
+    """Parent class. Other rules are inherited from this class."""
 
     artifactory_session = None
     artifactory_server = None
@@ -17,19 +17,19 @@ class Rule(object):
         self.today = today
 
     def _aql_add_filter(self, aql_query_list):
-        """  Executed before an AQL query. Adds the required fields to the query """
+        """Executed before an AQL query. Adds the required fields to the query"""
         return aql_query_list
 
     def _filter_result(self, result_artifact):
-        """ Filters artifacts according to some rule """
+        """Filters artifacts according to some rule"""
         return result_artifact
 
     def _aql_add_text(self, aql_text):
-        """ Adds text to the end of an AQL query """
+        """Adds text to the end of an AQL query"""
         return aql_text
 
     def remove_artifact(self, artifacts, result_artifact):
-        """ Displays artifacts that have been filtered """
+        """Displays artifacts that have been filtered"""
         if not isinstance(artifacts, list):
             artifacts = [artifacts]
         for artifact in artifacts:
@@ -37,7 +37,7 @@ class Rule(object):
             result_artifact.remove(artifact)
 
     def aql_add_filter(self, aql_query_list):
-        """ Adds a filter to an AQL query"""
+        """Adds a filter to an AQL query"""
         print(
             "Add AQL Filter - rule: {} - {}".format(
                 self.__class__.__name__, self.little_doc
@@ -51,7 +51,7 @@ class Rule(object):
         return new_aql_query_list
 
     def aql_add_text(self, aql_text):
-        """ Adds some expression to AQL query """
+        """Adds some expression to AQL query"""
         print(
             "Add AQL Text - rule: {} - {}".format(
                 self.__class__.__name__, self.little_doc
@@ -65,7 +65,7 @@ class Rule(object):
         return new_aql_text
 
     def filter_result(self, result_artifacts):
-        """ Filters received data from AQL """
+        """Filters received data from AQL"""
         print(
             "Filter artifacts - rule: {} - {}".format(
                 self.__class__.__name__, self.little_doc
@@ -87,7 +87,7 @@ class Rule(object):
 
     @classmethod
     def prepare_artifact(cls, artifacts):
-        """ properties, stat are given in list format, convert them to dict format """
+        """properties, stat are given in list format, convert them to dict format"""
         all_artifacts = []
         for artifact in artifacts:
             if "properties" in artifact:

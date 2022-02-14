@@ -15,7 +15,10 @@ setup(
     keywords=["DevOpsHQ"],
     packages=find_packages(exclude=["tests"]),
     entry_points={
-        'console_scripts': ['artifactory-cleanup=artifactory_cleanup.artifactorycleanup:ArtifactoryCleanup']},
+        "console_scripts": [
+            "artifactory-cleanup=artifactory_cleanup.artifactorycleanup:ArtifactoryCleanup"
+        ]
+    },
     install_requires=[
         "hurry.filesize",
         "prettytable",
@@ -32,6 +35,6 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
     ],
-python_requires=">=3.6",
+    python_requires=">=3.6",
     include_package_data=True,
 )

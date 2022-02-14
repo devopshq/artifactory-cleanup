@@ -21,32 +21,34 @@ class repo(Rule):
     """
 
     def __init__(self, name: str):
-        bad_sym = set('*/[]')
+        bad_sym = set("*/[]")
         if set(name) & bad_sym:
             raise PolicyException(
                 "Bad name for repo: {name}, contains bad symbols: {bad_sym}\n"
                 "Check that your have repo() correct".format(
-                    name=name,
-                    bad_sym=''.join(bad_sym)))
+                    name=name, bad_sym="".join(bad_sym)
+                )
+            )
         self.name = name
 
     def _aql_add_filter(self, aql_query_list):
-        print('Get from {}'.format(self.name))
+        print("Get from {}".format(self.name))
         request_url = "{}/api/storage/{}".format(self.artifactory_server, self.name)
         try:
-            print('Checking the existence of the {} repository'.format(self.name))
+            print("Checking the existence of the {} repository".format(self.name))
             r = self.artifactory_session.get(request_url)
             r.raise_for_status()
-            print('The {} repository exists'.format(self.name))
+            print("The {} repository exists".format(self.name))
         except HTTPError as e:
-            stderr.write('The {} repository does not exist'.format(self.name))
+            stderr.write("The {} repository does not exist".format(self.name))
             print(e)
             exit(1)
 
         update_dict = {
             "repo": {
                 "$eq": self.name,
-            }}
+            }
+        }
         aql_query_list.append(update_dict)
         return aql_query_list
 
@@ -60,17 +62,18 @@ class repo_by_mask(Rule):
         self.mask = mask
 
     def _aql_add_filter(self, aql_query_list):
-        print('Get from {}'.format(self.mask))
+        print("Get from {}".format(self.mask))
         update_dict = {
             "repo": {
                 "$match": self.mask,
-            }}
+            }
+        }
         aql_query_list.append(update_dict)
         return aql_query_list
 
 
 class property_eq(Rule):
-    """ Deletes repository artifacts with a specific property value only"""
+    """Deletes repository artifacts with a specific property value only"""
 
     def __init__(self, property_key, property_value):
         self.property_key = property_key
@@ -78,7 +81,11 @@ class property_eq(Rule):
 
     def _aql_add_filter(self, aql_query_list):
         update_dict = {
-            "$and": [{"property.key": {"$eq": self.property_key}}, {"property.value": {"$eq": self.property_value}}]}
+            "$and": [
+                {"property.key": {"$eq": self.property_key}},
+                {"property.value": {"$eq": self.property_value}},
+            ]
+        }
         aql_query_list.append(update_dict)
         return aql_query_list
 
@@ -98,6 +105,10 @@ class property_neq(Rule):
         self.property_value = str(property_value)
 
     def _filter_result(self, result_artifact):
-        good_artifact = [x for x in result_artifact if x['properties'].get(self.property_key) == self.property_value]
+        good_artifact = [
+            x
+            for x in result_artifact
+            if x["properties"].get(self.property_key) == self.property_value
+        ]
         self.remove_artifact(good_artifact, result_artifact)
         return result_artifact

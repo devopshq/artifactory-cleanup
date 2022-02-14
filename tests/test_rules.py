@@ -14,38 +14,62 @@ def test_keep_latest_n_version():
     result = [
         {
             "name": ".nupkg",
-            "properties": {"nuget.id": "Package", "nuget.version": "16.0.108", },
+            "properties": {
+                "nuget.id": "Package",
+                "nuget.version": "16.0.108",
+            },
         },
         {
             "name": ".nupkg",
-            "properties": {"nuget.id": "Package", "nuget.version": "16.0.110", },
+            "properties": {
+                "nuget.id": "Package",
+                "nuget.version": "16.0.110",
+            },
         },
         {
             "name": ".nupkg",
-            "properties": {"nuget.id": "Package", "nuget.version": "16.0.113", },
+            "properties": {
+                "nuget.id": "Package",
+                "nuget.version": "16.0.113",
+            },
         },
         {
             "name": ".nupkg",
-            "properties": {"nuget.id": "Package", "nuget.version": "16.0.109-Feature", },
+            "properties": {
+                "nuget.id": "Package",
+                "nuget.version": "16.0.109-Feature",
+            },
         },
         {
             "name": ".nupkg",
-            "properties": {"nuget.id": "Package", "nuget.version": "16.0.110-Feature", },
+            "properties": {
+                "nuget.id": "Package",
+                "nuget.version": "16.0.110-Feature",
+            },
         },
         {
             "name": ".nupkg",
-            "properties": {"nuget.id": "Package", "nuget.version": "16.0.111-Feature", },
+            "properties": {
+                "nuget.id": "Package",
+                "nuget.version": "16.0.111-Feature",
+            },
         },
     ]
 
     result_expexted = [
         {
             "name": ".nupkg",
-            "properties": {"nuget.id": "Package", "nuget.version": "16.0.108", },
+            "properties": {
+                "nuget.id": "Package",
+                "nuget.version": "16.0.108",
+            },
         },
         {
             "name": ".nupkg",
-            "properties": {"nuget.id": "Package", "nuget.version": "16.0.109-Feature", },
+            "properties": {
+                "nuget.id": "Package",
+                "nuget.version": "16.0.109-Feature",
+            },
         },
     ]
     result_after_filter = rule.filter_result(result)
@@ -56,34 +80,56 @@ def test_keep_latest_n_version_with_tar_gz():
     rule = rules.keep_latest_nupkg_n_version(1)
 
     result = [
-        {"name": ".tar.gz", },
         {
-            "name": ".nupkg",
-            "properties": {"nuget.id": "Package", "nuget.version": "16.0.110", },
+            "name": ".tar.gz",
         },
         {
             "name": ".nupkg",
-            "properties": {"nuget.id": "Package", "nuget.version": "16.0.113", },
+            "properties": {
+                "nuget.id": "Package",
+                "nuget.version": "16.0.110",
+            },
         },
         {
             "name": ".nupkg",
-            "properties": {"nuget.id": "Package", "nuget.version": "16.0.110-Feature", },
+            "properties": {
+                "nuget.id": "Package",
+                "nuget.version": "16.0.113",
+            },
         },
         {
             "name": ".nupkg",
-            "properties": {"nuget.id": "Package", "nuget.version": "16.0.111-Feature", },
+            "properties": {
+                "nuget.id": "Package",
+                "nuget.version": "16.0.110-Feature",
+            },
+        },
+        {
+            "name": ".nupkg",
+            "properties": {
+                "nuget.id": "Package",
+                "nuget.version": "16.0.111-Feature",
+            },
         },
     ]
 
     result_expexted = [
-        {"name": ".tar.gz", },
         {
-            "name": ".nupkg",
-            "properties": {"nuget.id": "Package", "nuget.version": "16.0.110", },
+            "name": ".tar.gz",
         },
         {
             "name": ".nupkg",
-            "properties": {"nuget.id": "Package", "nuget.version": "16.0.110-Feature", },
+            "properties": {
+                "nuget.id": "Package",
+                "nuget.version": "16.0.110",
+            },
+        },
+        {
+            "name": ".nupkg",
+            "properties": {
+                "nuget.id": "Package",
+                "nuget.version": "16.0.110-Feature",
+            },
         },
     ]
     result_after_filter = rule.filter_result(result)
@@ -96,30 +142,48 @@ def test_keep_latest_n_version_one():
     result = [
         {
             "name": ".nupkg",
-            "properties": {"nuget.id": "Package", "nuget.version": "16.0.110", },
+            "properties": {
+                "nuget.id": "Package",
+                "nuget.version": "16.0.110",
+            },
         },
         {
             "name": ".nupkg",
-            "properties": {"nuget.id": "Package", "nuget.version": "16.0.113", },
+            "properties": {
+                "nuget.id": "Package",
+                "nuget.version": "16.0.113",
+            },
         },
         {
             "name": ".nupkg",
-            "properties": {"nuget.id": "Package", "nuget.version": "16.0.110-Feature", },
+            "properties": {
+                "nuget.id": "Package",
+                "nuget.version": "16.0.110-Feature",
+            },
         },
         {
             "name": ".nupkg",
-            "properties": {"nuget.id": "Package", "nuget.version": "16.0.111-Feature", },
+            "properties": {
+                "nuget.id": "Package",
+                "nuget.version": "16.0.111-Feature",
+            },
         },
     ]
 
     result_expexted = [
         {
             "name": ".nupkg",
-            "properties": {"nuget.id": "Package", "nuget.version": "16.0.110", },
+            "properties": {
+                "nuget.id": "Package",
+                "nuget.version": "16.0.110",
+            },
         },
         {
             "name": ".nupkg",
-            "properties": {"nuget.id": "Package", "nuget.version": "16.0.110-Feature", },
+            "properties": {
+                "nuget.id": "Package",
+                "nuget.version": "16.0.110-Feature",
+            },
         },
     ]
     result_after_filter = rule.filter_result(result)
@@ -132,19 +196,31 @@ def test_keep_latest_n_version_empty():
     result = [
         {
             "name": ".nupkg",
-            "properties": {"nuget.id": "Package", "nuget.version": "16.0.110", },
+            "properties": {
+                "nuget.id": "Package",
+                "nuget.version": "16.0.110",
+            },
         },
         {
             "name": ".nupkg",
-            "properties": {"nuget.id": "Package", "nuget.version": "16.0.113", },
+            "properties": {
+                "nuget.id": "Package",
+                "nuget.version": "16.0.113",
+            },
         },
         {
             "name": ".nupkg",
-            "properties": {"nuget.id": "Package", "nuget.version": "16.0.110-Feature", },
+            "properties": {
+                "nuget.id": "Package",
+                "nuget.version": "16.0.110-Feature",
+            },
         },
         {
             "name": ".nupkg",
-            "properties": {"nuget.id": "Package", "nuget.version": "16.0.111-Feature", },
+            "properties": {
+                "nuget.id": "Package",
+                "nuget.version": "16.0.111-Feature",
+            },
         },
     ]
 
@@ -289,15 +365,33 @@ def test_keep_latest_version_n_file_in_folder():
     rule = rules.keep_latest_version_n_file_in_folder(1)
 
     result = [
-        {"name": "name.1.2.100.tar.gz", "path": "repo/folder", },
-        {"name": "name.1.2.200.tar.gz", "path": "repo/folder", },
-        {"name": "new_name_1.2.3.101.tar.gz", "path": "repo/folder", },
-        {"name": "new_name_1.2.4.100.tar.gz", "path": "repo/folder", },
+        {
+            "name": "name.1.2.100.tar.gz",
+            "path": "repo/folder",
+        },
+        {
+            "name": "name.1.2.200.tar.gz",
+            "path": "repo/folder",
+        },
+        {
+            "name": "new_name_1.2.3.101.tar.gz",
+            "path": "repo/folder",
+        },
+        {
+            "name": "new_name_1.2.4.100.tar.gz",
+            "path": "repo/folder",
+        },
     ]
 
     result_expexted = [
-        {"name": "name.1.2.100.tar.gz", "path": "repo/folder", },
-        {"name": "new_name_1.2.3.101.tar.gz", "path": "repo/folder", },
+        {
+            "name": "name.1.2.100.tar.gz",
+            "path": "repo/folder",
+        },
+        {
+            "name": "new_name_1.2.3.101.tar.gz",
+            "path": "repo/folder",
+        },
     ]
     result_after_filter = rule.filter_result(result)
     assert result_after_filter == result_expexted

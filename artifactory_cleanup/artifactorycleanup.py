@@ -1,4 +1,3 @@
-import contextlib
 import importlib
 import logging
 import sys
@@ -67,7 +66,10 @@ class ArtifactoryCleanup(cli.Application):
     )
 
     _days_in_future = cli.SwitchAttr(
-        '--days-in-future', help="Simulate future behaviour", mandatory=False, excludes = ["--destroy"]
+        "--days-in-future",
+        help="Simulate future behaviour",
+        mandatory=False,
+        excludes=["--destroy"],
     )
 
     def _destroy_or_verbose(self):
@@ -101,7 +103,7 @@ class ArtifactoryCleanup(cli.Application):
 
         if self._days_in_future:
             self._today = date.today() + timedelta(days=int(self._days_in_future))
-            print(f'Simulating cleanup actions that will occur on {self._today}')
+            print(f"Simulating cleanup actions that will occur on {self._today}")
         else:
             self._today = date.today()
 
@@ -129,10 +131,11 @@ class ArtifactoryCleanup(cli.Application):
 
         ctx_mgr_block, ctx_mgr_test = get_context_managers()
 
-
         for cleanup_rule in rules:  # type: CleanupPolicy
             with ctx_mgr_block(cleanup_rule.name):
-                cleanup_rule.init(artifactory_session, self._artifactory_server, self._today)
+                cleanup_rule.init(
+                    artifactory_session, self._artifactory_server, self._today
+                )
 
                 # prepare
                 with ctx_mgr_block("AQL filter"):

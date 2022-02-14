@@ -4,7 +4,7 @@ from artifactory_cleanup.rules.base import Rule
 
 
 class delete_older_than(Rule):
-    """ Deletes artifacts older than `` days`` days """
+    """Deletes artifacts older than `` days`` days"""
 
     def __init__(self, *, days):
         self.days = timedelta(days=days)
@@ -12,11 +12,12 @@ class delete_older_than(Rule):
     def _aql_add_filter(self, aql_query_list):
         older_than_date = self.today - self.days
         older_than_date_txt = older_than_date.isoformat()
-        print('Delete artifacts older than {}'.format(older_than_date_txt))
+        print("Delete artifacts older than {}".format(older_than_date_txt))
         update_dict = {
             "created": {
                 "$lt": older_than_date_txt,
-            }}
+            }
+        }
         aql_query_list.append(update_dict)
         return aql_query_list
 
@@ -28,10 +29,7 @@ class delete_without_downloads(Rule):
     """
 
     def _aql_add_filter(self, aql_query_list):
-        update_dict = {
-            "stat.downloads": {
-                "$eq": None
-            }}
+        update_dict = {"stat.downloads": {"$eq": None}}
         aql_query_list.append(update_dict)
         return aql_query_list
 
@@ -40,6 +38,7 @@ class delete_older_than_n_days_without_downloads(Rule):
     """
     Deletes artifacts that are older than n days and have not been downloaded.
     """
+
     def __init__(self, *, days):
         self.days = timedelta(days=days)
 
@@ -47,12 +46,8 @@ class delete_older_than_n_days_without_downloads(Rule):
         last_day = self.today - self.days
         update_dict = {
             "$and": [
-                {
-                    "stat.downloads": {"$eq": None}
-                },
-                {
-                    "created": {"$lte": last_day.isoformat()}
-                },
+                {"stat.downloads": {"$eq": None}},
+                {"created": {"$lte": last_day.isoformat()}},
             ],
         }
         aql_query_list.append(update_dict)
@@ -74,11 +69,12 @@ class delete_not_used_since(Rule):
         update_dict = {
             "$or": [
                 {"stat.downloaded": {"$lte": str(last_day)}},  # Скачивались давно
-                {"$and": [
-                    {"stat.downloads": {"$eq": None}},  # Не скачивались
-                    {"created": {"$lte": str(last_day)}}
-                ]
-                }
+                {
+                    "$and": [
+                        {"stat.downloads": {"$eq": None}},  # Не скачивались
+                        {"created": {"$lte": str(last_day)}},
+                    ]
+                },
             ]
         }
 
@@ -99,25 +95,33 @@ class delete_empty_folder(Rule):
         update_dict = {
             "repo": {
                 "$match": "deleteEmptyFolder",
-            }}
+            }
+        }
         aql_query_list.append(update_dict)
         return aql_query_list
 
     def _filter_result(self, result_artifact):
-        r = self.artifactory_session.get("{}/api/repositories?type=local".format(self.artifactory_server))
+        r = self.artifactory_session.get(
+            "{}/api/repositories?type=local".format(self.artifactory_server)
+        )
         r.raise_for_status()
         repositories = r.json()
 
         for count, repository in enumerate(repositories, start=1):
-            if repository['packageType'] == 'GitLfs':
+            if repository["packageType"] == "GitLfs":
                 # GitLfs should be handled by the jfrog cli: https://jfrog.com/blog/clean-up-your-git-lfs-repositories-with-jfrog-cli/
-                print(f"Skipping '{repository['key']}' because it is a Git LFS repository")
+                print(
+                    f"Skipping '{repository['key']}' because it is a Git LFS repository"
+                )
                 continue
 
-            url = '{}/api/plugins/execute/deleteEmptyDirsPlugin?params=paths={}'.format(self.artifactory_server,
-                                                                                        repository['key'])
+            url = "{}/api/plugins/execute/deleteEmptyDirsPlugin?params=paths={}".format(
+                self.artifactory_server, repository["key"]
+            )
 
-            print(f"Deleting empty folders for '{repository['key']}' - {count} of {len(repositories)}")
+            print(
+                f"Deleting empty folders for '{repository['key']}' - {count} of {len(repositories)}"
+            )
             r = self.artifactory_session.post(url)
             r.raise_for_status()
 
