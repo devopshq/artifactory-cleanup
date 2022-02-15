@@ -4,10 +4,18 @@
 
 from setuptools import setup, find_packages  # noqa: H301
 
+# read the contents of your README file
+from pathlib import Path
+
+this_directory = Path(__file__).parent
+long_description = (this_directory / "README.md").read_text()
+
 setup(
     name="artifactory-cleanup",
     version="0.2",
     description="Rules and cleanup policies for Artifactory",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     license="MIT",
     author="Alexey Burov",
     author_email="allburov@gmail.com",
