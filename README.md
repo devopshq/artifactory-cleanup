@@ -6,11 +6,14 @@
 
 <!-- toc -->
 
+- [Artifactory cleanup](#artifactory-cleanup)
+- [Tables of Contents](#tables-of-contents)
 - [Installation](#installation)
 - [Usage](#usage)
-  * [Commands](#commands)
-  * [Available Rules](#available-rules)
-  * [Artifact cleanup policies](#artifactory-cleanup-policies)
+  - [Commands](#commands)
+  - [Available Rules](#available-rules)
+  - [Artifact cleanup policies](#artifact-cleanup-policies)
+  - [Container Usage](#container-usage)
   
 <!-- tocstop -->
 
@@ -110,3 +113,32 @@ RULES = [
     ),
 ]
 ```
+
+## Container Usage ##
+
+To use the container image you first have to build it.  
+This assumes you have `docker` installed on your system.  
+In case you have setup your Artifactory with self-signed certificates, place all certificates of the chain of trust into the `container/certificates/` folder.  
+They will then be copied to the container's truststore.  
+To build the container image run the following command in the folder of the `Dockerfile`:
+
+```bash
+    docker build --build-arg VERSION=0.3 . --tag artifactory-cleanup:latest
+```
+
+`VERSION` represents the artifactory-cleanup version you want to have installed in the container.  
+To run the container use the following command:
+
+```bash
+    docker run \
+    --mount type=bind,source=./rules.py,target=/tmp/rules.py \
+    -e ARTIFACTORY_USER=<username> \
+    -e ARTIFACTORY_PASSWORD=<password> \
+    -e ARTIFACTORY_URL=<artifactory url> \
+    -e ARTIFACTORY_RULES_CONFIG=/tmp/rules.py \
+    artifactory-cleanup:latest
+```
+
+The environment variables specify the necessary `artifactory-cleanup` arguments.  
+Set the `ARTIFACTORY_DESTROY_ARTEFACTS` environment variable to deactivate the dry-run mode.  
+The above command assumes you to have your rules configuration file (`rules.py`!) in the same folder you run the command from.  
