@@ -98,3 +98,8 @@ ENV/
 # IDE
 
 .idea/
+
+# HELM/Docker
+helm/**/answer.yaml
+container/certificates/**/*
+rules.py

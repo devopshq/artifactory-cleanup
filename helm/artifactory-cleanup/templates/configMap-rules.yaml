@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: artifactory-cleanup-config-rules
+data:
+  rules.py: |
+{{ .Files.Get "rules.py" | indent 4 }}

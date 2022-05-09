@@ -6,11 +6,15 @@
 
 <!-- toc -->
 
+- [Artifactory cleanup](#artifactory-cleanup)
+- [Tables of Contents](#tables-of-contents)
 - [Installation](#installation)
 - [Usage](#usage)
-  * [Commands](#commands)
-  * [Available Rules](#available-rules)
-  * [Artifact cleanup policies](#artifactory-cleanup-policies)
+  - [Commands](#commands)
+  - [Available Rules](#available-rules)
+  - [Artifact cleanup policies](#artifact-cleanup-policies)
+  - [Container Usage](#container-usage)
+  - [Helm Chart Usage](#helm-chart-usage)
   
 <!-- tocstop -->
 
@@ -109,4 +113,36 @@ RULES = [
         rules.delete_docker_images_not_used(days=30),
     ),
 ]
+```
+
+## Container Usage ##
+
+Place custom self-signed certs for internal Artifactory instances in `container/certificates/` folder.  
+
+```bash
+    docker build --build-arg VERSION=0.3 . --tag artifactory-cleanup:latest
+```
+
+Upload the image to your container registry.  
+
+```bash
+    docker run \
+    --mount type=bind,source=./rules.py,target=/tmp/rules.py \
+    -e ARTIFACTORY_USER=<username> \
+    -e ARTIFACTORY_PASSWORD=<password> \
+    -e ARTIFACTORY_URL=<artifactory url> \
+    -e ARTIFACTORY_RULES_CONFIG=/tmp/rules.py \
+    <registry>/artifactory-cleanup:latest
+```
+
+## Helm Chart Usage ##
+
+Make sure you have helm installed -> link!  
+Put your rules.py into the helm chart folder (besides `Chart.yaml`). -> link existing docs  
+Prepare a `answer.yaml` file to overwrite values in `values.yaml`.  
+On your terminal, navigate to the helm chart folder and install the chart using the following command:  
+
+```bash
+    helm upgrade -i <release name> . -n <namespace> -f answer.yaml
+    # e.g.: helm upgrade -i artifactory-cleanup . -n artifactory-cleanup -f answer.yaml
 ```
