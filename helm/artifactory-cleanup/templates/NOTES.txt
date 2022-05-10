@@ -1,0 +1,5 @@
+The cronJob is deployed at namespace: {{ .Release.Namespace }}.
+The workload name is: {{ include "artifactory-cleanup.fullname" . }}.
+To view the logs run 'kubectl -n {{ .Release.Namespace }} logs <pod-name>'.
+Use the <pod-name> of the job you want to see the logs from.
+To get a list of all jobs of the parenting cronJob run: 'kubectl -n {{ .Release.Namespace }} describe cronjob {{ include "artifactory-cleanup.fullname" . }}'.
