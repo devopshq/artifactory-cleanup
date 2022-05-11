@@ -6,11 +6,14 @@
 
 <!-- toc -->
 
+- [Artifactory cleanup](#artifactory-cleanup)
+- [Tables of Contents](#tables-of-contents)
 - [Installation](#installation)
 - [Usage](#usage)
-  * [Commands](#commands)
-  * [Available Rules](#available-rules)
-  * [Artifact cleanup policies](#artifactory-cleanup-policies)
+  - [Commands](#commands)
+  - [Available Rules](#available-rules)
+  - [Artifact cleanup policies](#artifact-cleanup-policies)
+  - [Helm Chart Usage](#helm-chart-usage)
   
 <!-- tocstop -->
 
@@ -109,4 +112,18 @@ RULES = [
         rules.delete_docker_images_not_used(days=30),
     ),
 ]
+```
+
+## Helm Chart Usage ##
+
+Make sure you have (helm installed)[https://helm.sh/docs/intro/install/]!  
+Put your rules.py, containing your [cleanup rules](#available-rules), into the helm chart folder (besides `Chart.yaml`).  
+Create a copy of `values.yaml` called `answer.yaml` in the same folder.  
+In the `answer.yaml` remove everything but the values you want to overwrite.  
+There you should also provide your credentials and the Artifactory URL in the `artifactoryCleanupConfig` section.  
+On your terminal, navigate to the helm chart folder and install the chart using the following command:  
+
+```bash
+    helm upgrade -i <release name> . -n <namespace> -f answer.yaml
+    # e.g.: helm upgrade -i artifactory-cleanup . -n artifactory-cleanup -f answer.yaml
 ```
