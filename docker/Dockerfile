@@ -5,10 +5,6 @@ WORKDIR /app
 
 COPY run.sh .
 
-# https://askubuntu.com/a/649463
-COPY certificates/*.crt /usr/local/share/ca-certificates/
-RUN update-ca-certificates
-
 # set CERT paths for python libraries, necessary for self-signed certificates
 #  - Requests Library
 #  -> https://docs.python-requests.org/en/master/user/advanced/#ssl-cert-verification
