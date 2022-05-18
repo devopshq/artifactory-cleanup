@@ -127,7 +127,7 @@ docker run \
     -e ARTIFACTORY_PASSWORD=<password> \
     -e ARTIFACTORY_URL=<artifactory url> \
     -e ARTIFACTORY_RULES_CONFIG=/tmp/rules.py \
-    artifactory-cleanup:latest
+    devopshq/artifactory-cleanup:latest
 
 # Destroy mode - remove artifacts
 docker run \
@@ -137,7 +137,7 @@ docker run \
     -e ARTIFACTORY_URL=<artifactory url> \
     -e ARTIFACTORY_RULES_CONFIG=/tmp/rules.py \
     -e ARTIFACTORY_DESTROY_MODE_ENABLED="true" \
-    artifactory-cleanup:latest
+    devopshq/artifactory-cleanup:latest
 ```
 
 The environment variables specify the necessary `artifactory-cleanup` arguments.    
@@ -148,6 +148,6 @@ To build the container image locally run the following command in the folder of 
 
 
 ```bash
-docker build . --tag artifactory-cleanup:local
+docker build . --tag artifactory-cleanup
 ```
 
