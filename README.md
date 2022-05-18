@@ -148,6 +148,6 @@ To build the container image locally run the following command in the folder of 
 
 
 ```bash
-docker build . --tag artifactory-cleanup:latest
+docker build . --tag artifactory-cleanup:local
 ```
 
