@@ -115,24 +115,23 @@ RULES = [
 ```
 
 ## Docker Container Usage ##
+The below command assumes you to have your rules configuration file `rules.py` in the current working directory.
 
 To run the container use the following command:
 
 ```bash
-    # dry-run mode
-    docker run \
+# Dry mode - log artifacts that will be removed
+docker run \
     --mount type=bind,source=./rules.py,target=/tmp/rules.py \
-    --mount type=bind,source=./certificates/,target=/mnt/self-signed-certs/ \
     -e ARTIFACTORY_USER=<username> \
     -e ARTIFACTORY_PASSWORD=<password> \
     -e ARTIFACTORY_URL=<artifactory url> \
     -e ARTIFACTORY_RULES_CONFIG=/tmp/rules.py \
     artifactory-cleanup:latest
 
-    # 'delete artefacts' mode
-    docker run \
+# Destroy mode - remove artifacts
+docker run \
     --mount type=bind,source=./rules.py,target=/tmp/rules.py \
-    --mount type=bind,source=./certificates/,target=/mnt/self-signed-certs/ \
     -e ARTIFACTORY_USER=<username> \
     -e ARTIFACTORY_PASSWORD=<password> \
     -e ARTIFACTORY_URL=<artifactory url> \
@@ -141,19 +140,14 @@ To run the container use the following command:
     artifactory-cleanup:latest
 ```
 
-The environment variables specify the necessary `artifactory-cleanup` arguments.  
-Set the `ARTIFACTORY_DESTROY_MODE_ENABLED` environment variable to deactivate the dry-run mode.  
-The above command assumes you to have your rules configuration file (`rules.py`!) in the same folder you run the command from.  
+The environment variables specify the necessary `artifactory-cleanup` arguments.    
 
-To use the docker container image it first has to be built.  
-This is either done automatically via Github actions, or locally on your machine.  
-Building locally assumes you have `docker` installed on your system.  
-In case you have setup your Artifactory with self-signed certificates, place all certificates of the chain of trust into the `docker/certificates/` folder.  
-They will then be copied to the container's truststore.  
-To build the container image locally run the following command in the folder of the `Dockerfile`:
+In case you have setup your Artifactory self-signed certificates, place all certificates of the chain of trust into the `docker/certificates/` folder and add an additional argument `--mount type=bind,source=./certificates/,target=/mnt/self-signed-certs/` to a command.
+
+To build the container image locally run the following command in the folder of the `Dockerfile`.
+
 
 ```bash
-    docker build --build-arg VERSION=0.3 . --tag artifactory-cleanup:latest
+docker build . --tag artifactory-cleanup:latest
 ```
 
-`VERSION` represents the artifactory-cleanup version you want to have installed in the container.  
