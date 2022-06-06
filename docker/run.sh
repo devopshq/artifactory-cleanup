@@ -33,7 +33,7 @@ fi
 cd $( dirname $ARTIFACTORY_RULES_CONFIG)
 
 DESTROY=""
-if [[ -v "$ARTIFACTORY_DESTROY_MODE_ENABLED" ]]; then
+if [[ -v ARTIFACTORY_DESTROY_MODE_ENABLED ]]; then
     DESTROY="--destroy"
 fi
 
