@@ -40,6 +40,7 @@ jobs:
   deploy-docker:
     runs-on: ubuntu-latest
 
+    if: ${{ always() }}
     needs: deploy-pypi
     steps:
       - uses: actions/checkout@v2
