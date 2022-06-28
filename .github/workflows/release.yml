@@ -13,7 +13,6 @@ on:
 jobs:
   deploy-pypi:
     runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request'
 
     steps:
       - uses: actions/checkout@v2
@@ -31,6 +30,7 @@ jobs:
         run: python -m build
 
       - name: Publish package
+        if: github.ref_type == 'tag'
         uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
         with:
           user: __token__
@@ -67,6 +67,6 @@ jobs:
         with:
           context: .
           file: docker/Dockerfile
-          push: ${{ github.event_name != 'pull_request' }}
+          push: ${{ github.ref_type == 'tag' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
