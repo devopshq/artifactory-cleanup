@@ -14,6 +14,7 @@
   - [Available Rules](#available-rules)
   - [Artifact cleanup policies](#artifact-cleanup-policies)
   - [Docker Container Usage](#docker-container-usage)
+- [Release](#release)
   
 <!-- tocstop -->
 
@@ -151,3 +152,9 @@ To build the container image locally run the following command in the folder of 
 docker build . --tag artifactory-cleanup
 ```
 
+# Release
+
+In order to provide a new release of `artifactory-cleanup`, there are two steps involved.
+
+1. Bump the version in the [setup.py](setup.py)
+2. Create a Git release tag (e.g. `v0.3.3`) by creating a release on Github
