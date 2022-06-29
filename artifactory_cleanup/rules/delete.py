@@ -94,12 +94,7 @@ class delete_empty_folder(Rule):
 
     def _aql_add_filter(self, aql_query_list):
         # Get list of all files and folders
-        all_files_dict = {
-            "path": {
-                "$match": "**"
-            },
-            "type": {"$eq": "any"}
-        }
+        all_files_dict = {"path": {"$match": "**"}, "type": {"$eq": "any"}}
         aql_query_list.append(all_files_dict)
         return aql_query_list
 
@@ -125,17 +120,15 @@ class delete_empty_folder(Rule):
         def get_path_dict(artifacts):
             new_path_dict = nested_dict()
             for artifact in artifacts:
-                parts = artifact["path"].split('/')
+                parts = artifact["path"].split("/")
                 if parts:
                     marcher = new_path_dict
                     for key in parts:
                         # We need the repo for the root level folders. They are not in the
                         # artifacts list
-                        marcher[key]['data'] = {
-                            "repo": artifact['repo']
-                        }
-                        marcher = marcher[key]['children']
-                    marcher[artifact["name"]]['data'] = artifact
+                        marcher[key]["data"] = {"repo": artifact["repo"]}
+                        marcher = marcher[key]["children"]
+                    marcher[artifact["name"]]["data"] = artifact
             return default_to_regular(new_path_dict)
 
         artifact_tree = get_path_dict(result_artifact)
@@ -148,28 +141,27 @@ class delete_empty_folder(Rule):
             empty_folder_artifacts = deque()
 
             def _add_to_del_list(key):
-                empty_folder_artifacts.append(item[key]['data'])
+                empty_folder_artifacts.append(item[key]["data"])
                 # Also delete the item from the children list to recursively delete folders
                 # upwards
                 del item[key]
 
-
             for x in list(item.keys()):
-                if 'type' in item[x]['data'] and item[x]['data']['type'] == "file":
+                if "type" in item[x]["data"] and item[x]["data"]["type"] == "file":
                     continue
-                if not 'path' in item[x]['data']:
+                if not "path" in item[x]["data"]:
                     # Set the path and name for root folders which were not explicitly in the
                     # artifacts list
-                    item[x]['data']["path"] = path
-                    item[x]['data']["name"] = x
-                if not 'children' in item[x] or len(item[x]['children']) == 0:
+                    item[x]["data"]["path"] = path
+                    item[x]["data"]["name"] = x
+                if not "children" in item[x] or len(item[x]["children"]) == 0:
                     # This an empty folder
                     _add_to_del_list(x)
                 else:
-                    artifacts = get_folder_artifacts_with_no_children(item[x]['children'],
-                                                                      path=path + "/" + x if
-                                                                      len(path) > 0 else x)
-                    if len(item[x]['children']) == 0:
+                    artifacts = get_folder_artifacts_with_no_children(
+                        item[x]["children"], path=path + "/" + x if len(path) > 0 else x
+                    )
+                    if len(item[x]["children"]) == 0:
                         # just delete the whole folder since all children are empty
                         _add_to_del_list(x)
                     else:

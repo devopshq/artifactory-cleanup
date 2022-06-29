@@ -10,7 +10,6 @@ from prettytable import PrettyTable
 from requests.auth import HTTPBasicAuth
 from artifactory_cleanup.context_managers import get_context_managers
 from artifactory_cleanup.rules.base import CleanupPolicy
-from artifactory_cleanup.rules.delete import delete_empty_folder
 
 
 requests.packages.urllib3.disable_warnings()
