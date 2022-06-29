@@ -61,10 +61,6 @@ class ArtifactoryCleanup(cli.Application):
         mandatory=False,
     )
 
-    _remove_empty_folder = cli.Flag(
-        "--remove-empty-folder", help="Cleaning up empty folders in local repositories"
-    )
-
     _days_in_future = cli.SwitchAttr(
         "--days-in-future",
         help="Simulate future behaviour",
@@ -83,21 +79,13 @@ class ArtifactoryCleanup(cli.Application):
     def main(self):
         # remove trailing slash
         self._artifactory_server = self._artifactory_server.rstrip("/")
-        if self._remove_empty_folder:
-            rules = [
-                CleanupPolicy(
-                    "Cleaning up empty folders in local repositories",
-                    delete_empty_folder(),
-                )
-            ]
-        else:
-            try:
-                self._config = self._config.replace(".py", "")
-                sys.path.append(".")
-                rules = getattr(importlib.import_module(self._config), "RULES")
-            except ImportError as error:
-                print("Error: {}".format(error))
-                exit(1)
+        try:
+            self._config = self._config.replace(".py", "")
+            sys.path.append(".")
+            rules = getattr(importlib.import_module(self._config), "RULES")
+        except ImportError as error:
+            print("Error: {}".format(error))
+            exit(1)
 
         self._destroy_or_verbose()
 
