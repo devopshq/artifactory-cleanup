@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - master
+    tags:
+      - "*"
+  pull_request:
+    branches:
+      - 'master'
 
 jobs:
   deploy-pypi:
@@ -25,6 +30,7 @@ jobs:
         run: python -m build
 
       - name: Publish package
+        if: github.ref_type == 'tag'
         uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
         with:
           user: __token__
@@ -37,13 +43,29 @@ jobs:
     needs: deploy-pypi
     steps:
       - uses: actions/checkout@v2
-      - name: Login
-        env:
-          DOCKER_USER: ${{secrets.DEVOPSHQ_DOCKER_USER}}
-          DOCKER_PASSWORD: ${{secrets.DEVOPSHQ_DOCKER_TOKEN}}
-        run: |
-          docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
-      - name: Build
-        run: docker build . --file docker/Dockerfile --tag devopshq/artifactory-cleanup:latest
-      - name: Push
-        run: docker push devopshq/artifactory-cleanup:latest
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: devopshq/artifactory-cleanup
+          flavor: latest=true
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+
+      - name: Login to image repository
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DEVOPSHQ_DOCKER_USER }}
+          password: ${{ secrets.DEVOPSHQ_DOCKER_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: docker/Dockerfile
+          push: ${{ github.ref_type == 'tag' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
