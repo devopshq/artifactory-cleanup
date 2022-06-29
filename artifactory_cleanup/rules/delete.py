@@ -129,6 +129,11 @@ class delete_empty_folder(Rule):
                 if parts:
                     marcher = new_path_dict
                     for key in parts:
+                        # We need the repo for the root level folders. They are not in the
+                        # artifacts list
+                        marcher[key]['data'] = {
+                            "repo": artifact['repo']
+                        }
                         marcher = marcher[key]['children']
                     marcher[artifact["name"]]['data'] = artifact
             return default_to_regular(new_path_dict)
@@ -138,7 +143,7 @@ class delete_empty_folder(Rule):
         # Now we have a dict with all folders and files
         # An empty folder is represented if it is a dict and does not have any keys
 
-        def get_folder_artifacts_with_no_children(item):
+        def get_folder_artifacts_with_no_children(item, path=""):
 
             empty_folder_artifacts = deque()
 
@@ -150,13 +155,20 @@ class delete_empty_folder(Rule):
 
 
             for x in list(item.keys()):
-                if 'data' in item[x] and item[x]['data']['type'] == "file":
+                if 'type' in item[x]['data'] and item[x]['data']['type'] == "file":
                     continue
+                if not 'path' in item[x]['data']:
+                    # Set the path and name for root folders which were not explicitly in the
+                    # artifacts list
+                    item[x]['data']["path"] = path
+                    item[x]['data']["name"] = x
                 if not 'children' in item[x] or len(item[x]['children']) == 0:
                     # This an empty folder
                     _add_to_del_list(x)
                 else:
-                    artifacts = get_folder_artifacts_with_no_children(item[x]['children'])
+                    artifacts = get_folder_artifacts_with_no_children(item[x]['children'],
+                                                                      path=path + "/" + x if
+                                                                      len(path) > 0 else x)
                     if len(item[x]['children']) == 0:
                         # just delete the whole folder since all children are empty
                         _add_to_del_list(x)
