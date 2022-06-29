@@ -69,11 +69,6 @@ artifactory-cleanup --destroy --user user --password password --artifactory-serv
 # debug run - only print founded artifacts. it do not delete
 artifactory-cleanup --user user --password password --artifactory-server https://repo.example.com/artifactory --config reponame.py
 
-# Clean up empty folder
-# --remove-empty-folder
-# You need to use the plugin https://github.com/jfrog/artifactory-user-plugins/tree/master/cleanup/deleteEmptyDirs to delete empty folders
-artifactory-cleanup --remove-empty-folder --user user --password password --artifactory-server https://repo.example.com/artifactory
-
 # Debug run only for policytestname. Find any *policytestname*
 # debug run - only print founded artifacts. it do not delete
 artifactory-cleanup --policy-name policytestname --user user --password password --artifactory-server https://repo.example.com/artifactory --config reponame.py
@@ -158,3 +153,4 @@ In order to provide a new release of `artifactory-cleanup`, there are two steps 
 
 1. Bump the version in the [setup.py](setup.py)
 2. Create a Git release tag (e.g. `v0.3.3`) by creating a release on Github
+

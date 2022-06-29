@@ -1,4 +1,5 @@
 from datetime import timedelta
+from collections import defaultdict, deque
 
 from artifactory_cleanup.rules.base import Rule
 
@@ -92,37 +93,76 @@ class delete_empty_folder(Rule):
     """
 
     def _aql_add_filter(self, aql_query_list):
-        update_dict = {
-            "repo": {
-                "$match": "deleteEmptyFolder",
-            }
+        # Get list of all files and folders
+        all_files_dict = {
+            "path": {
+                "$match": "**"
+            },
+            "type": {"$eq": "any"}
         }
-        aql_query_list.append(update_dict)
+        aql_query_list.append(all_files_dict)
         return aql_query_list
 
     def _filter_result(self, result_artifact):
-        r = self.artifactory_session.get(
-            "{}/api/repositories?type=local".format(self.artifactory_server)
-        )
-        r.raise_for_status()
-        repositories = r.json()
 
-        for count, repository in enumerate(repositories, start=1):
-            if repository["packageType"] == "GitLfs":
-                # GitLfs should be handled by the jfrog cli: https://jfrog.com/blog/clean-up-your-git-lfs-repositories-with-jfrog-cli/
-                print(
-                    f"Skipping '{repository['key']}' because it is a Git LFS repository"
-                )
-                continue
+        # convert list of files to dict
+        # Source: https://stackoverflow.com/a/58917078
 
-            url = "{}/api/plugins/execute/deleteEmptyDirsPlugin?params=paths={}".format(
-                self.artifactory_server, repository["key"]
-            )
+        def nested_dict():
+            """
+            Creates a default dictionary where each value is an other default dictionary.
+            """
+            return defaultdict(nested_dict)
 
-            print(
-                f"Deleting empty folders for '{repository['key']}' - {count} of {len(repositories)}"
-            )
-            r = self.artifactory_session.post(url)
-            r.raise_for_status()
+        def default_to_regular(d):
+            """
+            Converts defaultdicts of defaultdicts to dict of dicts.
+            """
+            if isinstance(d, defaultdict):
+                d = {k: default_to_regular(v) for k, v in d.items()}
+            return d
 
-        return []
+        def get_path_dict(artifacts):
+            new_path_dict = nested_dict()
+            for artifact in artifacts:
+                parts = artifact["path"].split('/')
+                if parts:
+                    marcher = new_path_dict
+                    for key in parts:
+                        marcher = marcher[key]['children']
+                    marcher[artifact["name"]]['data'] = artifact
+            return default_to_regular(new_path_dict)
+
+        artifact_tree = get_path_dict(result_artifact)
+
+        # Now we have a dict with all folders and files
+        # An empty folder is represented if it is a dict and does not have any keys
+
+        def get_folder_artifacts_with_no_children(item):
+
+            empty_folder_artifacts = deque()
+
+            def _add_to_del_list(key):
+                empty_folder_artifacts.append(item[key]['data'])
+                # Also delete the item from the children list to recursively delete folders
+                # upwards
+                del item[key]
+
+
+            for x in list(item.keys()):
+                if 'data' in item[x] and item[x]['data']['type'] == "file":
+                    continue
+                if not 'children' in item[x] or len(item[x]['children']) == 0:
+                    # This an empty folder
+                    _add_to_del_list(x)
+                else:
+                    artifacts = get_folder_artifacts_with_no_children(item[x]['children'])
+                    if len(item[x]['children']) == 0:
+                        # just delete the whole folder since all children are empty
+                        _add_to_del_list(x)
+                    else:
+                        empty_folder_artifacts.extend(artifacts)
+
+            return empty_folder_artifacts
+
+        return list(get_folder_artifacts_with_no_children(artifact_tree))
