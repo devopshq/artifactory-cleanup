@@ -133,6 +133,11 @@ class delete_empty_folder(Rule):
 
         artifact_tree = get_path_dict(result_artifact)
 
+        # Artifactory also returns the directory itself. We need to remove it from the list
+        # since that tree branch has no children assigned
+        if '.' in artifact_tree:
+            del artifact_tree['.']
+
         # Now we have a dict with all folders and files
         # An empty folder is represented if it is a dict and does not have any keys
 
