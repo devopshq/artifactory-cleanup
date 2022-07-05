@@ -1,9 +1,10 @@
 from datetime import timedelta
-from collections import defaultdict, deque
 
 from artifactory_cleanup.rules.base import Rule
-from artifactory_cleanup.rules.utils import artifacts_list_to_tree, \
-    folder_artifacts_without_children
+from artifactory_cleanup.rules.utils import (
+    artifacts_list_to_tree,
+    folder_artifacts_without_children,
+)
 
 
 class delete_older_than(Rule):
