@@ -40,8 +40,8 @@ def artifacts_list_to_tree(list_of_artifacts: List):
     artifact_tree = default_to_regular(new_path_dict)
     # Artifactory also returns the directory itself. We need to remove it from the list
     # since that tree branch has no children assigned
-    if '.' in artifact_tree:
-        del artifact_tree['.']
+    if "." in artifact_tree:
+        del artifact_tree["."]
     return artifact_tree
 
 
@@ -85,7 +85,8 @@ def folder_artifacts_without_children(artifacts_tree: Dict, path=""):
             _add_to_del_list(artifact_name)
         else:
             artifacts = folder_artifacts_without_children(
-                tree_entry["children"], path=path + "/" + artifact_name if len(path) > 0 else artifact_name
+                tree_entry["children"],
+                path=path + "/" + artifact_name if len(path) > 0 else artifact_name,
             )
             # Additional check needed here because the recursive call may
             # delete additional children.
