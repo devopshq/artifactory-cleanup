@@ -1,8 +1,4 @@
-from artifactory_cleanup.rules.base import (
-    symbols_to_nuget,
-    parse_cross,
-    parse_cross_any_extenstion,
-)
+from artifactory_cleanup.rules.base import symbols_to_nuget, parse_cross, parse_cross_any_extenstion
 from artifactory_cleanup.rules.base import CrossPackage
 
 
