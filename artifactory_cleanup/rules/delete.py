@@ -2,6 +2,8 @@ from datetime import timedelta
 from collections import defaultdict, deque
 
 from artifactory_cleanup.rules.base import Rule
+from artifactory_cleanup.rules.utils import artifacts_list_to_tree, \
+    folder_artifacts_without_children
 
 
 class delete_older_than(Rule):
@@ -100,78 +102,8 @@ class delete_empty_folder(Rule):
 
     def _filter_result(self, result_artifact):
 
-        # convert list of files to dict
-        # Source: https://stackoverflow.com/a/58917078
-
-        def nested_dict():
-            """
-            Creates a default dictionary where each value is an other default dictionary.
-            """
-            return defaultdict(nested_dict)
-
-        def default_to_regular(d):
-            """
-            Converts defaultdicts of defaultdicts to dict of dicts.
-            """
-            if isinstance(d, defaultdict):
-                d = {k: default_to_regular(v) for k, v in d.items()}
-            return d
-
-        def get_path_dict(artifacts):
-            new_path_dict = nested_dict()
-            for artifact in artifacts:
-                parts = artifact["path"].split("/")
-                if parts:
-                    marcher = new_path_dict
-                    for key in parts:
-                        # We need the repo for the root level folders. They are not in the
-                        # artifacts list
-                        marcher[key]["data"] = {"repo": artifact["repo"]}
-                        marcher = marcher[key]["children"]
-                    marcher[artifact["name"]]["data"] = artifact
-            return default_to_regular(new_path_dict)
-
-        artifact_tree = get_path_dict(result_artifact)
-
-        # Artifactory also returns the directory itself. We need to remove it from the list
-        # since that tree branch has no children assigned
-        if "." in artifact_tree:
-            del artifact_tree["."]
+        artifact_tree = artifacts_list_to_tree(result_artifact)
 
         # Now we have a dict with all folders and files
-        # An empty folder is represented if it is a dict and does not have any keys
-
-        def get_folder_artifacts_with_no_children(item, path=""):
-
-            empty_folder_artifacts = deque()
-
-            def _add_to_del_list(key):
-                empty_folder_artifacts.append(item[key]["data"])
-                # Also delete the item from the children list to recursively delete folders
-                # upwards
-                del item[key]
-
-            for x in list(item.keys()):
-                if "type" in item[x]["data"] and item[x]["data"]["type"] == "file":
-                    continue
-                if not "path" in item[x]["data"]:
-                    # Set the path and name for root folders which were not explicitly in the
-                    # artifacts list
-                    item[x]["data"]["path"] = path
-                    item[x]["data"]["name"] = x
-                if not "children" in item[x] or len(item[x]["children"]) == 0:
-                    # This an empty folder
-                    _add_to_del_list(x)
-                else:
-                    artifacts = get_folder_artifacts_with_no_children(
-                        item[x]["children"], path=path + "/" + x if len(path) > 0 else x
-                    )
-                    if len(item[x]["children"]) == 0:
-                        # just delete the whole folder since all children are empty
-                        _add_to_del_list(x)
-                    else:
-                        empty_folder_artifacts.extend(artifacts)
-
-            return empty_folder_artifacts
-
-        return list(get_folder_artifacts_with_no_children(artifact_tree))
+        # An empty folder is represented by not having any children
+        return list(folder_artifacts_without_children(artifact_tree))
