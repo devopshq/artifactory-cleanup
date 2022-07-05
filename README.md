@@ -69,9 +69,9 @@ artifactory-cleanup --destroy --user user --password password --artifactory-serv
 # debug run - only print founded artifacts. it do not delete
 artifactory-cleanup --user user --password password --artifactory-server https://repo.example.com/artifactory --config reponame.py
 
-# Debug run only for ruletestname. Find any *ruletestname*
+# Debug run only for policytestname. Find any *policytestname*
 # debug run - only print founded artifacts. it do not delete
-artifactory-cleanup --rule-name ruletestname --user user --password password --artifactory-server https://repo.example.com/artifactory --config reponame.py
+artifactory-cleanup --policy-name policytestname --user user --password password --artifactory-server https://repo.example.com/artifactory --config reponame.py
 
 # REMOVE
 # For remove artifacts use --destroy
