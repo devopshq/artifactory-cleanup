@@ -23,7 +23,7 @@ jobs:
 
       - name: Test with pytest
         run: |
-          pytest -s --color=yes -vv
+          python3 -m pytest -s --color=yes -vv tests
 
       - name: Build package
         run: python -m build
