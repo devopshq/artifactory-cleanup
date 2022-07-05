@@ -1,0 +1,467 @@
+[
+  {
+    "repo": "test-repo",
+    "path": ".",
+    "name": ".",
+    "type": "folder",
+    "size": 0,
+    "depth": 0
+  },
+  {
+    "repo": "test-repo",
+    "path": ".",
+    "name": "user1",
+    "type": "folder",
+    "size": 0,
+    "depth": 1
+  },
+  {
+    "repo": "test-repo",
+    "path": ".",
+    "name": "user2",
+    "type": "folder",
+    "size": 0,
+    "depth": 1
+  },
+  {
+    "repo": "test-repo",
+    "path": ".",
+    "name": "user3",
+    "type": "folder",
+    "size": 0,
+    "depth": 1
+  },
+  {
+    "repo": "test-repo",
+    "path": "user1",
+    "name": "package1",
+    "type": "folder",
+    "size": 0,
+    "depth": 2
+  },
+  {
+    "repo": "test-repo",
+    "path": "user1/package1",
+    "name": "0.1.2",
+    "type": "folder",
+    "size": 0,
+    "depth": 3
+  },
+  {
+    "repo": "test-repo",
+    "path": "user1/package1/0.1.2",
+    "name": "testing",
+    "type": "folder",
+    "size": 0,
+    "depth": 4
+  },
+  {
+    "repo": "test-repo",
+    "path": "user1/package1/0.1.2/testing",
+    "name": "ee9a7171a4577b0077ba521a2a16411f",
+    "type": "folder",
+    "size": 0,
+    "depth": 5
+  },
+  {
+    "repo": "test-repo",
+    "path": "user1/package1/0.1.2/testing",
+    "name": "6a5ffb1868d640cbcb78c934c4728895",
+    "type": "folder",
+    "size": 0,
+    "depth": 5
+  },
+  {
+    "repo": "test-repo",
+    "path": "user1/package1/0.1.2/testing/6a5ffb1868d640cbcb78c934c4728895",
+    "name": "export",
+    "type": "folder",
+    "size": 0,
+    "depth": 6
+  },
+  {
+    "repo": "test-repo",
+    "path": "user1/package1/0.1.2/testing/6a5ffb1868d640cbcb78c934c4728895",
+    "name": "package",
+    "type": "folder",
+    "size": 0,
+    "depth": 6
+  },
+  {
+    "repo": "test-repo",
+    "path": "user1/package1/0.1.2/testing/6a5ffb1868d640cbcb78c934c4728895/export",
+    "name": "conanfile.py",
+    "type": "file",
+    "size": 896,
+    "depth": 7
+  },
+  {
+    "repo": "test-repo",
+    "path": "user1/package1/0.1.2/testing/6a5ffb1868d640cbcb78c934c4728895/export",
+    "name": "conanmanifest.txt",
+    "type": "file",
+    "size": 58,
+    "depth": 7
+  },
+  {
+    "repo": "test-repo",
+    "path": "user1/package1/0.1.2/testing/6a5ffb1868d640cbcb78c934c4728895/package",
+    "name": "9bfdcfa2bb925892ecf42e2a018a3f3529826676",
+    "type": "folder",
+    "size": 0,
+    "depth": 7
+  },
+  {
+    "repo": "test-repo",
+    "path": "user1/package1/0.1.2/testing/6a5ffb1868d640cbcb78c934c4728895/package/9bfdcfa2bb925892ecf42e2a018a3f3529826676",
+    "name": "53518c74f2e9410bb2f6df473adee01f",
+    "type": "folder",
+    "size": 0,
+    "depth": 8
+  },
+  {
+    "repo": "test-repo",
+    "path": "user1/package1/0.1.2/testing/6a5ffb1868d640cbcb78c934c4728895/package/9bfdcfa2bb925892ecf42e2a018a3f3529826676/53518c74f2e9410bb2f6df473adee01f",
+    "name": "conan_package.tgz",
+    "type": "file",
+    "size": 171473,
+    "depth": 9
+  },
+  {
+    "repo": "test-repo",
+    "path": "user1/package1/0.1.2/testing/6a5ffb1868d640cbcb78c934c4728895/package/9bfdcfa2bb925892ecf42e2a018a3f3529826676/53518c74f2e9410bb2f6df473adee01f",
+    "name": "conaninfo.txt",
+    "type": "file",
+    "size": 436,
+    "depth": 9
+  },
+  {
+    "repo": "test-repo",
+    "path": "user1/package1/0.1.2/testing/6a5ffb1868d640cbcb78c934c4728895/package/9bfdcfa2bb925892ecf42e2a018a3f3529826676/53518c74f2e9410bb2f6df473adee01f",
+    "name": "conanmanifest.txt",
+    "type": "file",
+    "size": 2197,
+    "depth": 9
+  },
+  {
+    "repo": "test-repo",
+    "path": "user1/package1/0.1.2/testing/ee9a7171a4577b0077ba521a2a16411f",
+    "name": "export",
+    "type": "folder",
+    "size": 0,
+    "depth": 6
+  },
+  {
+    "repo": "test-repo",
+    "path": "user1/package1/0.1.2/testing/ee9a7171a4577b0077ba521a2a16411f",
+    "name": "package",
+    "type": "folder",
+    "size": 0,
+    "depth": 6
+  },
+  {
+    "repo": "test-repo",
+    "path": "user1/package1/0.1.2/testing/ee9a7171a4577b0077ba521a2a16411f/export",
+    "name": "conanfile.py",
+    "type": "file",
+    "size": 904,
+    "depth": 7
+  },
+  {
+    "repo": "test-repo",
+    "path": "user1/package1/0.1.2/testing/ee9a7171a4577b0077ba521a2a16411f/export",
+    "name": "conanmanifest.txt",
+    "type": "file",
+    "size": 58,
+    "depth": 7
+  },
+  {
+    "repo": "test-repo",
+    "path": "user1/package1/0.1.2/testing/ee9a7171a4577b0077ba521a2a16411f/package",
+    "name": "9bfdcfa2bb925892ecf42e2a018a3f3529826676",
+    "type": "folder",
+    "size": 0,
+    "depth": 7
+  },
+  {
+    "repo": "test-repo",
+    "path": "user1/package1/0.1.2/testing/ee9a7171a4577b0077ba521a2a16411f/package/9bfdcfa2bb925892ecf42e2a018a3f3529826676",
+    "name": "bb158820ff3cdfb0764acd8abd0fcb05",
+    "type": "folder",
+    "size": 0,
+    "depth": 8
+  },
+  {
+    "repo": "test-repo",
+    "path": "user1/package1/0.1.2/testing/ee9a7171a4577b0077ba521a2a16411f/package/9bfdcfa2bb925892ecf42e2a018a3f3529826676/bb158820ff3cdfb0764acd8abd0fcb05",
+    "name": "conan_package.tgz",
+    "type": "file",
+    "size": 171473,
+    "depth": 9
+  },
+  {
+    "repo": "test-repo",
+    "path": "user1/package1/0.1.2/testing/ee9a7171a4577b0077ba521a2a16411f/package/9bfdcfa2bb925892ecf42e2a018a3f3529826676/bb158820ff3cdfb0764acd8abd0fcb05",
+    "name": "conaninfo.txt",
+    "type": "file",
+    "size": 436,
+    "depth": 9
+  },
+  {
+    "repo": "test-repo",
+    "path": "user1/package1/0.1.2/testing/ee9a7171a4577b0077ba521a2a16411f/package/9bfdcfa2bb925892ecf42e2a018a3f3529826676/bb158820ff3cdfb0764acd8abd0fcb05",
+    "name": "conanmanifest.txt",
+    "type": "file",
+    "size": 2197,
+    "depth": 9
+  },
+
+  {
+    "repo": "test-repo",
+    "path": "user1/package1",
+    "name": "0.1.2",
+    "type": "folder",
+    "size": 0,
+    "depth": 3
+  },
+  {
+    "repo": "test-repo",
+    "path": "user1/package1/0.1.2",
+    "name": "testing",
+    "type": "folder",
+    "size": 0,
+    "depth": 4
+  },
+  {
+    "repo": "test-repo",
+    "path": "user1/package1/0.1.2/testing",
+    "name": "ee9a7171a4577b0077ba521a2a16411f",
+    "type": "folder",
+    "size": 0,
+    "depth": 5
+  },
+  {
+    "repo": "test-repo",
+    "path": "user1/package1/0.1.2/testing",
+    "name": "6a5ffb1868d640cbcb78c934c4728895",
+    "type": "folder",
+    "size": 0,
+    "depth": 5
+  },
+  {
+    "repo": "test-repo",
+    "path": "user1/package1/0.1.2/testing/6a5ffb1868d640cbcb78c934c4728895",
+    "name": "export",
+    "type": "folder",
+    "size": 0,
+    "depth": 6
+  },
+  {
+    "repo": "test-repo",
+    "path": "user1/package1/0.1.2/testing/6a5ffb1868d640cbcb78c934c4728895",
+    "name": "package",
+    "type": "folder",
+    "size": 0,
+    "depth": 6
+  },
+  {
+    "repo": "test-repo",
+    "path": "user1/package1/0.1.2/testing/6a5ffb1868d640cbcb78c934c4728895/export",
+    "name": "conanfile.py",
+    "type": "file",
+    "size": 896,
+    "depth": 7
+  },
+  {
+    "repo": "test-repo",
+    "path": "user1/package1/0.1.2/testing/6a5ffb1868d640cbcb78c934c4728895/export",
+    "name": "conanmanifest.txt",
+    "type": "file",
+    "size": 58,
+    "depth": 7
+  },
+  {
+    "repo": "test-repo",
+    "path": "user1/package1/0.1.2/testing/6a5ffb1868d640cbcb78c934c4728895/package",
+    "name": "9bfdcfa2bb925892ecf42e2a018a3f3529826676",
+    "type": "folder",
+    "size": 0,
+    "depth": 7
+  },
+  {
+    "repo": "test-repo",
+    "path": "user2",
+    "name": "package2",
+    "type": "folder",
+    "size": 0,
+    "depth": 2
+  },
+  {
+    "repo": "test-repo",
+    "path": "user2",
+    "name": "package5",
+    "type": "folder",
+    "size": 0,
+    "depth": 2
+  },
+  {
+    "repo": "test-repo",
+    "path": "user2/package2",
+    "name": "4.2.0",
+    "type": "folder",
+    "size": 0,
+    "depth": 3
+  },
+  {
+    "repo": "test-repo",
+    "path": "user2/package2",
+    "name": "4.2.1",
+    "type": "folder",
+    "size": 0,
+    "depth": 3
+  },
+  {
+    "repo": "test-repo",
+    "path": "user2/package2/4.2.0",
+    "name": "testing",
+    "type": "folder",
+    "size": 0,
+    "depth": 4
+  },
+  {
+    "repo": "test-repo",
+    "path": "user2/package2/4.2.0/testing",
+    "name": "18259fd357457eed2a5b2dffede67385",
+    "type": "folder",
+    "size": 0,
+    "depth": 5
+  },
+  {
+    "repo": "test-repo",
+    "path": "user2/package2/4.2.0/testing/18259fd357457eed2a5b2dffede67385",
+    "name": "export",
+    "type": "folder",
+    "size": 0,
+    "depth": 6
+  },
+  {
+    "repo": "test-repo",
+    "path": "user2/package2/4.2.0/testing/18259fd357457eed2a5b2dffede67385",
+    "name": "package",
+    "type": "folder",
+    "size": 0,
+    "depth": 6
+  },
+  {
+    "repo": "test-repo",
+    "path": "user2/package2/4.2.0/testing/18259fd357457eed2a5b2dffede67385/export",
+    "name": "conanfile.py",
+    "type": "file",
+    "size": 4970,
+    "depth": 7
+  },
+  {
+    "repo": "test-repo",
+    "path": "user2/package2/4.2.0/testing/18259fd357457eed2a5b2dffede67385/export",
+    "name": "conanmanifest.txt",
+    "type": "file",
+    "size": 58,
+    "depth": 7
+  },
+  {
+    "repo": "test-repo",
+    "path": "user2/package2/4.2.0/testing/18259fd357457eed2a5b2dffede67385/package",
+    "name": "976790fbda33f5619b11df9030fb714af0990694",
+    "type": "folder",
+    "size": 0,
+    "depth": 7
+  },
+  {
+    "repo": "test-repo",
+    "path": "user2/package2/4.2.0/testing/18259fd357457eed2a5b2dffede67385/package/976790fbda33f5619b11df9030fb714af0990694",
+    "name": "8854919f6b53ccf1c347f5a34b475b6a",
+    "type": "folder",
+    "size": 0,
+    "depth": 8
+  },
+  {
+    "repo": "test-repo",
+    "path": "user2/package2/4.2.0/testing/18259fd357457eed2a5b2dffede67385/package/976790fbda33f5619b11df9030fb714af0990694/8854919f6b53ccf1c347f5a34b475b6a",
+    "name": "conan_package.tgz",
+    "type": "file",
+    "size": 21835527,
+    "depth": 9
+  },
+  {
+    "repo": "test-repo",
+    "path": "user2/package2/4.2.0/testing/18259fd357457eed2a5b2dffede67385/package/976790fbda33f5619b11df9030fb714af0990694/8854919f6b53ccf1c347f5a34b475b6a",
+    "name": "conaninfo.txt",
+    "type": "file",
+    "size": 2676,
+    "depth": 9
+  },
+  {
+    "repo": "test-repo",
+    "path": "user2/package2/4.2.0/testing/18259fd357457eed2a5b2dffede67385/package/976790fbda33f5619b11df9030fb714af0990694/8854919f6b53ccf1c347f5a34b475b6a",
+    "name": "conanmanifest.txt",
+    "type": "file",
+    "size": 67044,
+    "depth": 9
+  },
+  {
+    "repo": "test-repo",
+    "path": "user3/package3/4.2.1",
+    "name": "testing2",
+    "type": "folder",
+    "size": 0,
+    "depth": 4
+  },
+  {
+    "repo": "test-repo",
+    "path": "user3/package3/4.2.1/testing2",
+    "name": "18259fd357457eed2a5b2dffede67385",
+    "type": "folder",
+    "size": 0,
+    "depth": 5
+  },
+  {
+    "repo": "test-repo",
+    "path": "user3/package3/4.2.1/testing2/18259fd357457eed2a5b2dffede67385",
+    "name": "export",
+    "type": "folder",
+    "size": 0,
+    "depth": 6
+  },
+  {
+    "repo": "test-repo",
+    "path": "user3/package3/4.2.1/testing2/18259fd357457eed2a5b2dffede67385",
+    "name": "package",
+    "type": "folder",
+    "size": 0,
+    "depth": 6
+  },
+  {
+    "repo": "test-repo",
+    "path": "user3/package3/4.2.1/testing2/18259fd357457eed2a5b2dffede67385/package",
+    "name": "976790fbda33f5619b11df9030fb714af0990694",
+    "type": "folder",
+    "size": 0,
+    "depth": 7
+  },
+  {
+    "repo": "test-repo",
+    "path": "user3/package3/4.2.1/testing2/18259fd357457eed2a5b2dffede67385/package/976790fbda33f5619b11df9030fb714af0990694",
+    "name": "e708164fb64d5cce0bef0354b59a17ac",
+    "type": "folder",
+    "size": 0,
+    "depth": 8
+  },
+  {
+    "repo": "test-repo",
+    "path": "user3/package3/4.2.1/testing2/18259fd357457eed2a5b2dffede67385/package/976790fbda33f5619b11df9030fb714af0990694",
+    "name": "ba38761e49a42a9a44c8be1e30df4886",
+    "type": "folder",
+    "size": 0,
+    "depth": 8
+  }
+]
