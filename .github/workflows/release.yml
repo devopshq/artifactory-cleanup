@@ -19,7 +19,11 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install build
+          pip install build pytest
+
+      - name: Test with pytest
+        run: |
+          pytest -s --color=yes -vv
 
       - name: Build package
         run: python -m build
