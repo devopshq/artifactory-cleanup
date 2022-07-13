@@ -63,46 +63,36 @@ def load_artifacts():
     return artifacts_list
 
 
-def test_artifacts_list_to_tree():
-    artifacts_list = load_artifacts()
-
-    artifacts_tree = artifacts_list_to_tree(artifacts_list)
-
-    # Just some rough testing to verify that tree is correctly built
-    assert sorted(artifacts_tree.keys()) == sorted(["user1", "user2", "user3"])
-    assert sorted(artifacts_tree["user1"]["children"].keys()) == sorted(["package1"])
-    assert sorted(artifacts_tree["user2"]["children"].keys()) == sorted(
-        ["package2", "package5"]
-    )
-    assert sorted(
-        artifacts_tree["user2"]["children"]["package2"]["children"].keys()
-    ) == sorted(["4.2.0", "4.2.1"])
-    assert sorted(artifacts_tree["user3"]["children"].keys()) == sorted(["package3"])
-
-
 def test_folder_artifacts_without_children():
     artifacts_list = load_artifacts()
 
     artifacts_tree = artifacts_list_to_tree(artifacts_list)
-
     empty_folders = folder_artifacts_without_children(artifacts_tree)
-
-    assert len(empty_folders) == 3
 
     expected_empty_folders = [
         # Simple empty folder without children in the list, at a deeper level
-        "user2/package2/4.2.1",
+        {
+            "repo": "test-repo",
+            "path": "user2/package2",
+            "name": "4.2.1",
+            "type": "folder",
+            "size": 0,
+            "depth": 3,
+        },
         # Simple empty folder without children at a higher level
-        "user2/package5",
+        {
+            "repo": "test-repo",
+            "path": "user2",
+            "name": "package5",
+            "type": "folder",
+            "size": 0,
+            "depth": 2,
+        },
         # Longer folder structure where all subfolders are empty
-        "user3",
+        {
+            "repo": "test-repo",
+            "path": "",
+            "name": "user3",
+        },
     ]
-
-    for empty_folder in empty_folders:
-        empty_path = (
-            empty_folder["path"] + "/" + empty_folder["name"]
-            if len(empty_folder["path"]) > 0
-            else empty_folder["name"]
-        )
-
-        assert empty_path in expected_empty_folders
+    assert list(empty_folders) == expected_empty_folders
