@@ -33,19 +33,19 @@
   },
   {
     "repo": "test-repo",
-    "path": "user1",
-    "name": "package1",
-    "type": "folder",
-    "size": 0,
-    "depth": 2
-  },
-  {
-    "repo": "test-repo",
     "path": "user1/package1",
     "name": "0.1.2",
     "type": "folder",
     "size": 0,
     "depth": 3
+  },
+  {
+    "repo": "test-repo",
+    "path": "user1",
+    "name": "package1",
+    "type": "folder",
+    "size": 0,
+    "depth": 2
   },
   {
     "repo": "test-repo",
@@ -390,5 +390,13 @@
     "type": "folder",
     "size": 0,
     "depth": 8
+  },
+  {
+    "repo": "test2-repo",
+    "path": "emptyfolder1",
+    "name": "emptyfolder2",
+    "type": "folder",
+    "size": 0,
+    "depth": 1
   }
 ]

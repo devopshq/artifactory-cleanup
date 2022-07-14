@@ -1,102 +1,178 @@
-from collections import defaultdict, deque
-from typing import Dict, List
+from collections import defaultdict
+from typing import Dict, List, Tuple, Optional
+
+from treelib import Node, Tree
 
 
-def artifacts_list_to_tree(list_of_artifacts: List):
+def is_repository(data):
+    return data["path"] == "." and data["name"] == "."
+
+
+def get_fullpath(repo, path, name, **kwargs):
     """
-    Convert a list of artifacts to a dict representing the directory tree.
-    Each entry name corresponds to the folder or file name. And has two subnodes 'children' and
-    'data'. 'children' is recursively again the list of files/folder within that folder.
-    'data' contains the artifact data returned by artifactory.
-
-    Major idea based on https://stackoverflow.com/a/58917078
+    Get path from raw Artifactory's data
     """
-
-    def nested_dict():
-        """
-        Creates a default dictionary where each value is another default dictionary.
-        """
-        return defaultdict(nested_dict)
-
-    def default_to_regular(d):
-        """
-        Converts defaultdicts of defaultdicts to dict of dicts.
-        """
-        if isinstance(d, defaultdict):
-            d = {k: default_to_regular(v) for k, v in d.items()}
-        return d
-
-    new_path_dict = nested_dict()
-    for artifact in list_of_artifacts:
-        parts = artifact["path"].split("/")
-        if parts:
-            marcher = new_path_dict
-            for key in parts:
-                # We need the repo for the root level folders. They are not in the
-                # artifacts list
-                marcher[key]["data"] = {"repo": artifact["repo"]}
-                marcher = marcher[key]["children"]
-            marcher[artifact["name"]]["data"] = artifact
-    artifact_tree = default_to_regular(new_path_dict)
-    # Artifactory also returns the directory itself. We need to remove it from the list
-    # since that tree branch has no children assigned
-    if "." in artifact_tree:
-        del artifact_tree["."]
-    return artifact_tree
+    if name == ".":
+        # root - repository itself
+        return repo
+    if path == ".":
+        # folder under the root
+        return f"{repo}/{name}"
+    # Usual folder or a file
+    return f"{repo}/{path}/{name}"
 
 
-def folder_artifacts_without_children(artifacts_tree: Dict, path=""):
+def split_fullpath(fullpath: str) -> Tuple[str, Optional[str]]:
     """
-    Takes the artifacts tree and returns the list of artifacts which are folders
-    and do not have any children.
+    Split path into (name, parent)
+    >>> split_fullpath("repo/folder/filename.py")
+    ('filename.py', 'repo/folder')
 
-    If folder1 has only folder2 as a child, and folder2 is empty, the list only contains
-    folder1. I.e., empty folders are also recursively propagated back.
-
-    The input tree will be modified and empty folders will be deleted from the tree.
-
+    >>> split_fullpath("repo")
+    ('repo', None)
     """
+    parts = fullpath.rsplit("/", maxsplit=1)
+    if len(parts) == 1:
+        return parts[0], None
+    return parts[1], parts[0]
 
-    # use a deque instead of a list. it's faster to add elements there
-    empty_folder_artifacts = deque()
 
-    def _add_to_del_list(name: str):
+def parse_fullpath(fullpath: str) -> Tuple[str, str, str]:
+    """
+    Parse full path to (repo, path, name)
+    >>> parse_fullpath("repo/path/name.py")
+    ('repo', 'path', 'name.py')
+
+    >>> parse_fullpath("repo/path")
+    ('repo', '.', 'path')
+
+    >>> parse_fullpath("repo")
+    ('repo', '.', '.')
+    """
+    if "/" not in fullpath:
+        # root - repository itself
+        return fullpath, ".", "."
+    name, repo_path = split_fullpath(fullpath)
+
+    if "/" not in repo_path:
+        # folder under the root
+        return repo_path, ".", name
+
+    # Usual folder or a file
+    repo, path = repo_path.split("/", maxsplit=1)
+    return repo, path, name
+
+
+class ArtifactNode(Node):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.files = 0
+
+    def is_file(self):
+        if not self.data:
+            return False
+        return self.data["type"] == "file"
+
+    def get_raw_data(self) -> Dict:
         """
-        Add element with name to empty folder list and remove it from the tree
+        Get Artifactory raw data.
+
+        If we don't know exactly data - we try to build it from what we know
         """
-        empty_folder_artifacts.append(artifacts_tree[name]["data"])
-        # Also delete the item from the children list to recursively delete folders
-        # upwards
-        del artifacts_tree[name]
+        if self.data:
+            return self.data
 
-    # Use list(item.keys()) here so that we can delete items while iterating over the
-    # dict.
-    for artifact_name in list(artifacts_tree.keys()):
-        tree_entry = artifacts_tree[artifact_name]
-        if "type" in tree_entry["data"] and tree_entry["data"]["type"] == "file":
-            continue
-        if not "path" in tree_entry["data"]:
-            # Set the path and name for root folders which were not explicitly in the
-            # artifacts list
-            tree_entry["data"]["path"] = path
-            tree_entry["data"]["name"] = artifact_name
-        if not "children" in tree_entry or len(tree_entry["children"]) == 0:
-            # This an empty folder
-            _add_to_del_list(artifact_name)
-        else:
-            artifacts = folder_artifacts_without_children(
-                tree_entry["children"],
-                path=path + "/" + artifact_name if len(path) > 0 else artifact_name,
-            )
-            # Additional check needed here because the recursive call may
-            # delete additional children.
-            # And here we want to check again if all children would be deleted.
-            # Then also delete this.
-            if len(tree_entry["children"]) == 0:
-                # just delete the whole folder since all children are empty
-                _add_to_del_list(artifact_name)
-            else:
-                # add all empty folder children to the list
-                empty_folder_artifacts.extend(artifacts)
+        repo, path, name = parse_fullpath(self.identifier)
+        data = dict(repo=repo, path=path, name=name)
+        return data
 
-    return empty_folder_artifacts
+
+class RepositoryTree(Tree):
+    def parse_artifact(self, data):
+        """
+        Parse Artifactory's raw data and add artifact to the tree
+        """
+        fullpath = get_fullpath(**data)
+        self.add_artifact(fullpath, data)
+
+    def add_artifact(self, fullpath, data):
+        existed = self.get_node(fullpath)
+        if existed and existed.data is None:
+            # We met it before, but with no data
+            existed.data = data
+            return existed
+
+        name, parent = split_fullpath(fullpath)
+        self.upsert_path(parent)
+        artifact = ArtifactNode(tag=name, identifier=fullpath, data=data)
+        self.add_node(node=artifact, parent=parent)
+        return artifact
+
+    def upsert_path(self, fullpath):
+        """
+        Create path to the folder if not exist
+        """
+        if not fullpath:
+            return
+
+        exists = self.contains(fullpath)
+        if exists:
+            return
+
+        self.add_artifact(fullpath, data=None)
+
+    def count_files(self, nid=None) -> int:
+        """Count files inside the directory. DFS traversing"""
+        nid = nid or self.root
+        node: ArtifactNode = self.get_node(nid)
+        if node.is_file():
+            node.files = 1
+            return node.files
+
+        children: List[ArtifactNode] = self.children(nid)
+        for child in children:
+            self.count_files(child.identifier)
+        files = sum(child.files for child in children)
+        node.files = files
+        return node.files
+
+    def get_highest_empty_folders(self, nid=None) -> List[ArtifactNode]:
+        """Get the highest empty folders for the repository. DFS traversing"""
+        nid = nid or self.root
+        node: ArtifactNode = self.get_node(nid)
+        if not node.is_root() and node.files == 0:
+            # Empty folder that contains only empty folders
+            if all(child.files == 0 for child in self.children(nid)):
+                return [node]
+
+        folders = []
+        for child in self.children(nid):
+            _folder = self.get_highest_empty_folders(nid=child.identifier)
+            folders.extend(_folder)
+        return folders
+
+
+def build_repositories(artifacts: List[Dict]) -> List[RepositoryTree]:
+    """Build tree-like repository objects from raw Artifactory data"""
+    repositories = defaultdict(RepositoryTree)
+    for data in artifacts:
+        repo = repositories[data["repo"]]
+        repo.parse_artifact(data)
+    return list(repositories.values())
+
+
+def get_empty_folders(repositories: List[RepositoryTree]) -> List[Dict]:
+    folders = []
+    for repo in repositories:
+        repo.count_files()
+    for repo in repositories:
+        _folders = repo.get_highest_empty_folders()
+        folders.extend(_folders)
+
+    # Convert to raw data, similar to JSON Artifactory response
+    artifacts = [folder.get_raw_data() for folder in folders]
+    for data in artifacts:
+        if is_repository(data):
+            raise ValueError("Can not remove repository root")
+
+    return artifacts

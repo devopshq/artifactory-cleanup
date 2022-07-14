@@ -33,6 +33,7 @@ setup(
         "plumbum",
         "dohq-artifactory",
         "teamcity-messages",
+        "treelib",
     ],
     classifiers=[
         "Development Status :: 5 - Production/Stable",

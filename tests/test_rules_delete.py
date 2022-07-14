@@ -1,12 +1,17 @@
 import json
+import os
 
 from artifactory_cleanup.rules import delete_empty_folder
 
 
 def load_artifacts():
     """
+
+    test2-repo | REPO - not present in the list
+      - emptyfolder1  | FOLDER - not present in the list
+        - emptyfolder2
+
     test-repo
-        - .
         - user1
           - package1
             - 0.1.2
@@ -55,7 +60,8 @@ def load_artifacts():
                       - ba38761e49a42a9a44c8be1e30df4886
         - user3
     """
-    with open("artifacts_list.json", "r") as fp:
+    test_dir = os.path.dirname(__file__)
+    with open(f"{test_dir}/artifacts_list.json", "r") as fp:
         artifacts_list = json.load(fp)
     return artifacts_list
 
@@ -87,9 +93,17 @@ def test_delete_empty_folder():
         },
         # Longer folder structure where all subfolders are empty
         {
+            "depth": 1,
+            "size": 0,
             "repo": "test-repo",
-            "path": "",
+            "path": ".",
             "name": "user3",
+            "type": "folder",
+        },
+        {
+            "name": "emptyfolder1",
+            "path": ".",
+            "repo": "test2-repo",
         },
     ]
     assert list(artifacts_to_remove) == expected_empty_folders

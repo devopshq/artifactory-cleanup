@@ -1,10 +1,7 @@
 from datetime import timedelta
 
+from artifactory_cleanup.rules import utils
 from artifactory_cleanup.rules.base import Rule
-from artifactory_cleanup.rules.utils import (
-    artifacts_list_to_tree,
-    folder_artifacts_without_children,
-)
 
 
 class delete_older_than(Rule):
@@ -89,10 +86,10 @@ class delete_not_used_since(Rule):
 
 class delete_empty_folder(Rule):
     """
-    Clean up empty folders in local repositories. A special rule that runs separately on all repositories.
+    Remove empty folders.
 
-    Refers to the plugin
-    https://github.com/jfrog/artifactory-user-plugins/tree/master/cleanup/deleteEmptyDirs
+    If you just want to clean up empty folders - Artifactory must do it automatically.
+    We use the rule to help with some specific cases - look at README.md "FAQ: How to clean up Conan repository"
     """
 
     def _aql_add_filter(self, aql_query_list):
@@ -101,10 +98,7 @@ class delete_empty_folder(Rule):
         aql_query_list.append(all_files_dict)
         return aql_query_list
 
-    def _filter_result(self, result_artifact):
-
-        artifact_tree = artifacts_list_to_tree(result_artifact)
-
-        # Now we have a dict with all folders and files
-        # An empty folder is represented by not having any children
-        return list(folder_artifacts_without_children(artifact_tree))
+    def _filter_result(self, result_artifacts):
+        repositories = utils.build_repositories(result_artifacts)
+        folders = utils.get_empty_folders(repositories)
+        return folders
