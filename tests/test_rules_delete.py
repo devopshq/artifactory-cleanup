@@ -1,9 +1,6 @@
 import json
 
-from artifactory_cleanup.rules.utils import (
-    artifacts_list_to_tree,
-    folder_artifacts_without_children,
-)
+from artifactory_cleanup.rules import delete_empty_folder
 
 
 def load_artifacts():
@@ -63,11 +60,11 @@ def load_artifacts():
     return artifacts_list
 
 
-def test_folder_artifacts_without_children():
-    artifacts_list = load_artifacts()
+def test_delete_empty_folder():
+    artifacts = load_artifacts()
 
-    artifacts_tree = artifacts_list_to_tree(artifacts_list)
-    empty_folders = folder_artifacts_without_children(artifacts_tree)
+    rule = delete_empty_folder()
+    artifacts_to_remove = rule.filter_result(artifacts)
 
     expected_empty_folders = [
         # Simple empty folder without children in the list, at a deeper level
@@ -95,4 +92,4 @@ def test_folder_artifacts_without_children():
             "name": "user3",
         },
     ]
-    assert list(empty_folders) == expected_empty_folders
+    assert list(artifacts_to_remove) == expected_empty_folders
