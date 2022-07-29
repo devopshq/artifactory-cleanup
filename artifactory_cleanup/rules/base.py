@@ -205,7 +205,7 @@ class CleanupPolicy(object):
         else:
             artifact_path = "{repo}/{path}/{name}".format(**artifact)
 
-        artifact_path = quote(artifact)
+        artifact_path = quote(artifact_path)
         if destroy:
             print("DESTROY MODE - delete {}".format(artifact_path))
             delete_url = "{}/{}".format(self.artifactory_url, artifact_path)
