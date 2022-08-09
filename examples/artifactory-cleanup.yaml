@@ -1,0 +1,33 @@
+# Proposal: https://github.com/devopshq/artifactory-cleanup/issues/54
+# Please leave a comment if you'd enjoy using this format!
+
+artifactory-cleanup:
+  - server: https://repo.example.com/artifactory
+    # $VAR is auto populated from environment variables
+    user: $ARTIFACTORY_USERNAME
+    password: $ARTIFACTORY_USERNAME
+
+    policies:
+      - name: Remove all .tmp files older than 7 days
+        rules:
+          - repoByMask: "*.tmp"
+          - deleteOlderThan: 7
+
+      - name: My Docker Cleanup Policies
+        rules:
+          - repoByMask: "docker-*-tmp"
+          - deleteOlderThan:
+              days: 7
+
+      - name: My Docker Cleanup Policies
+        rules:
+          - repoByMask: "docker-*-tmp"
+          - excludeDockerImages:
+              - '*:latest'
+              - '*:release*'
+          - deleteOlderThan:
+              days: 7
+
+  # Other server
+  - server: https://staging.example.com/artifactory
+    rules: []
