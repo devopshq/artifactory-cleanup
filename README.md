@@ -140,7 +140,7 @@ docker run \
 
 The environment variables specify the necessary `artifactory-cleanup` arguments.    
 
-In case you have setup your Artifactory self-signed certificates, place all certificates of the chain of trust into the `docker/certificates/` folder and add an additional argument `--mount type=bind,source=./certificates/,target=/mnt/self-signed-certs/` to a command.
+In case you have set up your Artifactory self-signed certificates, place all certificates of the chain of trust into the `docker/certificates/` folder and add an additional argument `--mount type=bind,source=./certificates/,target=/mnt/self-signed-certs/` to a command.
 
 To build the container image locally run the following command in the folder of the `Dockerfile`.
 

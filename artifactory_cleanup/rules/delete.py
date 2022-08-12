@@ -55,7 +55,7 @@ class DeleteOlderThanNDaysWithoutDownloads(Rule):
         return aql_query_list
 
 
-class DeleteNotUsedSinse(Rule):
+class DeleteNotUsedSince(Rule):
     """
     Delete artifacts that were downloaded, but for a long time. N days passed.
     Or not downloaded at all from the moment of creation and it's been N days.
@@ -69,10 +69,10 @@ class DeleteNotUsedSinse(Rule):
 
         update_dict = {
             "$or": [
-                {"stat.downloaded": {"$lte": str(last_day)}},  # Скачивались давно
+                {"stat.downloaded": {"$lte": str(last_day)}},
                 {
                     "$and": [
-                        {"stat.downloads": {"$eq": None}},  # Не скачивались
+                        {"stat.downloads": {"$eq": None}},
                         {"created": {"$lte": str(last_day)}},
                     ]
                 },
@@ -109,5 +109,5 @@ class DeleteEmptyFolder(Rule):
 delete_older_than = DeleteOlderThan
 delete_without_downloads = DeleteWithoutDownloads
 delete_older_than_n_days_without_downloads = DeleteOlderThanNDaysWithoutDownloads
-delete_not_used_since = DeleteNotUsedSinse
+delete_not_used_since = DeleteNotUsedSince
 delete_empty_folder = DeleteEmptyFolder

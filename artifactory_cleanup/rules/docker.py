@@ -133,12 +133,10 @@ class DeleteDockerImagesNotUsed(RuleForDocker):
                 "$match": "manifest.json",
             },
             "$or": [
-                {
-                    "stat.downloaded": {"$lte": last_day.isoformat()}
-                },  # Скачивались давно
+                {"stat.downloaded": {"$lte": last_day.isoformat()}},
                 {
                     "$and": [
-                        {"stat.downloads": {"$eq": None}},  # Не скачивались
+                        {"stat.downloads": {"$eq": None}},
                         {"created": {"$lte": last_day.isoformat()}},
                     ]
                 },
@@ -161,7 +159,7 @@ class KeepLatestNVersionImagesByProperty(Rule):
     If you need to add minor then put 2 or if patch then put 3.
 
     :param custom_regexp: how to determine version.
-    По умолчанию ``r'(^ \d*\.\d*\.\d*.\d+$)``. Ищет версию в ``properties`` файла ``manifest.json``
+    By default ``r'(^ \d*\.\d*\.\d*.\d+$)``. Find a version in ``properties`` of the file ``manifest.json``
     """
 
     def __init__(
@@ -204,12 +202,7 @@ class KeepLatestNVersionImagesByProperty(Rule):
 
 class DeleteDockerImageIfNotContainedInProperties(RuleForDocker):
     """
-    .. warning::
-
-        Multiscanner project specific rule https://wiki.ptsecurity.com/x/koFIAg
-
     Remove Docker image, if it is not found in the properties of the artifact repository.
-
     """
 
     def __init__(
@@ -293,11 +286,6 @@ class DeleteDockerImageIfNotContainedInProperties(RuleForDocker):
 class DeleteDockerImageIfNotContainedInPropertiesValue(RuleForDocker):
     """
     Remove Docker image, if it is not found in the properties of the artifact repository
-
-    .. warning::
-
-        Multiscanner project specific rule https://wiki.ptsecurity.com/x/koFIAg
-
     """
 
     def __init__(
@@ -335,7 +323,7 @@ class DeleteDockerImageIfNotContainedInPropertiesValue(RuleForDocker):
             if not image.startswith(self.image_prefix):
                 continue
 
-            # For debag output all properties that begin as image
+            # For debug output all properties that begin as image
             values_with_image_name = [
                 x for x in properties_values if x.startswith(image)
             ]

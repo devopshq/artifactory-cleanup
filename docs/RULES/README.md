@@ -7,7 +7,7 @@
 | `DeleteOlderThan(days=N)` | Deletes artifacts that are older than N days |
 | `DeleteWithoutDownloads()` | Deletes artifacts that have never been downloaded (DownloadCount=0). Better to use with `DeleteOlderThan` rule |
 | `DeleteOlderThanNDaysWithoutDownloads(days=N)` | Deletes artifacts that are older than N days and have not been downloaded |
-| `DeleteNotUsedSinse(days=N)` | Delete artifacts that were downloaded, but for a long time. N days passed. Or not downloaded at all from the moment of creation and it's been N days |
+| `DeleteNotUsedSince(days=N)` | Delete artifacts that were downloaded, but for a long time. N days passed. Or not downloaded at all from the moment of creation and it's been N days |
 | `DeleteEmptyFolder()` | Clean up empty folders in given repository list |
 | `KeepLatestNupkgNVersions(count=N)` | Leaves N nupkg (adds `*.nupkg` filter) in release feature builds |
 | `KeepLatestNFiles(count=N)` | Leaves the last (by creation time) files in the amount of N pieces. WITHOUT accounting subfolders |
@@ -25,8 +25,8 @@
 | `DeleteDockerImagesOlderThan(days=N)` | Delete docker images that are older than N days |
 | `DeleteDockerImagesOlderThanNDaysWithoutDownloads(days=N)` | Deletes docker images that are older than N days and have not been downloaded |
 | `DeleteDockerImagesNotUsed(days=N)` | Removes Docker image not downloaded since N days |
-| `DeleteDockerImageIfNotContainedInProperties(docker_repo='docker-local', properties_prefix='my-prop', image_prefix=None, full_docker_repo_name=None)` | Remove Docker image, if it is not found in the properties of the artifact repository. Warning: [Multiscanner project specific rule](https://wiki.ptsecurity.com/x/koFIAg) |
-| `DeleteDockerImageIfNotContainedInPropertiesValue(docker_repo='docker-local', properties_prefix='my-prop', image_prefix=None, full_docker_repo_name=None)` | Remove Docker image, if it is not found in the properties of the artifact repository. Warning: [Multiscanner project specific rule](https://wiki.ptsecurity.com/x/koFIAg) |
+| `DeleteDockerImageIfNotContainedInProperties(docker_repo='docker-local', properties_prefix='my-prop', image_prefix=None, full_docker_repo_name=None)` | Remove Docker image, if it is not found in the properties of the artifact repository. |
+| `DeleteDockerImageIfNotContainedInPropertiesValue(docker_repo='docker-local', properties_prefix='my-prop', image_prefix=None, full_docker_repo_name=None)` | Remove Docker image, if it is not found in the properties of the artifact repository. |
 | `KeepLatestNVersionImagesByProperty(count=N, custom_regexp='some-regexp', number_of_digits_in_version=X)` | Leaves N Docker images with the same major. `(^ \d*\.\d*\.\d*.\d+$)` is the default regexp how to determine version. If you need to add minor then put 2 or if patch then put 3 (By default `1`) |
 
 

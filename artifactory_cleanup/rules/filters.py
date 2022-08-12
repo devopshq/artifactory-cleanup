@@ -44,7 +44,8 @@ class __FilterDockerImages(Rule):
         for mask in self.masks:
             if ":" not in mask:
                 raise AttributeError("Mask '{}' must contain ':'".format(mask))
-            mask = mask.replace(":", "/")  # alpine:2.4 to alpine/2.4
+            # alpine:2.4 => alpine/2.4
+            mask = mask.replace(":", "/")
             update_dict = {
                 "path": {
                     self.operator: mask,
@@ -90,7 +91,7 @@ class IncludeFilename(Rule):
 
     You can specify multiple paths::
 
-       IncludeFilename('*-*'), # фича-ветки
+       IncludeFilename('*-*'), # feature-branches
        IncludeFilename(['*tar.gz', '*.nupkg']),
 
     """

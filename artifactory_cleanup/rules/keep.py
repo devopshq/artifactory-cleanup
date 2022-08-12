@@ -55,7 +55,6 @@ class KeepLatestNupkgNVersions(Rule):
                         artifacts_by_version.items(), key=self.keyfunc
                     )
                     sorted_artifact = [x[1] for x in sorted_artifact]
-                    # Определяем количетсво артефактов
                     artifact_count = len(sorted_artifact)
                     good_artifact_count = artifact_count - self.count
                     if good_artifact_count < 0:
