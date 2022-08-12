@@ -6,7 +6,7 @@ from artifactory_cleanup.rules.base import Rule
 from artifactory_cleanup.rules.exception import PolicyException
 
 
-class repo(Rule):
+class Repo(Rule):
     """
     Apply the rule to one repository.
     If no name is specified, it is taken from the rule name::
@@ -53,7 +53,7 @@ class repo(Rule):
         return aql_query_list
 
 
-class repo_by_mask(Rule):
+class RepoByMask(Rule):
     """
     Apply rule to repositories matching by mask
     """
@@ -72,7 +72,7 @@ class repo_by_mask(Rule):
         return aql_query_list
 
 
-class property_eq(Rule):
+class PropertyEq(Rule):
     """Deletes repository artifacts with a specific property value only"""
 
     def __init__(self, property_key, property_value):
@@ -90,14 +90,14 @@ class property_eq(Rule):
         return aql_query_list
 
 
-class property_neq(Rule):
+class PropertyNeq(Rule):
     """
     Delete repository artifacts only if the value is not equal to the specified one.
     If there is no value, delete it anyway.
 
     You can specify a flag to not delete ``do_not_delete=1``::
 
-        property_neq('do_not_delete", '1')
+        PropertyNeq('do_not_delete", '1')
     """
 
     def __init__(self, property_key, property_value):
@@ -112,3 +112,11 @@ class property_neq(Rule):
         ]
         self.remove_artifact(good_artifact, result_artifact)
         return result_artifact
+
+
+# under_score - old style of naming
+# Keep it for backward compatibility
+repo = Repo
+repo_by_mask = RepoByMask
+property_eq = PropertyEq
+property_neq = PropertyNeq

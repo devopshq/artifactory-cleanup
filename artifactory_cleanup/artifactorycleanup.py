@@ -81,10 +81,10 @@ class ArtifactoryCleanup(cli.Application):
         try:
             self._config = self._config.replace(".py", "")
             sys.path.append(".")
-            rules = getattr(importlib.import_module(self._config), "RULES")
+            policies = getattr(importlib.import_module(self._config), "RULES")
         except ImportError as error:
             print("Error: {}".format(error))
-            exit(1)
+            sys.exit(1)
 
         self._destroy_or_verbose()
 
@@ -97,18 +97,18 @@ class ArtifactoryCleanup(cli.Application):
         artifactory_session = requests.Session()
         artifactory_session.auth = HTTPBasicAuth(self._user, self._password)
 
-        # Validate that all rules is CleanupPolicy
-        for cleanup_rule in rules:
-            if not isinstance(cleanup_rule, CleanupPolicy):
+        # Validate that all policies is CleanupPolicy
+        for policy in policies:
+            if not isinstance(policy, CleanupPolicy):
                 sys.exit(
-                    "Rule '{}' is not CleanupPolicy, check this please".format(
-                        cleanup_rule
-                    )
+                    "Rule '{}' is not CleanupPolicy, check this please".format(policy)
                 )
 
         if self._policy_name:
-            rules = [rule for rule in rules if self._policy_name in rule.name]
-            if not rules:
+            policies = [
+                policy for policy in policies if self._policy_name in policy.name
+            ]
+            if not policies:
                 sys.exit("Rule with name '{}' does not found".format(self._policy_name))
 
         table = PrettyTable()
@@ -118,28 +118,26 @@ class ArtifactoryCleanup(cli.Application):
 
         ctx_mgr_block, ctx_mgr_test = get_context_managers()
 
-        for cleanup_rule in rules:  # type: CleanupPolicy
-            with ctx_mgr_block(cleanup_rule.name):
-                cleanup_rule.init(
-                    artifactory_session, self._artifactory_server, self._today
-                )
+        for policy in policies:  # type: CleanupPolicy
+            with ctx_mgr_block(policy.name):
+                policy.init(artifactory_session, self._artifactory_server, self._today)
 
                 # prepare
                 with ctx_mgr_block("AQL filter"):
-                    cleanup_rule.aql_filter()
+                    policy.aql_filter()
 
                 # Get artifacts
                 with ctx_mgr_block("Get artifacts"):
                     print("*" * 80)
                     print("AQL Query:")
-                    print(cleanup_rule.aql_text)
+                    print(policy.aql_text)
                     print("*" * 80)
-                    artifacts = cleanup_rule.get_artifacts()
+                    artifacts = policy.get_artifacts()
                 print("Found {} artifacts".format(len(artifacts)))
 
                 # Filter
                 with ctx_mgr_block("Filter results"):
-                    artifacts_to_remove = cleanup_rule.filter(artifacts)
+                    artifacts_to_remove = policy.filter(artifacts)
                 print(
                     "Found {} artifacts AFTER filtering".format(
                         len(artifacts_to_remove)
@@ -148,7 +146,7 @@ class ArtifactoryCleanup(cli.Application):
 
                 # Delete or debug
                 for artifact in artifacts_to_remove:
-                    # test name for teamcity
+                    # test name for CI servers
                     repo_underscore = (
                         artifact["repo"].replace(".", "_").replace("/", "_")
                     )
@@ -163,7 +161,7 @@ class ArtifactoryCleanup(cli.Application):
                     )
 
                     with ctx_mgr_test(test_name):
-                        cleanup_rule.delete(artifact, destroy=self._destroy)
+                        policy.delete(artifact, destroy=self._destroy)
 
             # Info
             count_artifacts = len(artifacts_to_remove)
@@ -174,7 +172,7 @@ class ArtifactoryCleanup(cli.Application):
                 artifacts_size = size(artifacts_size)
                 print("Summary size: {}".format(artifacts_size))
 
-                table.add_row([cleanup_rule.name, count_artifacts, artifacts_size])
+                table.add_row([policy.name, count_artifacts, artifacts_size])
             except KeyError:
                 print("Summary size not defined")
             print()

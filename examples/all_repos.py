@@ -5,17 +5,17 @@ RULES = [
     # ------ ALL REPOS --------
     CleanupPolicy(
         "Очистка всех *.tmp - репозиториев",
-        rules.repo_by_mask("*.tmp"),
-        rules.delete_older_than(days=7),
+        rules.RepoByMask("*.tmp"),
+        rules.DeleteOlderThan(days=7),
     ),
     CleanupPolicy(
         "docker-tmp",
-        rules.repo_by_mask("docker*-tmp"),
-        rules.delete_docker_images_older_than(days=1),
+        rules.RepoByMask("docker*-tmp"),
+        rules.DeleteDockerImagesOlderThan(days=1),
     ),
     # ------ Concrete repo --------
     CleanupPolicy(
         "reponame.snapshot",
-        rules.delete_older_than(days=7),
+        rules.DeleteOlderThan(days=7),
     ),
 ]

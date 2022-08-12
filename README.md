@@ -40,18 +40,19 @@ You should take the following steps:
 
 1. Install `artifactory-cleanup`
 2. Сreate a python file, for example, `reponame.py` with the following contents:
+
 ```python
 from artifactory_cleanup import rules
 from artifactory_cleanup import CleanupPolicy
 
 RULES = [
 
-    # ------ ALL REPOS --------
-    CleanupPolicy(
-       'Delete files older than 30 days',
-        rules.repo('reponame'),
-        rules.delete_older_than(days=30),
-    ),
+  # ------ ALL REPOS --------
+  CleanupPolicy(
+    'Delete files older than 30 days',
+    rules.Repo('reponame'),
+    rules.DeleteOlderThan(days=30),
+  ),
 ]
 ```
 3. Run the command to SHOW (not remove) artifacts that will be deleted:
@@ -97,17 +98,17 @@ from artifactory_cleanup import CleanupPolicy
 
 RULES = [
 
-    CleanupPolicy(
-       'Delete all * .tmp repositories older than 7 days',
-        rules.repo_by_mask('*. tmp'),
-        rules.delete_older_than(days = 7),
-    ),
-    CleanupPolicy(
-        'Delete all images older than 30 days from docker-registry exclude latest, release',
-        rules.repo('docker-registry'),
-        rules.exclude_docker_images(['*:latest', '*:release*']),
-        rules.delete_docker_images_not_used(days=30),
-    ),
+  CleanupPolicy(
+    'Delete all * .tmp repositories older than 7 days',
+    rules.RepoByMask('*. tmp'),
+    rules.DeleteOlderThan(days=7),
+  ),
+  CleanupPolicy(
+    'Delete all images older than 30 days from docker-registry exclude latest, release',
+    rules.Repo('docker-registry'),
+    rules.ExcludeDockerImages(['*:latest', '*:release*']),
+    rules.DeleteDockerImagesNotUsed(days=30),
+  ),
 ]
 ```
 
@@ -139,7 +140,7 @@ docker run \
 
 The environment variables specify the necessary `artifactory-cleanup` arguments.    
 
-In case you have setup your Artifactory self-signed certificates, place all certificates of the chain of trust into the `docker/certificates/` folder and add an additional argument `--mount type=bind,source=./certificates/,target=/mnt/self-signed-certs/` to a command.
+In case you have set up your Artifactory self-signed certificates, place all certificates of the chain of trust into the `docker/certificates/` folder and add an additional argument `--mount type=bind,source=./certificates/,target=/mnt/self-signed-certs/` to a command.
 
 To build the container image locally run the following command in the folder of the `Dockerfile`.
 

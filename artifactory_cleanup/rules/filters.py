@@ -1,14 +1,14 @@
 from artifactory_cleanup.rules.base import Rule
 
 
-class include_path(Rule):
+class IncludePath(Rule):
     """
     Apply to artifacts by path / mask.
 
     You can specify multiple paths::
 
-       include_path('*production*'),
-       include_path(['*release*', '*master*']),
+       IncludePath('*production*'),
+       IncludePath(['*release*', '*master*']),
 
     """
 
@@ -25,7 +25,7 @@ class include_path(Rule):
         return aql_query_list
 
 
-class __filter_docker_images(Rule):
+class __FilterDockerImages(Rule):
     operator = None
 
     def __init__(self, masks):
@@ -44,7 +44,8 @@ class __filter_docker_images(Rule):
         for mask in self.masks:
             if ":" not in mask:
                 raise AttributeError("Mask '{}' must contain ':'".format(mask))
-            mask = mask.replace(":", "/")  # alpine:2.4 to alpine/2.4
+            # alpine:2.4 => alpine/2.4
+            mask = mask.replace(":", "/")
             update_dict = {
                 "path": {
                     self.operator: mask,
@@ -56,42 +57,42 @@ class __filter_docker_images(Rule):
         return aql_query_list
 
 
-class include_docker_images(__filter_docker_images):
+class IncludeDockerImages(__FilterDockerImages):
     """
     Apply to docker images with the specified names and tags.
 
     You can specify multiple names and tags::
 
-       include_docker_images('*:production*'),
-       include_docker_images(['ubuntu:*', 'debian:9']),
+       IncludeDockerImages('*:production*'),
+       IncludeDockerImages(['ubuntu:*', 'debian:9']),
 
     """
 
     operator = "$match"
 
 
-class exclude_docker_images(__filter_docker_images):
+class ExcludeDockerImages(__FilterDockerImages):
     """
     Exclude Docker images by name and tags.
 
     You can specify multiple names and tags::
 
-       exclude_path('*:production*'),
-       exclude_path(['ubuntu:*', 'debian:9']),
+       ExcludePath('*:production*'),
+       ExcludePath(['ubuntu:*', 'debian:9']),
 
     """
 
     operator = "$nmatch"
 
 
-class include_filename(Rule):
+class IncludeFilename(Rule):
     """
     Apply to artifacts by name/mask.
 
     You can specify multiple paths::
 
-       include_filename('*-*'), # фича-ветки
-       include_filename(['*tar.gz', '*.nupkg']),
+       IncludeFilename('*-*'), # feature-branches
+       IncludeFilename(['*tar.gz', '*.nupkg']),
 
     """
 
@@ -108,7 +109,7 @@ class include_filename(Rule):
         return aql_query_list
 
 
-class _exclude_mask(Rule):
+class _ExcludeMask(Rule):
     attribute_name = None
 
     def __init__(
@@ -137,29 +138,39 @@ class _exclude_mask(Rule):
         return aql_query_list
 
 
-class exclude_path(_exclude_mask):
+class ExcludePath(_ExcludeMask):
     """
     Exclude artifacts by path/mask.
 
     You can specify multiple paths::
 
-       exclude_path('*production*'),
-       exclude_path(['*release*', '*master*']),
+       ExcludePath('*production*'),
+       ExcludePath(['*release*', '*master*']),
 
     """
 
     attribute_name = "path"
 
 
-class exclude_filename(_exclude_mask):
+class ExcludeFilename(_ExcludeMask):
     """
     Exclude artifacts by name/mask.
 
     You can specify multiple paths::
 
-       exclude_filename('*-*'), # фича-ветки
-       exclude_filename(['*tar.gz', '*.nupkg']),
+       ExcludeFilename('*-*'), # feature-branch
+       ExcludeFilename(['*tar.gz', '*.nupkg']),
 
     """
 
     attribute_name = "name"
+
+
+# under_score - old style of naming
+# Keep it for backward compatibility
+include_path = IncludePath
+include_docker_images = IncludeDockerImages
+exclude_docker_images = ExcludeDockerImages
+include_filename = IncludeFilename
+exclude_path = ExcludePath
+exclude_filename = ExcludeFilename

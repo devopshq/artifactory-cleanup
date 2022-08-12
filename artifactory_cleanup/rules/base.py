@@ -81,7 +81,7 @@ class Rule(object):
 
     @property
     def little_doc(self):
-        # Образем всю документацию чтобы принтануть только первую самую важные строчку - что делает это правило
+        # Cut the docstring to show only the very first important line
         docs = [x.strip() for x in self.__doc__.splitlines() if x][0]
         return docs
 
@@ -115,7 +115,7 @@ class CleanupPolicy(object):
         CleanupPolicy(
            'myrepo.snapshot',
            rules.repo,
-           rules.delete_older_than(days=7),
+           rules.DeleteOlderThan(days=7),
         )
 
     """
@@ -168,7 +168,7 @@ class CleanupPolicy(object):
     @property
     def aql_text(self):
         """
-        Сollect from all rules additional texts of requests
+        Collect from all rules additional texts of requests
         """
         aql_query_dict = {"$and": self.aql_query_list}
         aql_text = 'items.find({query_dict}).include("*", "property", "stat")'.format(
@@ -186,11 +186,7 @@ class CleanupPolicy(object):
         r.raise_for_status()
         content = r.json()
         artifacts = content["results"]
-
-        # properties, stat отдаются в формате list, переделываем их в формат dict
         artifacts = Rule.prepare_artifact(artifacts)
-
-        # Сортируем по пути и имени
         artifacts = sorted(artifacts, key=lambda x: x["path"])
         return artifacts
 

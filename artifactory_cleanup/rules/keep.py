@@ -5,7 +5,7 @@ from itertools import groupby
 from artifactory_cleanup.rules.base import Rule
 
 
-class keep_latest_nupkg_n_version(Rule):
+class KeepLatestNupkgNVersions(Rule):
     r"""Leaves ``count`` nupkg (adds * .nupkg filter) in release \ feature builds"""
 
     def __init__(self, count):
@@ -55,7 +55,6 @@ class keep_latest_nupkg_n_version(Rule):
                         artifacts_by_version.items(), key=self.keyfunc
                     )
                     sorted_artifact = [x[1] for x in sorted_artifact]
-                    # Определяем количетсво артефактов
                     artifact_count = len(sorted_artifact)
                     good_artifact_count = artifact_count - self.count
                     if good_artifact_count < 0:
@@ -95,8 +94,8 @@ class keep_latest_nupkg_n_version(Rule):
         ]
 
 
-class keep_latest_n_file(Rule):
-    """ "Leaves the last (by creation time) files in the amount of N pieces. WITHOUT accounting subfolders"""
+class KeepLatestNFiles(Rule):
+    """Leaves the last (by creation time) files in the amount of N pieces. WITHOUT accounting subfolders"""
 
     def __init__(self, count):
         self.count = count
@@ -119,7 +118,7 @@ class keep_latest_n_file(Rule):
         return result_artifact
 
 
-class keep_latest_n_file_in_folder(Rule):
+class KeepLatestNFilesInFolder(Rule):
     """Leaves the last (by creation time) files in the number of ``count`` pieces in each folder"""
 
     def __init__(self, count):
@@ -150,7 +149,7 @@ class keep_latest_n_file_in_folder(Rule):
         return result_artifact
 
 
-class keep_latest_version_n_file_in_folder(Rule):
+class KeepLatestVersionNFilesInFolder(Rule):
     r"""Leaves the latest (by version) files in each folder.
 
     The definition of the version is using regexp. By default ``r'[^ \d][[\._]]()((\d+\.)+\d+)')``
@@ -195,3 +194,11 @@ class keep_latest_version_n_file_in_folder(Rule):
                 self.remove_artifact(artifact[1], result_artifact)
 
         return result_artifact
+
+
+# under_score - old style of naming
+# Keep it for backward compatibility
+keep_latest_nupkg_n_version = KeepLatestNupkgNVersions
+keep_latest_n_file = KeepLatestNFiles
+keep_latest_n_file_in_folder = KeepLatestNFilesInFolder
+keep_latest_version_n_file_in_folder = KeepLatestVersionNFilesInFolder

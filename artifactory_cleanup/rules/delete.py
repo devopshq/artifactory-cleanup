@@ -4,7 +4,7 @@ from artifactory_cleanup.rules import utils
 from artifactory_cleanup.rules.base import Rule
 
 
-class delete_older_than(Rule):
+class DeleteOlderThan(Rule):
     """Deletes artifacts older than `` days`` days"""
 
     def __init__(self, *, days):
@@ -23,10 +23,10 @@ class delete_older_than(Rule):
         return aql_query_list
 
 
-class delete_without_downloads(Rule):
+class DeleteWithoutDownloads(Rule):
     """
     Deletes artifacts that have never been downloaded. (DownloadCount=0).
-    Better to use with :class:`delete_older_than`
+    Better to use with :class:`DeleteOlderThan`
     """
 
     def _aql_add_filter(self, aql_query_list):
@@ -35,7 +35,7 @@ class delete_without_downloads(Rule):
         return aql_query_list
 
 
-class delete_older_than_n_days_without_downloads(Rule):
+class DeleteOlderThanNDaysWithoutDownloads(Rule):
     """
     Deletes artifacts that are older than n days and have not been downloaded.
     """
@@ -55,7 +55,7 @@ class delete_older_than_n_days_without_downloads(Rule):
         return aql_query_list
 
 
-class delete_not_used_since(Rule):
+class DeleteNotUsedSince(Rule):
     """
     Delete artifacts that were downloaded, but for a long time. N days passed.
     Or not downloaded at all from the moment of creation and it's been N days.
@@ -69,10 +69,10 @@ class delete_not_used_since(Rule):
 
         update_dict = {
             "$or": [
-                {"stat.downloaded": {"$lte": str(last_day)}},  # Скачивались давно
+                {"stat.downloaded": {"$lte": str(last_day)}},
                 {
                     "$and": [
-                        {"stat.downloads": {"$eq": None}},  # Не скачивались
+                        {"stat.downloads": {"$eq": None}},
                         {"created": {"$lte": str(last_day)}},
                     ]
                 },
@@ -84,7 +84,7 @@ class delete_not_used_since(Rule):
         return aql_query_list
 
 
-class delete_empty_folder(Rule):
+class DeleteEmptyFolder(Rule):
     """
     Remove empty folders.
 
@@ -102,3 +102,12 @@ class delete_empty_folder(Rule):
         repositories = utils.build_repositories(result_artifacts)
         folders = utils.get_empty_folders(repositories)
         return folders
+
+
+# under_score - old style of naming
+# Keep it for backward compatibility
+delete_older_than = DeleteOlderThan
+delete_without_downloads = DeleteWithoutDownloads
+delete_older_than_n_days_without_downloads = DeleteOlderThanNDaysWithoutDownloads
+delete_not_used_since = DeleteNotUsedSince
+delete_empty_folder = DeleteEmptyFolder
