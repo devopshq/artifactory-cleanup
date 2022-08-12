@@ -9,7 +9,7 @@ def test_repo_rules():
 
 
 def test_keep_latest_n_version():
-    rule = rules.keep_latest_nupkg_n_version(2)
+    rule = rules.KeepLatestNupkgNVersions(2)
 
     result = [
         {
@@ -77,7 +77,7 @@ def test_keep_latest_n_version():
 
 
 def test_keep_latest_n_version_with_tar_gz():
-    rule = rules.keep_latest_nupkg_n_version(1)
+    rule = rules.KeepLatestNupkgNVersions(1)
 
     result = [
         {
@@ -137,7 +137,7 @@ def test_keep_latest_n_version_with_tar_gz():
 
 
 def test_keep_latest_n_version_one():
-    rule = rules.keep_latest_nupkg_n_version(1)
+    rule = rules.KeepLatestNupkgNVersions(1)
 
     result = [
         {
@@ -191,7 +191,7 @@ def test_keep_latest_n_version_one():
 
 
 def test_keep_latest_n_version_empty():
-    rule = rules.keep_latest_nupkg_n_version(2)
+    rule = rules.KeepLatestNupkgNVersions(2)
 
     result = [
         {
@@ -230,7 +230,7 @@ def test_keep_latest_n_version_empty():
 
 
 def test_keep_latest_n_version_patch():
-    rule = rules.keep_latest_nupkg_n_version(2)
+    rule = rules.KeepLatestNupkgNVersions(2)
 
     result = [
         {
@@ -270,7 +270,7 @@ def test_keep_latest_n_version_patch():
 
 
 def test_keep_latest_n_file():
-    rule = rules.keep_latest_n_file(2)
+    rule = rules.KeepLatestNFiles(2)
 
     result = [
         {"path": 1, "name": 1},
@@ -290,7 +290,7 @@ def test_keep_latest_n_file():
 
 
 def test_keep_latest_n_file_empty():
-    rule = rules.keep_latest_n_file(10)
+    rule = rules.KeepLatestNFiles(10)
 
     result = [
         {"path": 1, "name": 1},
@@ -306,7 +306,7 @@ def test_keep_latest_n_file_empty():
 
 
 def test_keep_latest_n_file_in_folder():
-    rule = rules.keep_latest_n_file_in_folder(2)
+    rule = rules.KeepLatestNFilesInFolder(2)
 
     result = [
         {"path": 1, "name": 1},
@@ -338,7 +338,7 @@ def test_keep_latest_n_file_in_folder():
 
 
 def test_keep_latest_n_file_in_folder_empty():
-    rule = rules.keep_latest_n_file_in_folder(100)
+    rule = rules.KeepLatestNFilesInFolder(100)
 
     result = [
         {"path": 1, "name": 1},
@@ -362,7 +362,7 @@ def test_keep_latest_n_file_in_folder_empty():
 
 
 def test_keep_latest_version_n_file_in_folder():
-    rule = rules.keep_latest_version_n_file_in_folder(1)
+    rule = rules.KeepLatestVersionNFilesInFolder(1)
 
     result = [
         {
@@ -398,7 +398,7 @@ def test_keep_latest_version_n_file_in_folder():
 
 
 def test_delete_if_image_not_contained_in_properties():
-    rule = rules.delete_docker_image_if_not_contained_in_properties(
+    rule = rules.DeleteDockerImageIfNotContainedInProperties(
         "docker-repo", "test_docker."
     )
 
@@ -416,7 +416,7 @@ def test_delete_if_image_not_contained_in_properties():
 
 
 def test_delete_images_older_than_n_days():
-    rule = rules.delete_docker_images_older_than(days=10)
+    rule = rules.DeleteDockerImagesOlderThan(days=10)
     rule._collect_docker_size = lambda x: x
 
     result = [
@@ -618,7 +618,7 @@ def test_delete_files_that_do_not_exist_in_other_repository():
 
 
 def test_docker_values():
-    rule = rules.delete_docker_image_if_not_contained_in_properties_value(
+    rule = rules.DeleteDockerImageIfNotContainedInPropertiesValue(
         "docker-repo", "test_docker."
     )
 

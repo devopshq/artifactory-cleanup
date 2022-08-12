@@ -10,22 +10,22 @@ artifactory-cleanup:
     policies:
       - name: Remove all .tmp files older than 7 days
         rules:
-          - repoByMask: "*.tmp"
-          - deleteOlderThan: 7
+          - RepoByMask: "*.tmp"
+          - DeleteOlderThan: 7
 
       - name: My Docker Cleanup Policies
         rules:
-          - repoByMask: "docker-*-tmp"
-          - deleteOlderThan:
+          - RepoByMask: "docker-*-tmp"
+          - DeleteOlderThan:
               days: 7
 
       - name: My Docker Cleanup Policies
         rules:
-          - repoByMask: "docker-*-tmp"
-          - excludeDockerImages:
+          - RepoByMask: "docker-*-tmp"
+          - ExcludeDockerImages:
               - '*:latest'
               - '*:release*'
-          - deleteOlderThan:
+          - DeleteOlderThan:
               days: 7
 
   # Other server

@@ -10,7 +10,7 @@ from prettytable import PrettyTable
 from requests.auth import HTTPBasicAuth
 from artifactory_cleanup.context_managers import get_context_managers
 from artifactory_cleanup.rules.base import CleanupPolicy
-from artifactory_cleanup.rules.delete import delete_empty_folder
+from artifactory_cleanup.rules.delete import DeleteEmptyFolder
 
 
 requests.packages.urllib3.disable_warnings()
@@ -87,7 +87,7 @@ class ArtifactoryCleanup(cli.Application):
             rules = [
                 CleanupPolicy(
                     "Cleaning up empty folders in local repositories",
-                    delete_empty_folder(),
+                    DeleteEmptyFolder(),
                 )
             ]
         else:

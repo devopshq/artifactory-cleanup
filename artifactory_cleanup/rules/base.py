@@ -115,7 +115,7 @@ class CleanupPolicy(object):
         CleanupPolicy(
            'myrepo.snapshot',
            rules.repo,
-           rules.delete_older_than(days=7),
+           rules.DeleteOlderThan(days=7),
         )
 
     """

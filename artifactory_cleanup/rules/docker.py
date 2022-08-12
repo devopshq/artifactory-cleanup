@@ -60,7 +60,7 @@ class RuleForDocker(Rule):
         return new_result
 
 
-class delete_docker_images_older_than(RuleForDocker):
+class DeleteDockerImagesOlderThan(RuleForDocker):
     """Removes Docker image older than ``days`` days"""
 
     def __init__(self, *, days):
@@ -89,7 +89,7 @@ class delete_docker_images_older_than(RuleForDocker):
         return result_artifact
 
 
-class delete_docker_images_older_than_n_days_without_downloads(RuleForDocker):
+class DeleteDockerImagesOlderThanNDaysWithoutDownloads(RuleForDocker):
     """
     Deletes images that are older than n days and have not been downloaded.
     """
@@ -119,7 +119,7 @@ class delete_docker_images_older_than_n_days_without_downloads(RuleForDocker):
         return result_artifact
 
 
-class delete_docker_images_not_used(RuleForDocker):
+class DeleteDockerImagesNotUsed(RuleForDocker):
     """Removes Docker image not downloaded ``days`` days"""
 
     def __init__(self, *, days):
@@ -155,7 +155,7 @@ class delete_docker_images_not_used(RuleForDocker):
         return result_artifact
 
 
-class keep_latest_n_version_images_by_property(Rule):
+class KeepLatestNVersionImagesByProperty(Rule):
     r"""
     Leaves ``count`` Docker images with the same major.
     If you need to add minor then put 2 or if patch then put 3.
@@ -202,7 +202,7 @@ class keep_latest_n_version_images_by_property(Rule):
         return result_artifact
 
 
-class delete_docker_image_if_not_contained_in_properties(RuleForDocker):
+class DeleteDockerImageIfNotContainedInProperties(RuleForDocker):
     """
     .. warning::
 
@@ -290,7 +290,7 @@ class delete_docker_image_if_not_contained_in_properties(RuleForDocker):
         return result_docker_images
 
 
-class delete_docker_image_if_not_contained_in_properties_value(RuleForDocker):
+class DeleteDockerImageIfNotContainedInPropertiesValue(RuleForDocker):
     """
     Remove Docker image, if it is not found in the properties of the artifact repository
 
@@ -361,3 +361,19 @@ class delete_docker_image_if_not_contained_in_properties_value(RuleForDocker):
                         )
 
         return result_docker_images
+
+
+# under_score - old style of naming
+# Keep it for backward compatibility
+delete_docker_images_older_than = DeleteDockerImagesOlderThan
+delete_docker_images_older_than_n_days_without_downloads = (
+    DeleteDockerImagesOlderThanNDaysWithoutDownloads
+)
+delete_docker_images_not_used = DeleteDockerImagesNotUsed
+keep_latest_n_version_images_by_property = KeepLatestNVersionImagesByProperty
+delete_docker_image_if_not_contained_in_properties = (
+    DeleteDockerImageIfNotContainedInProperties
+)
+delete_docker_image_if_not_contained_in_properties_value = (
+    DeleteDockerImageIfNotContainedInPropertiesValue
+)
