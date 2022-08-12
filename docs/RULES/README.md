@@ -8,7 +8,7 @@
 | `delete_without_downloads()` | Deletes artifacts that have never been downloaded (DownloadCount=0). Better to use with `delete_older_than` rule |
 | `delete_older_than_n_days_without_downloads(days=N)` | Deletes artifacts that are older than N days and have not been downloaded |
 | `delete_not_used_since(days=N)` | Delete artifacts that were downloaded, but for a long time. N days passed. Or not downloaded at all from the moment of creation and it's been N days |
-| `delete_empty_folder()` | Clean up empty folders in local repositories. A special rule that runs separately on all repositories. Refers to [deleteEmptyDirs](https://github.com/jfrog/artifactory-user-plugins/tree/master/cleanup/deleteEmptyDirs) plugin |
+| `delete_empty_folder()` | Clean up empty folders in given repository list |
 | `keep_latest_nupkg_n_version(count=N)` | Leaves N nupkg (adds `*.nupkg` filter) in release feature builds |
 | `keep_latest_n_file(count=N)` | Leaves the last (by creation time) files in the amount of N pieces. WITHOUT accounting subfolders |
 | `keep_latest_n_file_in_folder(count=N)` | Leaves the last (by creation time) files in the number of N pieces in each folder |

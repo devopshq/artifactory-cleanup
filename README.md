@@ -14,6 +14,7 @@
   - [Available Rules](#available-rules)
   - [Artifact cleanup policies](#artifact-cleanup-policies)
   - [Docker Container Usage](#docker-container-usage)
+- [FAQ](#faq)
 - [Release](#release)
   
 <!-- tocstop -->
@@ -41,7 +42,7 @@ You should take the following steps:
 2. Сreate a python file, for example, `reponame.py` with the following contents:
 ```python
 from artifactory_cleanup import rules
-from artifactory_cleanup.rules import CleanupPolicy
+from artifactory_cleanup import CleanupPolicy
 
 RULES = [
 
@@ -69,11 +70,6 @@ artifactory-cleanup --destroy --user user --password password --artifactory-serv
 # debug run - only print founded artifacts. it do not delete
 artifactory-cleanup --user user --password password --artifactory-server https://repo.example.com/artifactory --config reponame.py
 
-# Clean up empty folder
-# --remove-empty-folder
-# You need to use the plugin https://github.com/jfrog/artifactory-user-plugins/tree/master/cleanup/deleteEmptyDirs to delete empty folders
-artifactory-cleanup --remove-empty-folder --user user --password password --artifactory-server https://repo.example.com/artifactory
-
 # Debug run only for policytestname. Find any *policytestname*
 # debug run - only print founded artifacts. it do not delete
 artifactory-cleanup --policy-name policytestname --user user --password password --artifactory-server https://repo.example.com/artifactory --config reponame.py
@@ -97,7 +93,7 @@ To add a cleaning policy you need:
 
 ```python
 from artifactory_cleanup import rules
-from artifactory_cleanup.rules import CleanupPolicy
+from artifactory_cleanup import CleanupPolicy
 
 RULES = [
 
@@ -151,6 +147,35 @@ To build the container image locally run the following command in the folder of 
 ```bash
 docker build . --tag artifactory-cleanup
 ```
+# FAQ
+
+## How to clean up Conan repository?
+The idea came from https://github.com/devopshq/artifactory-cleanup/issues/47
+
+```python
+from artifactory_cleanup import rules
+from artifactory_cleanup import CleanupPolicy
+RULES = [
+    # ------ ALL REPOS --------
+    CleanupPolicy(
+       'Delete files older than 60 days',
+        rules.repo('conan-testing'),
+        rules.delete_not_used_since(days=60),
+        # Make sure to keep conan metadata. See also
+        # https://github.com/devopshq/artifactory-cleanup/issues/47
+        rules.exclude_filename(['.timestamp', 'index.json']),
+    ),
+    CleanupPolicy(
+       'Delete empty folders',
+        rules.repo('conan-testing'),
+        rules.delete_empty_folder(),
+        # Exclude metadata files
+        # If a folder only contains these files, consider it as empty
+        rules.exclude_filename(['.timestamp', 'index.json']),
+    ),
+]
+```
+
 
 # Release
 
@@ -158,3 +183,4 @@ In order to provide a new release of `artifactory-cleanup`, there are two steps 
 
 1. Bump the version in the [setup.py](setup.py)
 2. Create a Git release tag (e.g. `v0.3.3`) by creating a release on Github
+
