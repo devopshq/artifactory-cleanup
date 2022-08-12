@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from artifactory_cleanup.rules import utils
 from artifactory_cleanup.rules.base import Rule
 
 
@@ -85,47 +86,22 @@ class DeleteNotUsedSinse(Rule):
 
 class DeleteEmptyFolder(Rule):
     """
-    Clean up empty folders in local repositories. A special rule that runs separately on all repositories.
+    Remove empty folders.
 
-    Refers to the plugin
-    https://github.com/jfrog/artifactory-user-plugins/tree/master/cleanup/deleteEmptyDirs
+    If you just want to clean up empty folders - Artifactory must do it automatically.
+    We use the rule to help with some specific cases - look at README.md "FAQ: How to clean up Conan repository"
     """
 
     def _aql_add_filter(self, aql_query_list):
-        update_dict = {
-            "repo": {
-                "$match": "deleteEmptyFolder",
-            }
-        }
-        aql_query_list.append(update_dict)
+        # Get list of all files and folders
+        all_files_dict = {"path": {"$match": "**"}, "type": {"$eq": "any"}}
+        aql_query_list.append(all_files_dict)
         return aql_query_list
 
-    def _filter_result(self, result_artifact):
-        r = self.artifactory_session.get(
-            "{}/api/repositories?type=local".format(self.artifactory_server)
-        )
-        r.raise_for_status()
-        repositories = r.json()
-
-        for count, repository in enumerate(repositories, start=1):
-            if repository["packageType"] == "GitLfs":
-                # GitLfs should be handled by the jfrog cli: https://jfrog.com/blog/clean-up-your-git-lfs-repositories-with-jfrog-cli/
-                print(
-                    f"Skipping '{repository['key']}' because it is a Git LFS repository"
-                )
-                continue
-
-            url = "{}/api/plugins/execute/deleteEmptyDirsPlugin?params=paths={}".format(
-                self.artifactory_server, repository["key"]
-            )
-
-            print(
-                f"Deleting empty folders for '{repository['key']}' - {count} of {len(repositories)}"
-            )
-            r = self.artifactory_session.post(url)
-            r.raise_for_status()
-
-        return []
+    def _filter_result(self, result_artifacts):
+        repositories = utils.build_repositories(result_artifacts)
+        folders = utils.get_empty_folders(repositories)
+        return folders
 
 
 # under_score - old style of naming
