@@ -27,6 +27,7 @@ class IncludePath(Rule):
 
 class __FilterDockerImages(Rule):
     operator = None
+    boolean_operator = None
 
     def __init__(self, masks):
         if isinstance(masks, str):
@@ -39,6 +40,9 @@ class __FilterDockerImages(Rule):
     def _aql_add_filter(self, aql_query_list):
         if not self.operator:
             raise AttributeError("Attribute 'operator' must be specified")
+
+        if not self.boolean_operator:
+            raise AttributeError("Attribute 'boolean_operator' must be specified")
 
         rule_list = []
         for mask in self.masks:
@@ -53,7 +57,7 @@ class __FilterDockerImages(Rule):
             }
             rule_list.append(update_dict)
 
-        aql_query_list.append({"$and": rule_list})
+        aql_query_list.append({boolean_operator: rule_list})
         return aql_query_list
 
 
@@ -69,6 +73,7 @@ class IncludeDockerImages(__FilterDockerImages):
     """
 
     operator = "$match"
+    boolean_operator = "$or"
 
 
 class ExcludeDockerImages(__FilterDockerImages):
@@ -83,6 +88,7 @@ class ExcludeDockerImages(__FilterDockerImages):
     """
 
     operator = "$nmatch"
+    boolean_operator = "$and"
 
 
 class IncludeFilename(Rule):
