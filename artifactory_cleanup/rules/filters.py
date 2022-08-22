@@ -57,7 +57,7 @@ class __FilterDockerImages(Rule):
             }
             rule_list.append(update_dict)
 
-        aql_query_list.append({boolean_operator: rule_list})
+        aql_query_list.append({self.boolean_operator: rule_list})
         return aql_query_list
 
 
