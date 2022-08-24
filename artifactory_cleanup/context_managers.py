@@ -9,7 +9,7 @@ def is_running_under_github_actions():
 
 
 @contextmanager
-def block(name):
+def noop_block_mgr(name):
     """
     As TC.block use "name" as a parameter, contextlib.nullcontext() can not be
     used directly
@@ -18,7 +18,7 @@ def block(name):
 
 
 @contextmanager
-def test(testName):
+def noop_test_mgr(testName):
     """
     As TC.test use "testName" as a parameter, contextlib.suppress() can not be
     used directly
@@ -44,8 +44,8 @@ def get_context_managers():
         ctx_mgr_test = TC.test
     elif is_running_under_github_actions():
         ctx_mgr_block = github_block
-        ctx_mgr_test = test
+        ctx_mgr_test = noop_test_mgr
     else:
-        ctx_mgr_block = block
-        ctx_mgr_test = test
+        ctx_mgr_block = noop_block_mgr
+        ctx_mgr_test = noop_test_mgr
     return ctx_mgr_block, ctx_mgr_test
