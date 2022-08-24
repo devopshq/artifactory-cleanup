@@ -34,6 +34,7 @@ setup(
         "dohq-artifactory",
         "teamcity-messages",
         "treelib",
+        "attrs",
     ],
     classifiers=[
         "Development Status :: 5 - Production/Stable",
