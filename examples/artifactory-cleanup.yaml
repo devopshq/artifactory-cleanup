@@ -2,32 +2,28 @@
 # Please leave a comment if you'd enjoy using this format!
 
 artifactory-cleanup:
-  - server: https://repo.example.com/artifactory
-    # $VAR is auto populated from environment variables
-    user: $ARTIFACTORY_USERNAME
-    password: $ARTIFACTORY_USERNAME
+  server: https://repo.example.com/artifactory
+  # $VAR is auto populated from environment variables
+  user: $ARTIFACTORY_USERNAME
+  password: $ARTIFACTORY_USERNAME
 
-    policies:
-      - name: Remove all .tmp files older than 7 days
-        rules:
-          - RepoByMask: "*.tmp"
-          - DeleteOlderThan: 7
+  policies:
+    - name: Remove all .tmp files older than 7 days
+      rules:
+        - RepoByMask: "*.tmp"
+        - DeleteOlderThan: 7
 
-      - name: My Docker Cleanup Policies
-        rules:
-          - RepoByMask: "docker-*-tmp"
-          - DeleteOlderThan:
-              days: 7
+    - name: My Docker Cleanup Policies
+      rules:
+        - RepoByMask: "docker-*-tmp"
+        - DeleteOlderThan:
+            days: 7
 
-      - name: My Docker Cleanup Policies
-        rules:
-          - RepoByMask: "docker-*-tmp"
-          - ExcludeDockerImages:
-              - '*:latest'
-              - '*:release*'
-          - DeleteOlderThan:
-              days: 7
-
-  # Other server
-  - server: https://staging.example.com/artifactory
-    rules: []
+    - name: My Docker Cleanup Policies
+      rules:
+        - RepoByMask: "docker-*-tmp"
+        - ExcludeDockerImages:
+            - '*:latest'
+            - '*:release*'
+        - DeleteOlderThan:
+            days: 7

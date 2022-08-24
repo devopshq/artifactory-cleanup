@@ -2,6 +2,7 @@ import importlib
 import logging
 import sys
 from datetime import timedelta, date
+from pathlib import Path
 
 import requests
 from hurry.filesize import size
@@ -22,7 +23,14 @@ def init_logging():
     )
 
 
-class ArtifactoryCleanup(cli.Application):
+class ArtifactoryCleanupCLI(cli.Application):
+    _artifactory_server = cli.SwitchAttr(
+        ["--artifactory-server"],
+        help="URL to artifactory, e.g: https://arti.example.com/artifactory",
+        mandatory=True,
+        envname="ARTIFACTORY_SERVER",
+    )
+
     _user = cli.SwitchAttr(
         ["--user"],
         help="Login to access to the artifactory",
@@ -38,25 +46,20 @@ class ArtifactoryCleanup(cli.Application):
     )
 
     _policy_name = cli.SwitchAttr(
-        ["--policy-name"], help="Name for a rule", mandatory=False
+        ["--policy-name"],
+        help="Name for a rule",
+        mandatory=False,
     )
 
     _config = cli.SwitchAttr(
-        ["--config"], help="Name of config with list of policies", mandatory=False
-    )
-
-    _artifactory_server = cli.SwitchAttr(
-        ["--artifactory-server"],
-        help="URL to artifactory, e.g: https://arti.example.com/artifactory",
+        ["--config"],
+        help="Name of config with list of policies",
         mandatory=True,
-        envname="ARTIFACTORY_SERVER",
     )
 
-    _destroy = cli.Flag("--destroy", help="Remove artifacts", mandatory=False)
-
-    _debug = cli.Flag(
-        "--debug",
-        help="Only print artifacts that can be deleted with the specified cleaning policies and rules",
+    _destroy = cli.Flag(
+        "--destroy",
+        help="Remove artifacts",
         mandatory=False,
     )
 
@@ -70,7 +73,7 @@ class ArtifactoryCleanup(cli.Application):
     def _destroy_or_verbose(self):
         if self._destroy:
             print("*" * 80)
-            print("Delete MODE")
+            print("Destroy MODE")
         else:
             print("*" * 80)
             print("Verbose MODE")
@@ -80,8 +83,11 @@ class ArtifactoryCleanup(cli.Application):
         self._artifactory_server = self._artifactory_server.rstrip("/")
         try:
             self._config = self._config.replace(".py", "")
-            sys.path.append(".")
-            policies = getattr(importlib.import_module(self._config), "RULES")
+            config_path = Path(self._config)
+            policies_directory = config_path.parent
+            policies_module_name = config_path.name
+            sys.path.append(str(policies_directory))
+            policies = getattr(importlib.import_module(policies_module_name), "RULES")
         except ImportError as error:
             print("Error: {}".format(error))
             sys.exit(1)
@@ -184,4 +190,4 @@ class ArtifactoryCleanup(cli.Application):
 
 if __name__ == "__main__":
     init_logging()
-    ArtifactoryCleanup.run()
+    ArtifactoryCleanupCLI.run()

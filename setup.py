@@ -24,7 +24,7 @@ setup(
     packages=find_packages(exclude=["tests"]),
     entry_points={
         "console_scripts": [
-            "artifactory-cleanup=artifactory_cleanup.artifactorycleanup:ArtifactoryCleanup"
+            "artifactory-cleanup=artifactory_cleanup.artifactorycleanup:ArtifactoryCleanupCLI"
         ]
     },
     install_requires=[

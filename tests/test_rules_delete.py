@@ -1,10 +1,12 @@
 import json
-import os
+
+import pytest
 
 from artifactory_cleanup.rules import delete_empty_folder
 
 
-def load_artifacts():
+@pytest.fixture
+def artifacts_list(shared_datadir):
     """
 
     test2-repo | REPO - not present in the list
@@ -60,14 +62,13 @@ def load_artifacts():
                       - ba38761e49a42a9a44c8be1e30df4886
         - user3
     """
-    test_dir = os.path.dirname(__file__)
-    with open(f"{test_dir}/artifacts_list.json", "r") as fp:
+    with open(f"{shared_datadir}/artifacts_list.json", "r") as fp:
         artifacts_list = json.load(fp)
     return artifacts_list
 
 
-def test_delete_empty_folder():
-    artifacts = load_artifacts()
+def test_delete_empty_folder(artifacts_list):
+    artifacts = artifacts_list
 
     rule = delete_empty_folder()
     artifacts_to_remove = rule.filter_result(artifacts)
