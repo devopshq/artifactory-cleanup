@@ -2,6 +2,7 @@ import inspect
 import json
 import sys
 from copy import deepcopy
+from datetime import date
 from typing import Optional, Union, List, Dict
 from urllib.parse import quote
 
@@ -70,20 +71,20 @@ class Rule(object):
     Make it small and then combine them in CleanupPolicy in more complicated entities.
     """
 
-    session = None
-    today = None
+    session: Optional[BaseUrlSession] = None
+    today: date = None
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self.__class__.__name__
 
     @property
-    def title(self):
+    def title(self) -> str:
         """Cut the docstring to show only the very first important line"""
         docs = [x.strip() for x in self.__doc__.splitlines() if x][0]
         return docs
 
-    def init(self, session, today, *args, **kwargs):
+    def init(self, session, today, *args, **kwargs) -> None:
         """
         Init the rule after got all information.
 
@@ -92,7 +93,7 @@ class Rule(object):
         self.session = session
         self.today = today
 
-    def aql_add_filter(self, filters):
+    def aql_add_filter(self, filters: List) -> List:
         """
         Add one or more filters to `<domain>.find(<filters>)` AQL part.
         It's called <criteria> in the documentation: <domain_query>.find(<criteria>)
@@ -106,7 +107,7 @@ class Rule(object):
         """
         return filters
 
-    def aql_add_text(self, aql):
+    def aql_add_text(self, aql: str) -> str:
         """
         You can change AQL text after applying all rules filters.
 
@@ -150,7 +151,10 @@ class CleanupPolicy(object):
     # domain_query in https://www.jfrog.com/confluence/display/JFROG/Artifactory+Query+Language#usage
     DOMAIN = "items"
 
-    def __init__(self, name, *rules):
+    session: Optional[BaseUrlSession] = None
+    today: date = None
+
+    def __init__(self, name: str, *rules: Rule):
         if not isinstance(name, str):
             raise ValueError(
                 "Bad CleanupPolicy, first argument must be name.\n"
@@ -167,11 +171,7 @@ class CleanupPolicy(object):
             if inspect.isclass(rule):
                 self.rules[i] = rule(self.name)
 
-        # Will be assigned in init() function later
-        self.session: Optional[BaseUrlSession] = None
-        self.today = None
-
-    def check(self, *args, **kwargs):
+    def check(self, *args, **kwargs) -> None:
         """
         Check that we're ready to run the policy.
         Here you can call additional APIs to check they're available or check that rules are consistent,
@@ -180,14 +180,6 @@ class CleanupPolicy(object):
         for rule in self.rules:
             rule.check(*args, **kwargs)
 
-    def init(self, session, today):
-        """
-        Set properties and apply them to all rules
-        """
-        self.session = session
-        self.today = today
-
-        for rule in self.rules:
             # Make sure people update their own rules to the latest interface
             # 0.4 => 1.0.0
             if hasattr(rule, "_aql_add_filter"):
@@ -197,9 +189,17 @@ class CleanupPolicy(object):
                     "- Read README.md https://github.com/devopshq/artifactory-cleanup#readme"
                 )
 
+    def init(self, session, today) -> None:
+        """
+        Set properties and apply them to all rules
+        """
+        self.session = session
+        self.today = today
+
+        for rule in self.rules:
             rule.init(session, today)
 
-    def build_aql_query(self):
+    def build_aql_query(self) -> None:
         """
         Collect all aql queries into a single list so that the rules check for conflicts among themselves
         """
@@ -210,7 +210,7 @@ class CleanupPolicy(object):
         print(self.aql_text)
         print("*" * 80)
 
-    def _get_aql_find_filters(self):
+    def _get_aql_find_filters(self) -> Dict:
         """Go over all rules and get .find filters"""
         filters = []
         for rule in self.rules:
@@ -223,7 +223,7 @@ class CleanupPolicy(object):
                 print()
         return {"$and": filters}
 
-    def _get_aql_text(self, find_filters):
+    def _get_aql_text(self, find_filters: Dict) -> str:
         """
         Collect from all rules additional texts of requests
         """
@@ -253,7 +253,7 @@ class CleanupPolicy(object):
         artifacts = pydash.sort(artifacts, key=lambda x: x["path"])
         return ArtifactsList.from_response(artifacts)
 
-    def filter(self, artifacts):
+    def filter(self, artifacts: ArtifactsList) -> ArtifactsList:
         """
         Filter artifacts again all rules
         """
@@ -271,7 +271,7 @@ class CleanupPolicy(object):
                 print()
         return artifacts
 
-    def delete(self, artifact, destroy):
+    def delete(self, artifact: ArtifactDict, destroy: bool) -> None:
         """
         Delete the artifact
         :param artifact: artifact to remove

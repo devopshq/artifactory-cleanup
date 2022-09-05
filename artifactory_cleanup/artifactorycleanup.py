@@ -5,7 +5,7 @@ from attr import dataclass
 from requests import Session
 
 from artifactory_cleanup.errors import ArtifactoryCleanupException
-from artifactory_cleanup.rules.base import CleanupPolicy
+from artifactory_cleanup.rules.base import CleanupPolicy, ArtifactDict
 
 
 @dataclass
@@ -86,7 +86,7 @@ class ArtifactoryCleanup:
         self.policies = policies
 
 
-def get_name_for_ci(artifact):
+def get_name_for_ci(artifact: ArtifactDict) -> str:
     return "cleanup.{}.{}_{}".format(
         escape(artifact["repo"]),
         escape(artifact["path"]),
@@ -94,7 +94,7 @@ def get_name_for_ci(artifact):
     )
 
 
-def escape(name):
+def escape(name: str) -> str:
     """
     Escape name for some CI servers
     """
