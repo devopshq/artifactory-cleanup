@@ -1,0 +1,2 @@
+class ArtifactoryCleanupException(Exception):
+    pass

@@ -71,7 +71,7 @@ def test_delete_empty_folder(artifacts_list):
     artifacts = artifacts_list
 
     rule = delete_empty_folder()
-    artifacts_to_remove = rule.filter_result(artifacts)
+    artifacts_to_remove = rule.filter(artifacts)
 
     expected_empty_folders = [
         # Simple empty folder without children in the list, at a deeper level

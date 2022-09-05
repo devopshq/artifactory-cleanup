@@ -15,7 +15,7 @@ class IncludePath(Rule):
     def __init__(self, mask):
         self.mask = mask
 
-    def _aql_add_filter(self, aql_query_list):
+    def aql_add_items_find_filters(self, aql_query_list):
         update_dict = {
             "path": {
                 "$match": self.mask,
@@ -37,7 +37,7 @@ class __FilterDockerImages(Rule):
         else:
             raise AttributeError("Mask must by str|list")
 
-    def _aql_add_filter(self, aql_query_list):
+    def aql_add_items_find_filters(self, aql_query_list):
         if not self.operator:
             raise AttributeError("Attribute 'operator' must be specified")
 
@@ -105,7 +105,7 @@ class IncludeFilename(Rule):
     def __init__(self, mask):
         self.mask = mask
 
-    def _aql_add_filter(self, aql_query_list):
+    def aql_add_items_find_filters(self, aql_query_list):
         update_dict = {
             "name": {
                 "$match": self.mask,
@@ -129,7 +129,7 @@ class _ExcludeMask(Rule):
         else:
             raise AttributeError("Mask must by str|list")
 
-    def _aql_add_filter(self, aql_query_list):
+    def aql_add_items_find_filters(self, aql_query_list):
         rule_list = []
         for mask in self.masks:
             update_dict = {

@@ -33,7 +33,9 @@ def test_dry_mode(capsys, shared_datadir, requests_mock):
     stdout, stderr = capsys.readouterr()
     assert code == 0, stdout
     assert "Verbose MODE" in stdout
-    assert "DEBUG - delete repo-name-here/path/to/file/filename1.json" in stdout
+    assert (
+        "DEBUG - we would delete 'repo-name-here/path/to/file/filename1.json'" in stdout
+    )
 
     assert (
         requests_mock.call_count == 2

@@ -1,6 +1,9 @@
 import inspect
 import json
+from copy import deepcopy
 from urllib.parse import quote
+
+import pydash
 
 
 class Rule(object):
@@ -16,15 +19,27 @@ class Rule(object):
         self.artifactory_server = None
         self.today = None
 
-    def init(self, artifactory_session, artifactory_server, today):
+    @property
+    def name(self):
+        return self.__class__.__name__
+
+    @property
+    def title(self):
+        """Cut the docstring to show only the very first important line"""
+        docs = [x.strip() for x in self.__doc__.splitlines() if x][0]
+        return docs
+
+    def init(self, artifactory_session, artifactory_server, today, *args, **kwargs):
         """
-        Init the rule after got all information
+        Init the rule after got all information.
+
+        Please make sure to add *args, **kwargs for future extension
         """
         self.artifactory_session = artifactory_session
         self.artifactory_server = artifactory_server
         self.today = today
 
-    def _aql_add_filter(self, aql_query_list):
+    def aql_add_filter(self, items_find_filters):
         """
         Add filter to `items.find` AQL part.
 
@@ -36,108 +51,43 @@ class Rule(object):
 
         Also, you can find any conflicts with others rules here, if they conflict on AQL level
         """
-        return aql_query_list
+        return items_find_filters
 
-    def _aql_add_text(self, aql_text):
+    def aql_add_text(self, aql):
         """
-        Change AQL text after applying all rules filters
-        """
-        return aql_text
+        You can change AQL text after applying all rules filters.
 
-    def _filter_result(self, result_artifact):
+        You can apply sort rules and other AQL filter here.
+        https://www.jfrog.com/confluence/display/JFROG/Artifactory+Query+Language
+        """
+        return aql
+
+    def filter(self, artifacts):
         """
         Filter artifacts after performing AQL query.
-        To remove artifacts from the list - please use Rule.remove_artifact method in order to log the action as well.
+        To remove artifacts from the list (keep artifact) - please use Rule.remove_artifact method in order to log the action as well.
 
         If you have your own logic - please overwrite the method in your Rule class.
         Here you can filter artifacts in memory, make additional calls to Artifactory or even call other services!
 
-        :param result_artifact: Filtered artifacts list that we get after filter them with AQL
+        :param artifacts: Filtered artifacts list that we get after filter them with AQL
         :return List of artifacts that you are going to remove
         """
-        return result_artifact
+        return artifacts
 
     @staticmethod
-    def remove_artifact(artifacts, result_artifact):
+    def remove_artifact(artifacts_to_remove, artifacts):
         """
         Remove and log artifacts
         :param artifacts: Artifacts to remove
-        :param result_artifact: Artifacts remove from it
+        :param artifacts: Artifacts remove from it
         """
-        if not isinstance(artifacts, list):
-            artifacts = [artifacts]
-        for artifact in artifacts:
+        if not isinstance(artifacts_to_remove, list):
+            artifacts_to_remove = [artifacts_to_remove]
+
+        for artifact in artifacts_to_remove:
             print(f"Filter package {artifact['path']}/{artifact['name']}")
-            result_artifact.remove(artifact)
-
-    def aql_add_filter(self, aql_query_list):
-        """
-        Add filters to `items.find` AQL part
-        """
-        print(f"Add AQL Filter - rule: {self.__class__.__name__} - {self.little_doc}")
-        new_aql_query_list = self._aql_add_filter(aql_query_list)
-        if aql_query_list != new_aql_query_list:
-            print("Before AQL query: {}".format(aql_query_list))
-            print("After AQL query: {}".format(new_aql_query_list))
-            print()
-        return new_aql_query_list
-
-    def aql_add_text(self, aql_text):
-        """
-        Adds some expression to AQL query
-        """
-        print(f"Add AQL Text - rule: {self.__class__.__name__} - {self.little_doc}")
-        new_aql_text = self._aql_add_text(aql_text)
-        if new_aql_text != aql_text:
-            print("Before AQL text: {}".format(aql_text))
-            print("After AQL text: {}".format(new_aql_text))
-            print()
-        return new_aql_text
-
-    def filter_result(self, result_artifacts):
-        """
-        Filter artifacts after performing AQL query
-
-        It's a high level function, if you want to specify your own logic
-        please overwrite in your Rule class `_filter_result` method
-        """
-        print(f"Filter artifacts - rule: {self.__class__.__name__} - {self.little_doc}")
-        new_result = self._filter_result(result_artifacts)
-        if len(new_result) != len(result_artifacts):
-            print("Before count: {}".format(len(result_artifacts)))
-            print("After count: {}".format(len(new_result)))
-            print()
-
-        return new_result
-
-    @property
-    def little_doc(self):
-        """
-        Cut the docstring to show only the very first important line
-        """
-        docs = [x.strip() for x in self.__doc__.splitlines() if x][0]
-        return docs
-
-    @classmethod
-    def prepare_artifact(cls, artifacts):
-        """properties, stat are given in list format, convert them to dict format"""
-        all_artifacts = []
-        for artifact in artifacts:
-            if "properties" in artifact:
-                artifact["properties"] = {
-                    x["key"]: x.get("value") for x in artifact["properties"]
-                }
-            else:
-                artifact["properties"] = {}
-
-            if "stats" in artifact:
-                artifact["stats"] = artifact["stats"][0]
-            else:
-                artifact["stats"] = {}
-
-            all_artifacts.append(artifact)
-
-        return all_artifacts
+            artifacts.remove(artifact)
 
 
 class CleanupPolicy(object):
@@ -155,26 +105,26 @@ class CleanupPolicy(object):
 
     def __init__(self, name, *rules):
         if not isinstance(name, str):
-            raise Exception(
+            raise ValueError(
                 "Bad CleanupPolicy, first argument must be name.\n"
-                "CleanupPolicy argument: name={}, *args={}".format(name, rules)
+                f"You called: CleanupPolicy(name={name}, *rules={rules})"
             )
+
         self.name = name
         self.rules = list(rules)
 
         # init object if passed not initialized class
-        # for `rules.repo` rule
+        # for `rules.repo` rule, see above in the docstring
         for i, rule in enumerate(self.rules):
             if inspect.isclass(rule):
                 self.rules[i] = rule(self.name)
 
-        # Assigned in self.init() function
+        # Will be assigned in init() function later
         self.artifactory_session = None
         self.artifactory_url = None
         self.today = None
 
-        # Defined in aql_filter
-        self.aql_query_list = []
+        self.aql_text = None
 
     def init(self, artifactory_session, artifactory_url, today):
         """
@@ -185,37 +135,73 @@ class CleanupPolicy(object):
         self.today = today
 
         for rule in self.rules:
+            # Make sure people update their own rules to the latest interface
+            # 0.4 => 1.0.0
+            if hasattr(rule, "_aql_add_filter"):
+                raise ValueError(
+                    f"Please update the Rule '{rule.name}' to the new Rule API.\n"
+                    "- Read CHANGELOG.md https://github.com/devopshq/artifactory-cleanup/blob/master/CHANGELOG.md\n"
+                    "- Read README.md https://github.com/devopshq/artifactory-cleanup#readme"
+                )
+
             rule.init(artifactory_session, artifactory_url, today)
 
-    def aql_filter(self):
+    def build_aql_query(self):
         """
         Collect all aql queries into a single list so that the rules check for conflicts among themselves
         """
-        for rule in self.rules:
-            self.aql_query_list = rule.aql_add_filter(self.aql_query_list)
+        aql_items_find_filters = self._get_aql_items_find_filters()
+        self.aql_text = self._get_aql_text(aql_items_find_filters)
+        print("*" * 80)
+        print("Result AQL Query:")
+        print(self.aql_text)
+        print("*" * 80)
 
-    @property
-    def aql_text(self):
+    def _get_aql_items_find_filters(self):
+        """Go over all rules and get items.find filters"""
+        aql_items_find_filters = []
+        for rule in self.rules:
+            before_query_list = deepcopy(aql_items_find_filters)
+            print(f"Add AQL Filter - rule: {rule.name} - {rule.title}")
+            aql_items_find_filters = rule.aql_add_items_find_filters(
+                aql_items_find_filters
+            )
+            if before_query_list != aql_items_find_filters:
+                print("Before AQL query: {}".format(before_query_list))
+                print("After AQL query: {}".format(aql_items_find_filters))
+                print()
+        return aql_items_find_filters
+
+    def _get_aql_text(self, aql_items_find_filters):
         """
         Collect from all rules additional texts of requests
         """
-        aql_query_dict = {"$and": self.aql_query_list}
-        aql_text = 'items.find({query_dict}).include("*", "property", "stat")'.format(
-            query_dict=json.dumps(aql_query_dict)
-        )
+        filters = json.dumps({"$and": aql_items_find_filters})
+        aql = f'items.find({filters}).include("*", "property", "stat")'
 
         for rule in self.rules:
-            aql_text = rule.aql_add_text(aql_text)
-        return aql_text
+            before_aql = aql
+            print(f"Add AQL Text - rule: {rule.name} - {rule.title}")
+            aql = rule.aql_add_text(aql)
+            if before_aql != aql:
+                print("Before AQL text: {}".format(before_aql))
+                print("After AQL text: {}".format(aql))
+                print()
+        return aql
 
     def get_artifacts(self):
+        """
+        Get artifacts from Artifactory by AQL filters that we collect from all rules in the policy
+        :return list of artifacts
+        """
+        assert self.aql_text, "Call build_aql_query before calling get_artifacts"
         aql_url = "{}/api/search/aql".format(self.artifactory_url)
         r = self.artifactory_session.post(aql_url, data=self.aql_text)
         r.raise_for_status()
         content = r.json()
         artifacts = content["results"]
-        artifacts = Rule.prepare_artifact(artifacts)
-        artifacts = sorted(artifacts, key=lambda x: x["path"])
+        artifacts = pydash.for_each(artifacts, self.prepare)
+        artifacts = pydash.sort(artifacts, key=lambda x: x["path"])
         return artifacts
 
     def filter(self, artifacts):
@@ -223,7 +209,13 @@ class CleanupPolicy(object):
         Filter artifacts again all rules
         """
         for rule in self.rules:
-            artifacts = rule.filter_result(artifacts)
+            before = len(artifacts)
+            print(f"Filter artifacts - rule: {rule.name} - {rule.title}")
+            artifacts = rule.filter(artifacts)
+            if before != len(artifacts):
+                print(f"Before count: {before}")
+                print(f"After count: {len(artifacts)}")
+                print()
         return artifacts
 
     def delete(self, artifact, destroy):
@@ -231,18 +223,33 @@ class CleanupPolicy(object):
         Delete the artifact
         :param artifact: artifact to remove
         :param destroy: if False - just log the action, do not actually remove the artifact
-        :return:
         """
-        if artifact["path"] == ".":
-            artifact_path = "{repo}/{name}".format(**artifact)
-        else:
-            artifact_path = "{repo}/{path}/{name}".format(**artifact)
-
+        path = "{repo}/{name}" if artifact["path"] == "." else "{repo}/{path}/{name}"
+        artifact_path = path.format(**artifact)
         artifact_path = quote(artifact_path)
-        if destroy:
-            print("DESTROY MODE - delete {}".format(artifact_path))
-            delete_url = "{}/{}".format(self.artifactory_url, artifact_path)
-            r = self.artifactory_session.delete(delete_url)
-            r.raise_for_status()
+
+        if not destroy:
+            print(f"DEBUG - we would delete '{artifact_path}'")
+            return
+
+        print(f"DESTROY MODE - delete '{artifact_path}'")
+        delete_url = "{}/{}".format(self.artifactory_url, artifact_path)
+        r = self.artifactory_session.delete(delete_url)
+        r.raise_for_status()
+
+    @classmethod
+    def prepare(cls, artifact):
+        """
+        Convert properties, stat from the list format to the dict format
+        """
+        if "properties" in artifact:
+            artifact["properties"] = {
+                x["key"]: x.get("value") for x in artifact["properties"]
+            }
         else:
-            print("DEBUG - delete {}".format(artifact_path))
+            artifact["properties"] = {}
+
+        if "stats" in artifact:
+            artifact["stats"] = artifact["stats"][0]
+        else:
+            artifact["stats"] = {}

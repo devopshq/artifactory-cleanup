@@ -35,6 +35,7 @@ setup(
         "teamcity-messages",
         "treelib",
         "attrs",
+        "pydash",
     ],
     classifiers=[
         "Development Status :: 5 - Production/Stable",

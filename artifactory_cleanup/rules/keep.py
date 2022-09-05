@@ -11,14 +11,14 @@ class KeepLatestNupkgNVersions(Rule):
     def __init__(self, count):
         self.count = count
 
-    def _filter_result(self, result_artifact):
+    def filter(self, artifacts):
         artifact_grouped = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
 
         # Groupby:
         # - Nuget package name
         #   - Nuget Feature
         #       - Nuget MajorMinor version
-        for artifact in result_artifact:
+        for artifact in artifacts:
             if not artifact["name"].endswith(".nupkg"):
                 continue
 
@@ -37,11 +37,9 @@ class KeepLatestNupkgNVersions(Rule):
 
         artifact_grouped = self.good_artifacts(artifact_grouped)
 
-        result_artifact = self.remove_founded_artifacts(
-            artifact_grouped, result_artifact
-        )
+        artifacts = self.remove_founded_artifacts(artifact_grouped, artifacts)
 
-        return result_artifact
+        return artifacts
 
     def good_artifacts(self, artifact_grouped):
         for package, features in artifact_grouped.items():
@@ -65,7 +63,7 @@ class KeepLatestNupkgNVersions(Rule):
                     ]
         return artifact_grouped
 
-    def remove_founded_artifacts(self, artifact_grouped, result_artifact):
+    def remove_founded_artifacts(self, artifact_grouped, artifacts):
         # Remove found artifact
         for package, features in artifact_grouped.items():
             for feature, versions in features.items():
@@ -78,8 +76,8 @@ class KeepLatestNupkgNVersions(Rule):
                                 **locals()
                             )
                         )
-                        result_artifact.remove(artifact)
-        return result_artifact
+                        artifacts.remove(artifact)
+        return artifacts
 
     @staticmethod
     def keyfunc(s):
@@ -100,22 +98,22 @@ class KeepLatestNFiles(Rule):
     def __init__(self, count):
         self.count = count
 
-    def _aql_add_text(self, aql_text):
+    def aql_add_text(self, aql_text):
         aql_text = "{}.sort({})".format(aql_text, r'{"$asc" : ["created"]}')
         return aql_text
 
-    def _filter_result(self, result_artifact):
-        artifact_count = len(result_artifact)
+    def filter(self, artifacts):
+        artifact_count = len(artifacts)
         good_artifact_count = artifact_count - self.count
         if good_artifact_count < 0:
             good_artifact_count = 0
 
-        good_artifacts = result_artifact[good_artifact_count:]
+        good_artifacts = artifacts[good_artifact_count:]
         for artifact in good_artifacts:
             print("Filter package {path}/{name}".format(**artifact))
-            result_artifact.remove(artifact)
+            artifacts.remove(artifact)
 
-        return result_artifact
+        return artifacts
 
 
 class KeepLatestNFilesInFolder(Rule):
@@ -124,14 +122,14 @@ class KeepLatestNFilesInFolder(Rule):
     def __init__(self, count):
         self.count = count
 
-    def _aql_add_text(self, aql_text):
+    def aql_add_text(self, aql_text):
         aql_text = "{}.sort({})".format(aql_text, r'{"$asc" : ["created"]}')
         return aql_text
 
-    def _filter_result(self, result_artifact):
+    def filter(self, artifacts):
         artifacts_by_path = defaultdict(list)
 
-        for artifact in result_artifact:
+        for artifact in artifacts:
             path = artifact["path"]
             artifacts_by_path[path].append(artifact)
 
@@ -144,9 +142,9 @@ class KeepLatestNFilesInFolder(Rule):
             good_artifacts = _artifacts[good_artifact_count:]
             for artifact in good_artifacts:
                 print("Filter package {path}/{name}".format(**artifact))
-                result_artifact.remove(artifact)
+                artifacts.remove(artifact)
 
-        return result_artifact
+        return artifacts
 
 
 class KeepLatestVersionNFilesInFolder(Rule):
@@ -159,10 +157,10 @@ class KeepLatestVersionNFilesInFolder(Rule):
         self.count = count
         self.custom_regexp = custom_regexp
 
-    def _filter_result(self, result_artifact):
+    def filter(self, artifacts):
         artifacts_by_path_and_name = defaultdict(list)
 
-        for artifact in result_artifact[:]:
+        for artifact in artifacts[:]:
             path = artifact["path"]
             version = re.findall(self.custom_regexp, artifact["name"])
             # save the version only if it was possible to uniquely determine it
@@ -177,7 +175,7 @@ class KeepLatestVersionNFilesInFolder(Rule):
                 key = path + "/" + name_without_version
                 artifacts_by_path_and_name[key].append(artifactory_with_version)
             else:
-                self.remove_artifact(artifact, result_artifact)
+                self.remove_artifact(artifact, artifacts)
 
         for artifactory_with_version in artifacts_by_path_and_name.values():
             artifactory_with_version.sort(
@@ -191,9 +189,9 @@ class KeepLatestVersionNFilesInFolder(Rule):
 
             good_artifacts = artifactory_with_version[good_artifact_count:]
             for artifact in good_artifacts:
-                self.remove_artifact(artifact[1], result_artifact)
+                self.remove_artifact(artifact[1], artifacts)
 
-        return result_artifact
+        return artifacts
 
 
 # under_score - old style of naming
