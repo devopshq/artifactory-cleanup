@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.0
+- Support YAML configuration! #54 🎉
+- Introduce new and stable (from this point) API for Rules #33
+
+### Backward incompatible changes
+In order to simplify API for Rule and CleanupPolicy and support some feature we have to introduce backward incompatible changes.
+
+Keep them in mind if you create your own Rules and going to update from `0.4.1` to `1.0.0`.
+
+
 ## 0.4.2
 - Fix: Failed to run artifactory-cleanup-0.4.1 command #64
 
