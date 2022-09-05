@@ -3,6 +3,8 @@ from typing import Dict, List, Tuple, Optional
 
 from treelib import Node, Tree
 
+from artifactory_cleanup.rules.base import ArtifactsList
+
 
 def is_repository(data):
     return data["path"] == "." and data["name"] == "."
@@ -161,7 +163,7 @@ def build_repositories(artifacts: List[Dict]) -> List[RepositoryTree]:
     return list(repositories.values())
 
 
-def get_empty_folders(repositories: List[RepositoryTree]) -> List[Dict]:
+def get_empty_folders(repositories: List[RepositoryTree]) -> ArtifactsList:
     folders = []
     for repo in repositories:
         repo.count_files()
@@ -170,7 +172,7 @@ def get_empty_folders(repositories: List[RepositoryTree]) -> List[Dict]:
         folders.extend(_folders)
 
     # Convert to raw data, similar to JSON Artifactory response
-    artifacts = [folder.get_raw_data() for folder in folders]
+    artifacts = ArtifactsList(folder.get_raw_data() for folder in folders)
     for data in artifacts:
         if is_repository(data):
             raise ValueError("Can not remove repository root")
