@@ -179,6 +179,27 @@ RULES = [
 ]
 ```
 
+## How to keep latest N docker images?
+We can combine docker rules with usual "files" rules!
+
+The idea came from https://github.com/devopshq/artifactory-cleanup/issues/61
+
+```python
+CleanupPolicy(
+    'docker-demo-cleanup',
+    # Select repo
+    rules.repo('docker-demo'),
+    # Delete docker images older than 30 days
+    rules.DeleteDockerImagesOlderThan(days=30),
+    # Keep these tags for all images
+    rules.ExcludeDockerImages(['*:latest', '*:release*']),
+    # Exclude these docker tags
+    rules.ExcludePath("base-tools*"),
+    # Keep 3 docker tags for all images
+    rules.KeepLatestNFilesInFolder(count=3),
+)
+```
+
 
 # Release
 
