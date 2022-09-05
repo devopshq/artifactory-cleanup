@@ -1,12 +1,65 @@
 import inspect
 import json
+import sys
 from copy import deepcopy
-from typing import Optional
+from typing import Optional, Union, List, Dict
 from urllib.parse import quote
 
 import pydash
 
 from artifactory_cleanup.base_url_session import BaseUrlSession
+
+if sys.version_info >= (3, 8):
+    from typing import TypedDict
+else:
+    from typing_extensions import TypedDict
+
+
+class ArtifactDict(TypedDict):
+    repo: str
+    path: str
+    name: str
+    properties: dict
+    stats: dict
+
+
+class ArtifactsList(List[ArtifactDict]):
+    def remove(self, artifacts: Union[ArtifactDict, List[ArtifactDict]]) -> None:
+        """
+        Remove artifacts (or one artifact) and log that.
+        """
+        if not isinstance(artifacts, list):
+            artifacts = [artifacts]
+
+        for artifact in artifacts:
+            print(f"Filter package {artifact['path']}/{artifact['name']}")
+            super().remove(artifact)
+
+    @classmethod
+    def from_response(cls, artifacts: List[Dict]) -> "ArtifactsList":
+        """
+        :param artifacts: Pure AQL response
+        """
+        return ArtifactsList(cls.prepare(artifact) for artifact in artifacts)
+
+    @classmethod
+    def prepare(cls, artifact: Dict) -> ArtifactDict:
+        """
+        Convert properties, stat from the list format to the dict format
+        """
+        if "properties" in artifact:
+            artifact["properties"] = {
+                x["key"]: x.get("value") for x in artifact["properties"]
+            }
+        else:
+            artifact["properties"] = {}
+
+        if "stats" in artifact:
+            artifact["stats"] = artifact["stats"][0]
+        else:
+            artifact["stats"] = {}
+
+        return artifact
 
 
 class Rule(object):
@@ -63,10 +116,10 @@ class Rule(object):
         """
         return aql
 
-    def filter(self, artifacts):
+    def filter(self, artifacts: ArtifactsList) -> ArtifactsList:
         """
         Filter artifacts after performing AQL query.
-        To remove artifacts from the list (keep artifact) - please use Rule.remove_artifact method in order to log the action as well.
+        To keep artifacts - use `artifacts.remove(artifacts_to_keep)` method.
 
         If you have your own logic - please overwrite the method in your Rule class.
         Here you can filter artifacts in memory, make additional calls to Artifactory or even call other services!
@@ -75,20 +128,6 @@ class Rule(object):
         :return List of artifacts that you are going to remove
         """
         return artifacts
-
-    @staticmethod
-    def remove_artifact(artifacts_to_remove, artifacts):
-        """
-        Remove and log artifacts
-        :param artifacts: Artifacts to remove
-        :param artifacts: Artifacts remove from it
-        """
-        if not isinstance(artifacts_to_remove, list):
-            artifacts_to_remove = [artifacts_to_remove]
-
-        for artifact in artifacts_to_remove:
-            print(f"Filter package {artifact['path']}/{artifact['name']}")
-            artifacts.remove(artifact)
 
 
 class CleanupPolicy(object):
@@ -187,7 +226,7 @@ class CleanupPolicy(object):
                 print()
         return aql
 
-    def get_artifacts(self):
+    def get_artifacts(self) -> ArtifactsList:
         """
         Get artifacts from Artifactory by AQL filters that we collect from all rules in the policy
         :return list of artifacts
@@ -197,9 +236,8 @@ class CleanupPolicy(object):
         r.raise_for_status()
         content = r.json()
         artifacts = content["results"]
-        artifacts = pydash.for_each(artifacts, self.prepare)
         artifacts = pydash.sort(artifacts, key=lambda x: x["path"])
-        return artifacts
+        return ArtifactsList.from_response(artifacts)
 
     def filter(self, artifacts):
         """
@@ -209,6 +247,10 @@ class CleanupPolicy(object):
             before = len(artifacts)
             print(f"Filter artifacts - rule: {rule.name} - {rule.title}")
             artifacts = rule.filter(artifacts)
+
+            if not isinstance(artifacts, ArtifactsList):
+                raise ValueError(f"`{rule.name}` rule must return ArtifactsList")
+
             if before != len(artifacts):
                 print(f"Before count: {before}")
                 print(f"After count: {len(artifacts)}")
@@ -232,20 +274,3 @@ class CleanupPolicy(object):
         print(f"DESTROY MODE - delete '{artifact_path}'")
         r = self.session.delete(artifact_path)
         r.raise_for_status()
-
-    @classmethod
-    def prepare(cls, artifact):
-        """
-        Convert properties, stat from the list format to the dict format
-        """
-        if "properties" in artifact:
-            artifact["properties"] = {
-                x["key"]: x.get("value") for x in artifact["properties"]
-            }
-        else:
-            artifact["properties"] = {}
-
-        if "stats" in artifact:
-            artifact["stats"] = artifact["stats"][0]
-        else:
-            artifact["stats"] = {}

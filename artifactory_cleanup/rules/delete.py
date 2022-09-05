@@ -98,8 +98,8 @@ class DeleteEmptyFolder(Rule):
         aql_query_list.append(all_files_dict)
         return aql_query_list
 
-    def filter(self, artifactss):
-        repositories = utils.build_repositories(artifactss)
+    def filter(self, artifacts):
+        repositories = utils.build_repositories(artifacts)
         folders = utils.get_empty_folders(repositories)
         return folders
 

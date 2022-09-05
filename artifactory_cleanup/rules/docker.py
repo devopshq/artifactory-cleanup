@@ -45,9 +45,9 @@ class RuleForDocker(Rule):
                 image = f"{artifact['path']}/{artifact['name']}"
                 artifact["size"] = images_dict[image]
 
-    def filter(self, artifactss):
+    def filter(self, artifacts):
         """Determines the size of deleted images"""
-        new_result = super(RuleForDocker, self).filter(artifactss)
+        new_result = super(RuleForDocker, self).filter(artifacts)
         self._collect_docker_size(new_result)
 
         return new_result
@@ -187,9 +187,7 @@ class KeepLatestNVersionImagesByProperty(Rule):
                 good_artifact_count = 0
 
             good_artifacts = artifactory_with_version[good_artifact_count:]
-            for artifact in good_artifacts:
-                self.remove_artifact(artifact[1], artifacts)
-
+            artifacts.remove(good_artifacts)
         return artifacts
 
 

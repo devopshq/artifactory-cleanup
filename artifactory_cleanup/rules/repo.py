@@ -2,7 +2,7 @@ from sys import stderr
 
 from requests import HTTPError
 
-from artifactory_cleanup.rules.base import Rule
+from artifactory_cleanup.rules.base import Rule, ArtifactsList
 from artifactory_cleanup.rules.exception import PolicyException
 
 
@@ -51,6 +51,9 @@ class Repo(Rule):
         }
         aql_query_list.append(update_dict)
         return aql_query_list
+
+    def filter(self, artifacts: ArtifactsList):
+        return artifacts
 
 
 class RepoByMask(Rule):
@@ -110,7 +113,7 @@ class PropertyNeq(Rule):
             for x in artifacts
             if x["properties"].get(self.property_key) == self.property_value
         ]
-        self.remove_artifact(good_artifact, artifacts)
+        artifacts.remove(good_artifact)
         return artifacts
 
 

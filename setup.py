@@ -36,6 +36,7 @@ setup(
         "treelib",
         "attrs",
         "pydash",
+        'typing-extensions; python_version < "3.8.0"',
     ],
     classifiers=[
         "Development Status :: 5 - Production/Stable",

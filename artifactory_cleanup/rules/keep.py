@@ -175,7 +175,7 @@ class KeepLatestVersionNFilesInFolder(Rule):
                 key = path + "/" + name_without_version
                 artifacts_by_path_and_name[key].append(artifactory_with_version)
             else:
-                self.remove_artifact(artifact, artifacts)
+                artifacts.remove(artifact)
 
         for artifactory_with_version in artifacts_by_path_and_name.values():
             artifactory_with_version.sort(
@@ -188,8 +188,7 @@ class KeepLatestVersionNFilesInFolder(Rule):
                 good_artifact_count = 0
 
             good_artifacts = artifactory_with_version[good_artifact_count:]
-            for artifact in good_artifacts:
-                self.remove_artifact(artifact[1], artifacts)
+            artifacts.remove(good_artifacts)
 
         return artifacts
 
