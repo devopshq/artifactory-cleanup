@@ -4,12 +4,15 @@
 - Support YAML configuration! #54 🎉
 - Introduce new and stable (from this point) API for Rules #33
 
-### Backward incompatible changes in API
+### Backward incompatible changes
 In order to simplify API for Rule and CleanupPolicy and support some feature we have to introduce backward incompatible changes.
 
 Keep them in mind if you create your own Rules and going to update from `0.4.1` to `1.0.0`.
 
 #### Rules
+- Rename `DeleteEmptyFolder` to `DeleteEmptyFolders`
+
+#### Rules API
 - Methods have been changed:
   - `_aql_add_filter(aql_query_list)` => `aql_add_filter(filters)`
   - `_aql_add_text(aql_text)` => `aql_add_text(aql)`
@@ -32,7 +35,7 @@ Keep them in mind if you create your own Rules and going to update from `0.4.1` 
 ## 0.4.0
 
 - Remove `--remove-empty-folder` option. Artifactory provides corresponding built-in functionality already
-- Change the `delete_empty_folder` rule to not depend on an external plugin, but directly delete files from this script
+- Change the `delete_empty_folders` rule to not depend on an external plugin, but directly delete files from this script
 
 ## 0.3.4
 

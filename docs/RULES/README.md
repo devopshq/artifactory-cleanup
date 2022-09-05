@@ -8,7 +8,7 @@
 | `DeleteWithoutDownloads()` | Deletes artifacts that have never been downloaded (DownloadCount=0). Better to use with `DeleteOlderThan` rule |
 | `DeleteOlderThanNDaysWithoutDownloads(days=N)` | Deletes artifacts that are older than N days and have not been downloaded |
 | `DeleteNotUsedSince(days=N)` | Delete artifacts that were downloaded, but for a long time. N days passed. Or not downloaded at all from the moment of creation and it's been N days |
-| `DeleteEmptyFolder()` | Clean up empty folders in given repository list |
+| `DeleteEmptyFolders()` | Clean up empty folders in given repository list |
 | `KeepLatestNupkgNVersions(count=N)` | Leaves N nupkg (adds `*.nupkg` filter) in release feature builds |
 | `KeepLatestNFiles(count=N)` | Leaves the last (by creation time) files in the amount of N pieces. WITHOUT accounting subfolders |
 | `KeepLatestNFilesInFolder(count=N)` | Leaves the last (by creation time) files in the number of N pieces in each folder |
