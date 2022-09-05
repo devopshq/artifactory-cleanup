@@ -12,7 +12,7 @@ from artifactory_cleanup.artifactorycleanup import (
     ArtifactoryCleanup,
 )
 from artifactory_cleanup.base_url_session import BaseUrlSession
-from artifactory_cleanup.loaders import ConfigLoaderPython, ConfigLoaderCLI
+from artifactory_cleanup.loaders import PythonPoliciesLoader, CliConnectionLoader
 from artifactory_cleanup.context_managers import get_context_managers
 
 requests.packages.urllib3.disable_warnings()
@@ -90,10 +90,11 @@ class ArtifactoryCleanupCLI(cli.Application):
         self._destroy_or_verbose()
         today = self._get_today()
 
-        server, user, password = ConfigLoaderCLI(self).get_connection()
+        server, user, password = CliConnectionLoader(self).get_connection()
         session = BaseUrlSession(server)
         session.auth = HTTPBasicAuth(user, password)
-        policies = ConfigLoaderPython.load(self._config)
+        policies = PythonPoliciesLoader.load(self._config)
+
         cleanup = ArtifactoryCleanup(
             session=session,
             policies=policies,

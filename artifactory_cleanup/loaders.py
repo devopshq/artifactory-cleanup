@@ -6,7 +6,7 @@ from typing import List, Tuple
 from artifactory_cleanup.rules.base import CleanupPolicy
 
 
-class ConfigLoaderPython:
+class PythonPoliciesLoader:
     """
     Load policies and rules from python file
     """
@@ -24,7 +24,7 @@ class ConfigLoaderPython:
             # Validate that all policies is CleanupPolicy
             for policy in policies:
                 if not isinstance(policy, CleanupPolicy):
-                    sys.exit(f"Rule '{policy}' is not CleanupPolicy, check it please")
+                    sys.exit(f"Policy '{policy}' is not CleanupPolicy, check it please")
 
             return policies
         except ImportError as error:
@@ -32,7 +32,9 @@ class ConfigLoaderPython:
             sys.exit(1)
 
 
-class ConfigLoaderCLI:
+class CliConnectionLoader:
+    """Get connection information from cli"""
+
     def __init__(self, cli):
         self.cli = cli
 
