@@ -11,7 +11,7 @@ Keep them in mind if you create your own Rules and going to update from `0.4.1` 
 
 #### Rules
 - Methods have been changed:
-  - `_aql_add_filter(aql_query_list)` => `aql_add_filter(items_find_filters)`
+  - `_aql_add_filter(aql_query_list)` => `aql_add_filter(filters)`
   - `_aql_add_text(aql_text)` => `aql_add_text(aql)`
   - `_filter_result(result_artifact)` => `filter(artifacts)`
 - `filter(artifacts)` must return `ArtifactsList` instance, not just a list

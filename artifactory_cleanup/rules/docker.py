@@ -59,11 +59,11 @@ class DeleteDockerImagesOlderThan(RuleForDocker):
     def __init__(self, *, days):
         self.days = timedelta(days=days)
 
-    def aql_add_items_find_filters(self, aql_query_list):
+    def aql_add_filter(self, filters):
         older_than_date = self.today - self.days
         older_than_date_txt = older_than_date.isoformat()
         print("Delete docker images older than {}".format(older_than_date_txt))
-        update_dict = {
+        filter_ = {
             "modified": {
                 "$lt": older_than_date_txt,
             },
@@ -71,8 +71,8 @@ class DeleteDockerImagesOlderThan(RuleForDocker):
                 "$match": "manifest.json",
             },
         }
-        aql_query_list.append(update_dict)
-        return aql_query_list
+        filters.append(filter_)
+        return filters
 
     def filter(self, artifacts):
         for artifact in artifacts:
@@ -90,9 +90,9 @@ class DeleteDockerImagesOlderThanNDaysWithoutDownloads(RuleForDocker):
     def __init__(self, *, days):
         self.days = timedelta(days=days)
 
-    def aql_add_items_find_filters(self, aql_query_list):
+    def aql_add_filter(self, filters):
         last_day = self.today - self.days
-        update_dict = {
+        filter_ = {
             "name": {
                 "$match": "manifest.json",
             },
@@ -101,8 +101,8 @@ class DeleteDockerImagesOlderThanNDaysWithoutDownloads(RuleForDocker):
                 {"created": {"$lte": last_day.isoformat()}},
             ],
         }
-        aql_query_list.append(update_dict)
-        return aql_query_list
+        filters.append(filter_)
+        return filters
 
     def filter(self, artifacts):
         for artifact in artifacts:
@@ -118,10 +118,10 @@ class DeleteDockerImagesNotUsed(RuleForDocker):
     def __init__(self, *, days):
         self.days = timedelta(days=days)
 
-    def aql_add_items_find_filters(self, aql_query_list):
+    def aql_add_filter(self, filters):
         last_day = self.today - self.days
         print("Delete docker images not used from {}".format(last_day.isoformat()))
-        update_dict = {
+        filter_ = {
             "name": {
                 "$match": "manifest.json",
             },
@@ -135,8 +135,8 @@ class DeleteDockerImagesNotUsed(RuleForDocker):
                 },
             ],
         }
-        aql_query_list.append(update_dict)
-        return aql_query_list
+        filters.append(filter_)
+        return filters
 
     def filter(self, artifacts):
         for artifact in artifacts:

@@ -43,14 +43,14 @@ class Repo(Rule):
             print(e)
             exit(1)
 
-    def aql_add_items_find_filters(self, aql_query_list):
-        update_dict = {
+    def aql_add_filter(self, filters):
+        filter_ = {
             "repo": {
                 "$eq": self.repo,
             }
         }
-        aql_query_list.append(update_dict)
-        return aql_query_list
+        filters.append(filter_)
+        return filters
 
     def filter(self, artifacts: ArtifactsList):
         return artifacts
@@ -64,15 +64,15 @@ class RepoByMask(Rule):
     def __init__(self, mask):
         self.mask = mask
 
-    def aql_add_items_find_filters(self, aql_query_list):
+    def aql_add_filter(self, filters):
         print("Get from {}".format(self.mask))
-        update_dict = {
+        filter_ = {
             "repo": {
                 "$match": self.mask,
             }
         }
-        aql_query_list.append(update_dict)
-        return aql_query_list
+        filters.append(filter_)
+        return filters
 
 
 class PropertyEq(Rule):
@@ -82,15 +82,15 @@ class PropertyEq(Rule):
         self.property_key = property_key
         self.property_value = property_value
 
-    def aql_add_items_find_filters(self, aql_query_list):
-        update_dict = {
+    def aql_add_filter(self, filters):
+        filter_ = {
             "$and": [
                 {"property.key": {"$eq": self.property_key}},
                 {"property.value": {"$eq": self.property_value}},
             ]
         }
-        aql_query_list.append(update_dict)
-        return aql_query_list
+        filters.append(filter_)
+        return filters
 
 
 class PropertyNeq(Rule):

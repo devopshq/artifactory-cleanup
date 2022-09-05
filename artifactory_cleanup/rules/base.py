@@ -92,19 +92,19 @@ class Rule(object):
         self.session = session
         self.today = today
 
-    def aql_add_filter(self, items_find_filters):
+    def aql_add_filter(self, filters):
         """
-        Add filter to `items.find` AQL part.
+        Add one or more filters to `<domain>.find(<filters>)` AQL part.
+        It's called <criteria> in the documentation: <domain_query>.find(<criteria>)
+        https://www.jfrog.com/confluence/display/JFROG/Artifactory+Query+Language#usage
 
-        Here you can filter artifacts on Artifactory side with AQL:
-        https://www.jfrog.com/confluence/display/JFROG/Artifactory+Query+Language
-
+        The artifacts will be filtered on Artifactory side.
         It's better to filter out as much as possible with that filter
         rather than get all artifacts and filter out them in memory because it leads to a heavy response from Artifactory
 
-        Also, you can find any conflicts with others rules here, if they conflict on AQL level
+        You can detect any conflicts with others rules here, if they conflict on AQL level.
         """
-        return items_find_filters
+        return filters
 
     def aql_add_text(self, aql):
         """
@@ -146,6 +146,9 @@ class CleanupPolicy(object):
            rules.DeleteOlderThan(days=7),
         )
     """
+
+    # domain_query in https://www.jfrog.com/confluence/display/JFROG/Artifactory+Query+Language#usage
+    DOMAIN = "items"
 
     def __init__(self, name, *rules):
         if not isinstance(name, str):
@@ -200,34 +203,32 @@ class CleanupPolicy(object):
         """
         Collect all aql queries into a single list so that the rules check for conflicts among themselves
         """
-        aql_items_find_filters = self._get_aql_items_find_filters()
-        self.aql_text = self._get_aql_text(aql_items_find_filters)
+        aql_find_filters = self._get_aql_find_filters()
+        self.aql_text = self._get_aql_text(aql_find_filters)
         print("*" * 80)
         print("Result AQL Query:")
         print(self.aql_text)
         print("*" * 80)
 
-    def _get_aql_items_find_filters(self):
-        """Go over all rules and get items.find filters"""
-        aql_items_find_filters = []
+    def _get_aql_find_filters(self):
+        """Go over all rules and get .find filters"""
+        filters = []
         for rule in self.rules:
-            before_query_list = deepcopy(aql_items_find_filters)
+            before_query_list = deepcopy(filters)
             print(f"Add AQL Filter - rule: {rule.name} - {rule.title}")
-            aql_items_find_filters = rule.aql_add_items_find_filters(
-                aql_items_find_filters
-            )
-            if before_query_list != aql_items_find_filters:
+            filters = rule.aql_add_filter(filters)
+            if before_query_list != filters:
                 print("Before AQL query: {}".format(before_query_list))
-                print("After AQL query: {}".format(aql_items_find_filters))
+                print("After AQL query: {}".format(filters))
                 print()
-        return aql_items_find_filters
+        return {"$and": filters}
 
-    def _get_aql_text(self, aql_items_find_filters):
+    def _get_aql_text(self, find_filters):
         """
         Collect from all rules additional texts of requests
         """
-        filters = json.dumps({"$and": aql_items_find_filters})
-        aql = f'items.find({filters}).include("*", "property", "stat")'
+        filters_text = json.dumps(find_filters)
+        aql = f'{self.DOMAIN}.find({filters_text}).include("*", "property", "stat")'
 
         for rule in self.rules:
             before_aql = aql

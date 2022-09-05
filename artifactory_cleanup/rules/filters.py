@@ -15,14 +15,14 @@ class IncludePath(Rule):
     def __init__(self, mask):
         self.mask = mask
 
-    def aql_add_items_find_filters(self, aql_query_list):
-        update_dict = {
+    def aql_add_filter(self, filters):
+        filter_ = {
             "path": {
                 "$match": self.mask,
             }
         }
-        aql_query_list.append(update_dict)
-        return aql_query_list
+        filters.append(filter_)
+        return filters
 
 
 class __FilterDockerImages(Rule):
@@ -37,7 +37,7 @@ class __FilterDockerImages(Rule):
         else:
             raise AttributeError("Mask must by str|list")
 
-    def aql_add_items_find_filters(self, aql_query_list):
+    def aql_add_filter(self, filters):
         if not self.operator:
             raise AttributeError("Attribute 'operator' must be specified")
 
@@ -50,15 +50,15 @@ class __FilterDockerImages(Rule):
                 raise AttributeError("Mask '{}' must contain ':'".format(mask))
             # alpine:2.4 => alpine/2.4
             mask = mask.replace(":", "/")
-            update_dict = {
+            filter_ = {
                 "path": {
                     self.operator: mask,
                 }
             }
-            rule_list.append(update_dict)
+            rule_list.append(filter_)
 
-        aql_query_list.append({self.boolean_operator: rule_list})
-        return aql_query_list
+        filters.append({self.boolean_operator: rule_list})
+        return filters
 
 
 class IncludeDockerImages(__FilterDockerImages):
@@ -105,14 +105,14 @@ class IncludeFilename(Rule):
     def __init__(self, mask):
         self.mask = mask
 
-    def aql_add_items_find_filters(self, aql_query_list):
-        update_dict = {
+    def aql_add_filter(self, filters):
+        filter_ = {
             "name": {
                 "$match": self.mask,
             }
         }
-        aql_query_list.append(update_dict)
-        return aql_query_list
+        filters.append(filter_)
+        return filters
 
 
 class _ExcludeMask(Rule):
@@ -129,19 +129,19 @@ class _ExcludeMask(Rule):
         else:
             raise AttributeError("Mask must by str|list")
 
-    def aql_add_items_find_filters(self, aql_query_list):
+    def aql_add_filter(self, filters):
         rule_list = []
         for mask in self.masks:
-            update_dict = {
+            filter_ = {
                 self.attribute_name: {
                     "$nmatch": mask,
                 }
             }
-            rule_list.append(update_dict)
+            rule_list.append(filter_)
         and_list = {"$and": rule_list}
 
-        aql_query_list.append(and_list)
-        return aql_query_list
+        filters.append(and_list)
+        return filters
 
 
 class ExcludePath(_ExcludeMask):
