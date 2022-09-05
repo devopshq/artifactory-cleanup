@@ -15,7 +15,7 @@ class RuleForDocker(Rule):
     """
 
     def get_docker_images_list(self, docker_repo):
-        url = "/api/docker/{docker_repo}/v2/_catalog"
+        url = f"/api/docker/{docker_repo}/v2/_catalog"
         r = self.session.get(url)
         r.raise_for_status()
         content = r.json()
