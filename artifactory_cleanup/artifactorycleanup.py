@@ -37,6 +37,9 @@ class ArtifactoryCleanup:
         for policy in self.policies:
             with block_ctx_mgr(policy.name):
                 # Prepare
+                with block_ctx_mgr("Check"):
+                    policy.check()
+
                 with block_ctx_mgr("AQL filter"):
                     policy.build_aql_query()
 

@@ -70,9 +70,8 @@ class Rule(object):
     Make it small and then combine them in CleanupPolicy in more complicated entities.
     """
 
-    def __init__(self):
-        self.session = None
-        self.today = None
+    session = None
+    today = None
 
     @property
     def name(self):
@@ -129,6 +128,12 @@ class Rule(object):
         """
         return artifacts
 
+    def check(self, *args, **kwargs):
+        """
+        Checks that Rule is configured right.
+        Make sure to add args, kwargs, because we can add more options there in the future
+        """
+
 
 class CleanupPolicy(object):
     """
@@ -140,7 +145,6 @@ class CleanupPolicy(object):
            rules.repo,
            rules.DeleteOlderThan(days=7),
         )
-
     """
 
     def __init__(self, name, *rules):
@@ -163,6 +167,15 @@ class CleanupPolicy(object):
         # Will be assigned in init() function later
         self.session: Optional[BaseUrlSession] = None
         self.today = None
+
+    def check(self, *args, **kwargs):
+        """
+        Check that we're ready to run the policy.
+        Here you can call additional APIs to check they're available or check that rules are consistent,
+        like have no contradictory rules in one set
+        """
+        for rule in self.rules:
+            rule.check(*args, **kwargs)
 
     def init(self, session, today):
         """
