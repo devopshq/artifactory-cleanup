@@ -1,9 +1,12 @@
 import inspect
 import json
 from copy import deepcopy
+from typing import Optional
 from urllib.parse import quote
 
 import pydash
+
+from artifactory_cleanup.base_url_session import BaseUrlSession
 
 
 class Rule(object):
@@ -15,8 +18,7 @@ class Rule(object):
     """
 
     def __init__(self):
-        self.artifactory_session = None
-        self.artifactory_server = None
+        self.session = None
         self.today = None
 
     @property
@@ -29,14 +31,13 @@ class Rule(object):
         docs = [x.strip() for x in self.__doc__.splitlines() if x][0]
         return docs
 
-    def init(self, artifactory_session, artifactory_server, today, *args, **kwargs):
+    def init(self, session, today, *args, **kwargs):
         """
         Init the rule after got all information.
 
         Please make sure to add *args, **kwargs for future extension
         """
-        self.artifactory_session = artifactory_session
-        self.artifactory_server = artifactory_server
+        self.session = session
         self.today = today
 
     def aql_add_filter(self, items_find_filters):
@@ -112,6 +113,7 @@ class CleanupPolicy(object):
 
         self.name = name
         self.rules = list(rules)
+        self.aql_text = None
 
         # init object if passed not initialized class
         # for `rules.repo` rule, see above in the docstring
@@ -120,18 +122,14 @@ class CleanupPolicy(object):
                 self.rules[i] = rule(self.name)
 
         # Will be assigned in init() function later
-        self.artifactory_session = None
-        self.artifactory_url = None
+        self.session: Optional[BaseUrlSession] = None
         self.today = None
 
-        self.aql_text = None
-
-    def init(self, artifactory_session, artifactory_url, today):
+    def init(self, session, today):
         """
         Set properties and apply them to all rules
         """
-        self.artifactory_session = artifactory_session
-        self.artifactory_url = artifactory_url
+        self.session = session
         self.today = today
 
         for rule in self.rules:
@@ -144,7 +142,7 @@ class CleanupPolicy(object):
                     "- Read README.md https://github.com/devopshq/artifactory-cleanup#readme"
                 )
 
-            rule.init(artifactory_session, artifactory_url, today)
+            rule.init(session, today)
 
     def build_aql_query(self):
         """
@@ -195,8 +193,7 @@ class CleanupPolicy(object):
         :return list of artifacts
         """
         assert self.aql_text, "Call build_aql_query before calling get_artifacts"
-        aql_url = "{}/api/search/aql".format(self.artifactory_url)
-        r = self.artifactory_session.post(aql_url, data=self.aql_text)
+        r = self.session.post("/api/search/aql", data=self.aql_text)
         r.raise_for_status()
         content = r.json()
         artifacts = content["results"]
@@ -233,8 +230,7 @@ class CleanupPolicy(object):
             return
 
         print(f"DESTROY MODE - delete '{artifact_path}'")
-        delete_url = "{}/{}".format(self.artifactory_url, artifact_path)
-        r = self.artifactory_session.delete(delete_url)
+        r = self.session.delete(artifact_path)
         r.raise_for_status()
 
     @classmethod

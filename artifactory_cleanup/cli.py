@@ -11,6 +11,7 @@ from requests.auth import HTTPBasicAuth
 from artifactory_cleanup.artifactorycleanup import (
     ArtifactoryCleanup,
 )
+from artifactory_cleanup.base_url_session import BaseUrlSession
 from artifactory_cleanup.loaders import ConfigLoaderPython, ConfigLoaderCLI
 from artifactory_cleanup.context_managers import get_context_managers
 
@@ -90,11 +91,10 @@ class ArtifactoryCleanupCLI(cli.Application):
         today = self._get_today()
 
         server, user, password = ConfigLoaderCLI(self).get_connection()
-        session = requests.Session()
+        session = BaseUrlSession(server)
         session.auth = HTTPBasicAuth(user, password)
         policies = ConfigLoaderPython.load(self._config)
         cleanup = ArtifactoryCleanup(
-            server=server,
             session=session,
             policies=policies,
             destroy=self._destroy,

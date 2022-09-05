@@ -14,7 +14,10 @@ Keep them in mind if you create your own Rules and going to update from `0.4.1` 
   - `_aql_add_filter(aql_query_list)` => `aql_add_filter(items_find_filters)`
   - `_aql_add_text(aql_text)` => `aql_add_text(aql)`
   - `_filter_result(result_artifact)` => `filter(artifacts)`
-
+- Removed `artifactory_server`. Read below about new `self.session`, probably you don't need it anymore
+- Renamed `self.artifactory_session` to `self.session`. 
+  - Call `self.session.get('/relative/path)` - it adds Artifactory URL at the start of `/relative/path` and calls `http://artifactory.example.com/relaive/path`.
+  - If you still need to get Artifactory URL in rules - get it with `self.session.base_url`.
 
 ## 0.4.2
 - Fix: Failed to run artifactory-cleanup-0.4.1 command #64

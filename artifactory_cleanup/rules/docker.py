@@ -15,32 +15,25 @@ class RuleForDocker(Rule):
     """
 
     def get_docker_images_list(self, docker_repo):
-        _href = "{}/api/docker/{}/v2/_catalog".format(
-            self.artifactory_server, docker_repo
-        )
-        r = self.artifactory_session.get(_href)
+        url = "/api/docker/{docker_repo}/v2/_catalog"
+        r = self.session.get(url)
         r.raise_for_status()
         content = r.json()
 
         return content["repositories"]
 
     def get_docker_tags_list(self, docker_repo, docker_image):
-        _href = "{}/api/docker/{}/v2/{}/tags/list".format(
-            self.artifactory_server, docker_repo, docker_image
-        )
-        r = self.artifactory_session.get(_href)
+        url = f"/api/docker/{docker_repo}/v2/{docker_image}/tags/list"
+        r = self.session.get(url)
         r.raise_for_status()
         content = r.json()
-
         return content["tags"]
 
     def _collect_docker_size(self, new_result):
         docker_repos = list(set(x["repo"] for x in new_result))
 
         if docker_repos:
-            aql = ArtifactoryPath(
-                self.artifactory_server, session=self.artifactory_session
-            )
+            aql = ArtifactoryPath(self.session.base_url, session=self.session)
             args = ["items.find", {"$or": [{"repo": repo} for repo in docker_repos]}]
             artifacts_list = aql.aql(*args)
 
