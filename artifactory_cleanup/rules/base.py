@@ -1,8 +1,6 @@
 import inspect
 import json
-import re
 from urllib.parse import quote
-from collections import namedtuple
 
 
 class Rule(object):
@@ -260,47 +258,3 @@ class CleanupPolicy(object):
             r.raise_for_status()
         else:
             print("DEBUG - delete {}".format(artifact_path))
-
-
-def symbols_to_nuget(
-    artifact_name, symbols_to_nuget_reqexp=r"^(.*?)\.(\d+.*)\.symbols.tar.gz"
-):
-    m = re.match(symbols_to_nuget_reqexp, artifact_name)
-    name = version = None
-    if m:
-        name = m.group(1)
-        version = m.group(2)
-
-    return name, version
-
-
-CrossPackage = namedtuple("CrossPackage", ["name", "branch", "version"])
-
-
-def parse_cross(artifact):
-    m = re.match(
-        r"(?P<package>\S*)/(?P<branch>\S*)/(?P<version>[0-9.]+)/.*/(?P=package)[_.-]*(?P=version)?.tar.gz",
-        artifact,
-    )
-    if m:
-        name = m.group("package")
-        branch = m.group("branch")
-        version = m.group("version")
-        return CrossPackage(name, branch, version)
-
-    return None
-
-
-def parse_cross_any_extenstion(artifact):
-    m = re.match(
-        r"(?P<package>\S*)/(?P<branch>\S*)/(?P<version>[0-9.]+)/"
-        r".*/(?P=package)[_.-]*(?P=version)?-*(?P=branch)*",
-        artifact,
-    )
-    if m:
-        name = m.group("package")
-        branch = m.group("branch")
-        version = m.group("version")
-        return CrossPackage(name, branch, version)
-
-    return None
