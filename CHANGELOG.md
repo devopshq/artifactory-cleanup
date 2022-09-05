@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.1
+
+- Use `CamelCase` style of rules by default.
+- Internal refactoring, add tests, remove unused code.
+
 ## 0.4.0
 
 - Remove `--remove-empty-folder` option. Artifactory provides corresponding built-in functionality already
