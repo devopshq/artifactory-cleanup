@@ -67,18 +67,14 @@ class Rule(object):
         if not isinstance(artifacts, list):
             artifacts = [artifacts]
         for artifact in artifacts:
-            print("Filter package {path}/{name}".format(**artifact))
+            print(f"Filter package {artifact['path']}/{artifact['name']}")
             result_artifact.remove(artifact)
 
     def aql_add_filter(self, aql_query_list):
         """
         Add filters to `items.find` AQL part
         """
-        print(
-            "Add AQL Filter - rule: {} - {}".format(
-                self.__class__.__name__, self.little_doc
-            )
-        )
+        print(f"Add AQL Filter - rule: {self.__class__.__name__} - {self.little_doc}")
         new_aql_query_list = self._aql_add_filter(aql_query_list)
         if aql_query_list != new_aql_query_list:
             print("Before AQL query: {}".format(aql_query_list))
@@ -90,11 +86,7 @@ class Rule(object):
         """
         Adds some expression to AQL query
         """
-        print(
-            "Add AQL Text - rule: {} - {}".format(
-                self.__class__.__name__, self.little_doc
-            )
-        )
+        print(f"Add AQL Text - rule: {self.__class__.__name__} - {self.little_doc}")
         new_aql_text = self._aql_add_text(aql_text)
         if new_aql_text != aql_text:
             print("Before AQL text: {}".format(aql_text))
@@ -109,11 +101,7 @@ class Rule(object):
         It's a high level function, if you want to specify your own logic
         please overwrite in your Rule class `_filter_result` method
         """
-        print(
-            "Filter artifacts - rule: {} - {}".format(
-                self.__class__.__name__, self.little_doc
-            )
-        )
+        print(f"Filter artifacts - rule: {self.__class__.__name__} - {self.little_doc}")
         new_result = self._filter_result(result_artifacts)
         if len(new_result) != len(result_artifacts):
             print("Before count: {}".format(len(result_artifacts)))
