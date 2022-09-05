@@ -57,22 +57,11 @@ class ArtifactoryCleanup:
                 # Filter
                 with block_ctx_mgr("Filter results"):
                     artifacts_to_remove = policy.filter(artifacts)
-                print(
-                    "Found {} artifacts AFTER filtering".format(
-                        len(artifacts_to_remove)
-                    )
-                )
+                print(f"Found {len(artifacts_to_remove)} artifacts AFTER filtering")
 
                 # Delete or debug
                 for artifact in artifacts_to_remove:
-                    # test name for CI servers
-                    test_name = "cleanup.{}.{}_{}".format(
-                        escape(artifact["repo"]),
-                        escape(artifact["path"]),
-                        escape(artifact["name"]),
-                    )
-
-                    with test_ctx_mgr(test_name):
+                    with test_ctx_mgr(get_name_for_ci(artifact)):
                         policy.delete(artifact, destroy=self.destroy)
 
             # Info
@@ -100,6 +89,14 @@ class ArtifactoryCleanup:
             raise ArtifactoryCleanupException(
                 f"Rule with name '{policy_name}' not found"
             )
+
+
+def get_name_for_ci(artifact):
+    return "cleanup.{}.{}_{}".format(
+        escape(artifact["repo"]),
+        escape(artifact["path"]),
+        escape(artifact["name"]),
+    )
 
 
 def escape(name):
