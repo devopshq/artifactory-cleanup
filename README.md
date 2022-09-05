@@ -151,19 +151,21 @@ docker build . --tag artifactory-cleanup
 # FAQ
 
 ## How to clean up Conan repository?
+We can handle conan's metadata by creating two policies:
+1. First one removes files but keep all metadata.
+2. Second one look at folders and if it contains only medata files - removes it (because there's no associated with metadata files)
+
 The idea came from https://github.com/devopshq/artifactory-cleanup/issues/47
 
 ```python
 from artifactory_cleanup import rules
 from artifactory_cleanup import CleanupPolicy
 RULES = [
-    # ------ ALL REPOS --------
     CleanupPolicy(
        'Delete files older than 60 days',
         rules.repo('conan-testing'),
         rules.delete_not_used_since(days=60),
-        # Make sure to keep conan metadata. See also
-        # https://github.com/devopshq/artifactory-cleanup/issues/47
+        # Keep conan metadata
         rules.exclude_filename(['.timestamp', 'index.json']),
     ),
     CleanupPolicy(
