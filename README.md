@@ -171,7 +171,7 @@ RULES = [
     CleanupPolicy(
        'Delete empty folders',
         rules.repo('conan-testing'),
-        rules.delete_empty_folder(),
+        rules.delete_empty_folders(),
         # Exclude metadata files
         # If a folder only contains these files, consider it as empty
         rules.exclude_filename(['.timestamp', 'index.json']),

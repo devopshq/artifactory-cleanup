@@ -49,7 +49,6 @@ class RuleForDocker(Rule):
         """Determines the size of deleted images"""
         new_result = super(RuleForDocker, self).filter(artifacts)
         self._collect_docker_size(new_result)
-
         return new_result
 
 
