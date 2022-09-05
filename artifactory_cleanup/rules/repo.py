@@ -13,7 +13,7 @@ class Repo(Rule):
 
         CleanupPolicy(
            'myrepo.snapshot',
-           # if the rule is one for all repositories - you can skip duplicate name
+           # if the there's only one policy for the repository - you can skip duplicate name
            rules.repo,
            ...
         ),
@@ -31,19 +31,19 @@ class Repo(Rule):
             )
         self.repo = name
 
-    def aql_add_items_find_filters(self, aql_query_list):
-        print("Get from {}".format(self.repo))
+    def check(self, *args, **kwargs):
+        print(f"Checking '{self.repo}' repository exists.")
         try:
-            print("Checking the existence of the {} repository".format(self.repo))
             url = f"/api/storage/{self.repo}"
             r = self.session.get(url)
             r.raise_for_status()
-            print("The {} repository exists".format(self.repo))
+            print(f"The {self.repo} repository exists.")
         except HTTPError as e:
-            stderr.write("The {} repository does not exist".format(self.repo))
+            stderr.write(f"The {self.repo} repository does not exist!")
             print(e)
             exit(1)
 
+    def aql_add_items_find_filters(self, aql_query_list):
         update_dict = {
             "repo": {
                 "$eq": self.repo,
