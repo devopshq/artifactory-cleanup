@@ -52,9 +52,9 @@ class RuleForDocker(Rule):
                 image = f"{artifact['path']}/{artifact['name']}"
                 artifact["size"] = images_dict[image]
 
-    def filter_result(self, result_artifacts):
+    def filter(self, artifactss):
         """Determines the size of deleted images"""
-        new_result = super(RuleForDocker, self).filter_result(result_artifacts)
+        new_result = super(RuleForDocker, self).filter(artifactss)
         self._collect_docker_size(new_result)
 
         return new_result
@@ -66,7 +66,7 @@ class DeleteDockerImagesOlderThan(RuleForDocker):
     def __init__(self, *, days):
         self.days = timedelta(days=days)
 
-    def _aql_add_filter(self, aql_query_list):
+    def aql_add_items_find_filters(self, aql_query_list):
         older_than_date = self.today - self.days
         older_than_date_txt = older_than_date.isoformat()
         print("Delete docker images older than {}".format(older_than_date_txt))
@@ -81,12 +81,12 @@ class DeleteDockerImagesOlderThan(RuleForDocker):
         aql_query_list.append(update_dict)
         return aql_query_list
 
-    def _filter_result(self, result_artifact):
-        for artifact in result_artifact:
+    def filter(self, artifacts):
+        for artifact in artifacts:
             artifact["path"], docker_tag = artifact["path"].rsplit("/", 1)
             artifact["name"] = docker_tag
 
-        return result_artifact
+        return artifacts
 
 
 class DeleteDockerImagesOlderThanNDaysWithoutDownloads(RuleForDocker):
@@ -97,7 +97,7 @@ class DeleteDockerImagesOlderThanNDaysWithoutDownloads(RuleForDocker):
     def __init__(self, *, days):
         self.days = timedelta(days=days)
 
-    def _aql_add_filter(self, aql_query_list):
+    def aql_add_items_find_filters(self, aql_query_list):
         last_day = self.today - self.days
         update_dict = {
             "name": {
@@ -111,12 +111,12 @@ class DeleteDockerImagesOlderThanNDaysWithoutDownloads(RuleForDocker):
         aql_query_list.append(update_dict)
         return aql_query_list
 
-    def _filter_result(self, result_artifact):
-        for artifact in result_artifact:
+    def filter(self, artifacts):
+        for artifact in artifacts:
             artifact["path"], docker_tag = artifact["path"].rsplit("/", 1)
             artifact["name"] = docker_tag
 
-        return result_artifact
+        return artifacts
 
 
 class DeleteDockerImagesNotUsed(RuleForDocker):
@@ -125,7 +125,7 @@ class DeleteDockerImagesNotUsed(RuleForDocker):
     def __init__(self, *, days):
         self.days = timedelta(days=days)
 
-    def _aql_add_filter(self, aql_query_list):
+    def aql_add_items_find_filters(self, aql_query_list):
         last_day = self.today - self.days
         print("Delete docker images not used from {}".format(last_day.isoformat()))
         update_dict = {
@@ -145,12 +145,12 @@ class DeleteDockerImagesNotUsed(RuleForDocker):
         aql_query_list.append(update_dict)
         return aql_query_list
 
-    def _filter_result(self, result_artifact):
-        for artifact in result_artifact:
+    def filter(self, artifacts):
+        for artifact in artifacts:
             artifact["path"], docker_tag = artifact["path"].rsplit("/", 1)
             artifact["name"] = docker_tag
 
-        return result_artifact
+        return artifacts
 
 
 class KeepLatestNVersionImagesByProperty(Rule):
@@ -173,9 +173,9 @@ class KeepLatestNVersionImagesByProperty(Rule):
         self.property = r"docker.manifest"
         self.number_of_digits_in_version = number_of_digits_in_version
 
-    def _filter_result(self, result_artifact):
+    def filter(self, artifacts):
         artifacts_by_path_and_name = defaultdict(list)
-        for artifact in result_artifact[:]:
+        for artifact in artifacts[:]:
             property = artifact["properties"][self.property]
             version = re.findall(self.custom_regexp, property)
             if len(version) == 1:
@@ -195,9 +195,9 @@ class KeepLatestNVersionImagesByProperty(Rule):
 
             good_artifacts = artifactory_with_version[good_artifact_count:]
             for artifact in good_artifacts:
-                self.remove_artifact(artifact[1], result_artifact)
+                self.remove_artifact(artifact[1], artifacts)
 
-        return result_artifact
+        return artifacts
 
 
 class DeleteDockerImageIfNotContainedInProperties(RuleForDocker):
@@ -217,10 +217,10 @@ class DeleteDockerImageIfNotContainedInProperties(RuleForDocker):
         self.image_prefix = image_prefix
         self.full_docker_repo_name = full_docker_repo_name
 
-    def get_properties_dict(self, result_artifact):
+    def get_properties_dict(self, artifacts):
         properties_dict = defaultdict(dict)
 
-        for artifact in result_artifact:
+        for artifact in artifacts:
             if artifact.get("properties"):
                 properties_with_image = [
                     x
@@ -237,9 +237,9 @@ class DeleteDockerImageIfNotContainedInProperties(RuleForDocker):
 
         return properties_dict
 
-    def _filter_result(self, result_artifact):
+    def filter(self, artifacts):
         images = self.get_docker_images_list(self.docker_repo)
-        properties_dict = self.get_properties_dict(result_artifact)
+        properties_dict = self.get_properties_dict(artifacts)
         result_docker_images = []
 
         for image in images:
@@ -300,10 +300,10 @@ class DeleteDockerImageIfNotContainedInPropertiesValue(RuleForDocker):
         self.image_prefix = image_prefix
         self.full_docker_repo_name = full_docker_repo_name
 
-    def get_properties_values(self, result_artifact):
+    def get_properties_values(self, artifacts):
         """Creates a list of artifact property values if the value starts with self.properties_prefix"""
         properties_values = set()
-        for artifact in result_artifact:
+        for artifact in artifacts:
             properties_values |= set(
                 (
                     artifact["properties"].get(x)
@@ -314,9 +314,9 @@ class DeleteDockerImageIfNotContainedInPropertiesValue(RuleForDocker):
 
         return properties_values
 
-    def _filter_result(self, result_artifact):
+    def filter(self, artifacts):
         images = self.get_docker_images_list(self.docker_repo)
-        properties_values = self.get_properties_values(result_artifact)
+        properties_values = self.get_properties_values(artifacts)
         result_docker_images = []
 
         for image in images:

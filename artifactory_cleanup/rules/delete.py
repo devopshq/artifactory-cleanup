@@ -10,7 +10,7 @@ class DeleteOlderThan(Rule):
     def __init__(self, *, days):
         self.days = timedelta(days=days)
 
-    def _aql_add_filter(self, aql_query_list):
+    def aql_add_items_find_filters(self, aql_query_list):
         older_than_date = self.today - self.days
         older_than_date_txt = older_than_date.isoformat()
         print("Delete artifacts older than {}".format(older_than_date_txt))
@@ -29,7 +29,7 @@ class DeleteWithoutDownloads(Rule):
     Better to use with :class:`DeleteOlderThan`
     """
 
-    def _aql_add_filter(self, aql_query_list):
+    def aql_add_items_find_filters(self, aql_query_list):
         update_dict = {"stat.downloads": {"$eq": None}}
         aql_query_list.append(update_dict)
         return aql_query_list
@@ -43,7 +43,7 @@ class DeleteOlderThanNDaysWithoutDownloads(Rule):
     def __init__(self, *, days):
         self.days = timedelta(days=days)
 
-    def _aql_add_filter(self, aql_query_list):
+    def aql_add_items_find_filters(self, aql_query_list):
         last_day = self.today - self.days
         update_dict = {
             "$and": [
@@ -64,7 +64,7 @@ class DeleteNotUsedSince(Rule):
     def __init__(self, days):
         self.days = timedelta(days=days)
 
-    def _aql_add_filter(self, aql_query_list):
+    def aql_add_items_find_filters(self, aql_query_list):
         last_day = self.today - self.days
 
         update_dict = {
@@ -92,14 +92,14 @@ class DeleteEmptyFolder(Rule):
     We use the rule to help with some specific cases - look at README.md "FAQ: How to clean up Conan repository"
     """
 
-    def _aql_add_filter(self, aql_query_list):
+    def aql_add_items_find_filters(self, aql_query_list):
         # Get list of all files and folders
         all_files_dict = {"path": {"$match": "**"}, "type": {"$eq": "any"}}
         aql_query_list.append(all_files_dict)
         return aql_query_list
 
-    def _filter_result(self, result_artifacts):
-        repositories = utils.build_repositories(result_artifacts)
+    def filter(self, artifactss):
+        repositories = utils.build_repositories(artifactss)
         folders = utils.get_empty_folders(repositories)
         return folders
 

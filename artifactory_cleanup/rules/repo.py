@@ -29,24 +29,24 @@ class Repo(Rule):
                     name=name, bad_sym="".join(bad_sym)
                 )
             )
-        self.name = name
+        self.repo = name
 
-    def _aql_add_filter(self, aql_query_list):
-        print("Get from {}".format(self.name))
-        request_url = "{}/api/storage/{}".format(self.artifactory_server, self.name)
+    def aql_add_items_find_filters(self, aql_query_list):
+        print("Get from {}".format(self.repo))
+        request_url = "{}/api/storage/{}".format(self.artifactory_server, self.repo)
         try:
-            print("Checking the existence of the {} repository".format(self.name))
+            print("Checking the existence of the {} repository".format(self.repo))
             r = self.artifactory_session.get(request_url)
             r.raise_for_status()
-            print("The {} repository exists".format(self.name))
+            print("The {} repository exists".format(self.repo))
         except HTTPError as e:
-            stderr.write("The {} repository does not exist".format(self.name))
+            stderr.write("The {} repository does not exist".format(self.repo))
             print(e)
             exit(1)
 
         update_dict = {
             "repo": {
-                "$eq": self.name,
+                "$eq": self.repo,
             }
         }
         aql_query_list.append(update_dict)
@@ -61,7 +61,7 @@ class RepoByMask(Rule):
     def __init__(self, mask):
         self.mask = mask
 
-    def _aql_add_filter(self, aql_query_list):
+    def aql_add_items_find_filters(self, aql_query_list):
         print("Get from {}".format(self.mask))
         update_dict = {
             "repo": {
@@ -79,7 +79,7 @@ class PropertyEq(Rule):
         self.property_key = property_key
         self.property_value = property_value
 
-    def _aql_add_filter(self, aql_query_list):
+    def aql_add_items_find_filters(self, aql_query_list):
         update_dict = {
             "$and": [
                 {"property.key": {"$eq": self.property_key}},
@@ -104,14 +104,14 @@ class PropertyNeq(Rule):
         self.property_key = property_key
         self.property_value = str(property_value)
 
-    def _filter_result(self, result_artifact):
+    def filter(self, artifacts):
         good_artifact = [
             x
-            for x in result_artifact
+            for x in artifacts
             if x["properties"].get(self.property_key) == self.property_value
         ]
-        self.remove_artifact(good_artifact, result_artifact)
-        return result_artifact
+        self.remove_artifact(good_artifact, artifacts)
+        return artifacts
 
 
 # under_score - old style of naming

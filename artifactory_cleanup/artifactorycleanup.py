@@ -4,6 +4,7 @@ from typing import List, Iterator
 from attr import dataclass
 from requests import Session
 
+from artifactory_cleanup.errors import ArtifactoryCleanupException
 from artifactory_cleanup.rules.base import CleanupPolicy
 
 
@@ -12,10 +13,6 @@ class CleanupSummary:
     policy_name: str
     artifacts_removed: int
     artifacts_size: int
-
-
-class ArtifactoryCleanupException(Exception):
-    pass
 
 
 class ArtifactoryCleanup:
@@ -41,30 +38,26 @@ class ArtifactoryCleanup:
     def cleanup(self, block_ctx_mgr, test_ctx_mgr) -> Iterator[CleanupSummary]:
         for policy in self.policies:
             with block_ctx_mgr(policy.name):
-                # prepare
+                # Prepare
                 with block_ctx_mgr("AQL filter"):
-                    policy.aql_filter()
+                    policy.build_aql_query()
 
                 # Get artifacts
                 with block_ctx_mgr("Get artifacts"):
-                    print("*" * 80)
-                    print("AQL Query:")
-                    print(policy.aql_text)
-                    print("*" * 80)
                     artifacts = policy.get_artifacts()
                 print("Found {} artifacts".format(len(artifacts)))
 
-                # Filter
+                # Filter artifacts
                 with block_ctx_mgr("Filter results"):
                     artifacts_to_remove = policy.filter(artifacts)
                 print(f"Found {len(artifacts_to_remove)} artifacts AFTER filtering")
 
-                # Delete or debug
+                # Delete artifacts
                 for artifact in artifacts_to_remove:
                     with test_ctx_mgr(get_name_for_ci(artifact)):
                         policy.delete(artifact, destroy=self.destroy)
 
-            # Info
+            # Show summary
             print(f"Deleted artifacts count: {len(artifacts_to_remove)}")
             try:
                 artifacts_size = sum([x["size"] for x in artifacts_to_remove])
@@ -86,9 +79,10 @@ class ArtifactoryCleanup:
         """
         policies = [policy for policy in self.policies if policy_name in policy.name]
         if not policies:
-            raise ArtifactoryCleanupException(
-                f"Rule with name '{policy_name}' not found"
-            )
+            msg = f"Rule with name '{policy_name}' not found"
+            raise ArtifactoryCleanupException(msg)
+
+        self.policies = policies
 
 
 def get_name_for_ci(artifact):

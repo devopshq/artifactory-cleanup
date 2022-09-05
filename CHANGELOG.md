@@ -4,10 +4,16 @@
 - Support YAML configuration! #54 🎉
 - Introduce new and stable (from this point) API for Rules #33
 
-### Backward incompatible changes
+### Backward incompatible changes in API
 In order to simplify API for Rule and CleanupPolicy and support some feature we have to introduce backward incompatible changes.
 
 Keep them in mind if you create your own Rules and going to update from `0.4.1` to `1.0.0`.
+
+#### Rules
+- Methods have been changed:
+  - `_aql_add_filter(aql_query_list)` => `aql_add_filter(items_find_filters)`
+  - `_aql_add_text(aql_text)` => `aql_add_text(aql)`
+  - `_filter_result(result_artifact)` => `filter(artifacts)`
 
 
 ## 0.4.2
