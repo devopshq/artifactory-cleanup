@@ -37,6 +37,4 @@ class ConfigLoaderCLI:
         self.cli = cli
 
     def get_connection(self) -> Tuple[str, str, str]:
-        # remove trailing slash
-        server = self.cli._artifactory_server.rstrip("/")
-        return server, self.cli._user, self.cli._password
+        return self.cli._artifactory_server, self.cli._user, self.cli._password

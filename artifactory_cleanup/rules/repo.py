@@ -33,10 +33,10 @@ class Repo(Rule):
 
     def aql_add_items_find_filters(self, aql_query_list):
         print("Get from {}".format(self.repo))
-        request_url = "{}/api/storage/{}".format(self.artifactory_server, self.repo)
         try:
             print("Checking the existence of the {} repository".format(self.repo))
-            r = self.artifactory_session.get(request_url)
+            url = f"/api/storage/{self.repo}"
+            r = self.session.get(url)
             r.raise_for_status()
             print("The {} repository exists".format(self.repo))
         except HTTPError as e:

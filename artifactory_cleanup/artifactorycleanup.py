@@ -18,13 +18,11 @@ class CleanupSummary:
 class ArtifactoryCleanup:
     def __init__(
         self,
-        server: str,
         session: Session,
         policies: List[CleanupPolicy],
         destroy: bool,
         today: date,
     ):
-        self.server = server
         self.session = session
         self.policies = policies
         self.destroy = destroy
@@ -33,7 +31,7 @@ class ArtifactoryCleanup:
 
     def _init_policies(self, today):
         for policy in self.policies:
-            policy.init(self.session, self.server, today)
+            policy.init(self.session, today)
 
     def cleanup(self, block_ctx_mgr, test_ctx_mgr) -> Iterator[CleanupSummary]:
         for policy in self.policies:
