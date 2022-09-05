@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.4.2
+- Fix: Failed to run artifactory-cleanup-0.4.1 command #64
+
 ## 0.4.1
 
 - Use `CamelCase` style of rules by default.

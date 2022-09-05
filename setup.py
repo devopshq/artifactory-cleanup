@@ -12,7 +12,7 @@ long_description = (this_directory / "README.md").read_text()
 
 setup(
     name="artifactory-cleanup",
-    version="0.4.1",
+    version="0.4.2",
     description="Rules and cleanup policies for Artifactory",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -24,7 +24,7 @@ setup(
     packages=find_packages(exclude=["tests"]),
     entry_points={
         "console_scripts": [
-            "artifactory-cleanup=artifactory_cleanup.artifactorycleanup:ArtifactoryCleanupCLI"
+            "artifactory-cleanup=artifactory_cleanup.cli:ArtifactoryCleanupCLI"
         ]
     },
     install_requires=[
