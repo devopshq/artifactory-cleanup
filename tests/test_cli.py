@@ -72,3 +72,31 @@ def test_destroy(capsys, shared_datadir, requests_mock):
         last_request.url
         == "http://example.com/repo-name-here/path/to/file/filename1.json"
     )
+
+
+@pytest.mark.usefixtures("requests_repo_name_here")
+def test_yaml_config(capsys, shared_datadir, requests_mock):
+    _, code = ArtifactoryCleanupCLI.run(
+        [
+            "ArtifactoryCleanupCLI",
+            "--user",
+            "user",
+            "--password",
+            "password",
+            "--artifactory-server",
+            "http://example.com/",
+            "--config",
+            str(shared_datadir / "cleanup.yaml"),
+        ],
+        exit=False,
+    )
+    stdout, stderr = capsys.readouterr()
+    assert code == 0, stdout
+    assert "Verbose MODE" in stdout
+    assert (
+        "DEBUG - we would delete 'repo-name-here/path/to/file/filename1.json'" in stdout
+    )
+
+    assert (
+        requests_mock.call_count == 2
+    ), "Requests: check repository exists, AQL, NO DELETE"
