@@ -179,15 +179,19 @@ class CleanupPolicy(object):
         """
         for rule in self.rules:
             rule.check(*args, **kwargs)
+            self._check_rules_are_updated(rule)
 
-            # Make sure people update their own rules to the latest interface
-            # 0.4 => 1.0.0
-            if hasattr(rule, "_aql_add_filter"):
-                raise ValueError(
-                    f"Please update the Rule '{rule.name}' to the new Rule API.\n"
-                    "- Read CHANGELOG.md https://github.com/devopshq/artifactory-cleanup/blob/master/CHANGELOG.md\n"
-                    "- Read README.md https://github.com/devopshq/artifactory-cleanup#readme"
-                )
+    def _check_rules_are_updated(self, rule):
+        # Make sure people update their own rules to the latest interface
+        # 0.4 => 1.0.0
+        old_attributes = ("_aql_add_filter", "_aql_add_text", "_filter_result")
+        old_rule = any(hasattr(rule, attr) for attr in old_attributes)
+        if old_rule:
+            raise ValueError(
+                f"Please update the Rule '{rule.name}' to the new Rule API.\n"
+                "- Read CHANGELOG.md https://github.com/devopshq/artifactory-cleanup/blob/master/CHANGELOG.md\n"
+                "- Read README.md https://github.com/devopshq/artifactory-cleanup#readme"
+            )
 
     def init(self, session, today) -> None:
         """
