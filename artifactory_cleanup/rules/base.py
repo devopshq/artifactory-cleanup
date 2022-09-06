@@ -74,14 +74,14 @@ class Rule(object):
     session: Optional[BaseUrlSession] = None
     today: date = None
 
-    @property
-    def name(self) -> str:
-        return self.__class__.__name__
+    @classmethod
+    def name(cls) -> str:
+        return cls.__name__
 
-    @property
-    def title(self) -> str:
+    @classmethod
+    def title(cls) -> str:
         """Cut the docstring to show only the very first important line"""
-        docs = [x.strip() for x in self.__doc__.splitlines() if x][0]
+        docs = [x.strip() for x in cls.__doc__.splitlines() if x][0]
         return docs
 
     def init(self, session, today, *args, **kwargs) -> None:
@@ -188,7 +188,7 @@ class CleanupPolicy(object):
         old_rule = any(hasattr(rule, attr) for attr in old_attributes)
         if old_rule:
             raise ValueError(
-                f"Please update the Rule '{rule.name}' to the new Rule API.\n"
+                f"Please update the Rule '{rule.name()()}' to the new Rule API.\n"
                 "- Read CHANGELOG.md https://github.com/devopshq/artifactory-cleanup/blob/master/CHANGELOG.md\n"
                 "- Read README.md https://github.com/devopshq/artifactory-cleanup#readme"
             )
@@ -219,7 +219,7 @@ class CleanupPolicy(object):
         filters = []
         for rule in self.rules:
             before_query_list = deepcopy(filters)
-            print(f"Add AQL Filter - rule: {rule.name} - {rule.title}")
+            print(f"Add AQL Filter - rule: {rule.name()} - {rule.title()}")
             filters = rule.aql_add_filter(filters)
             if before_query_list != filters:
                 print("Before AQL query: {}".format(before_query_list))
@@ -236,7 +236,7 @@ class CleanupPolicy(object):
 
         for rule in self.rules:
             before_aql = aql
-            print(f"Add AQL Text - rule: {rule.name} - {rule.title}")
+            print(f"Add AQL Text - rule: {rule.name()} - {rule.title()}")
             aql = rule.aql_add_text(aql)
             if before_aql != aql:
                 print("Before AQL text: {}".format(before_aql))
@@ -263,11 +263,11 @@ class CleanupPolicy(object):
         """
         for rule in self.rules:
             before = len(artifacts)
-            print(f"Filter artifacts - rule: {rule.name} - {rule.title}")
+            print(f"Filter artifacts - rule: {rule.name()} - {rule.title()}")
             artifacts = rule.filter(artifacts)
 
             if not isinstance(artifacts, ArtifactsList):
-                raise ValueError(f"`{rule.name}` rule must return ArtifactsList")
+                raise ValueError(f"`{rule.name()}` rule must return ArtifactsList")
 
             if before != len(artifacts):
                 print(f"Before count: {before}")

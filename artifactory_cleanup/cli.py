@@ -12,7 +12,11 @@ from artifactory_cleanup.artifactorycleanup import (
     ArtifactoryCleanup,
 )
 from artifactory_cleanup.base_url_session import BaseUrlSession
-from artifactory_cleanup.loaders import PythonPoliciesLoader, CliConnectionLoader
+from artifactory_cleanup.loaders import (
+    PythonPoliciesLoader,
+    CliConnectionLoader,
+    YamlConfigLoader,
+)
 from artifactory_cleanup.context_managers import get_context_managers
 
 requests.packages.urllib3.disable_warnings()
@@ -93,7 +97,10 @@ class ArtifactoryCleanupCLI(cli.Application):
         server, user, password = CliConnectionLoader(self).get_connection()
         session = BaseUrlSession(server)
         session.auth = HTTPBasicAuth(user, password)
-        policies = PythonPoliciesLoader.load(self._config)
+        if self._config.endswith(".yaml"):
+            policies = YamlConfigLoader(self._config).get_policies()
+        else:
+            policies = PythonPoliciesLoader(self._config).get_policies()
 
         cleanup = ArtifactoryCleanup(
             session=session,

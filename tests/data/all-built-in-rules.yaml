@@ -1,0 +1,84 @@
+artifactory-cleanup:
+  server: https://repo.example.com/artifactory
+  user: $ARTIFACTORY_USERNAME
+  password: $ARTIFACTORY_PASSWORD
+
+  policies:
+    - name: repo-without-name
+      rules:
+        - rule: Repo
+
+    - name: repo
+      rules:
+        - rule: Repo
+          name: "repo-name-here"
+        - rule: RepoByMask
+          mask: "*-tmp"
+        - rule: PropertyEq
+          property_key: key-name
+          property_value: 1
+        - rule: PropertyNeq
+          property_key: key-name
+          property_value: 1
+
+    - name: delete
+      rules:
+        - rule: DeleteOlderThan
+          days: 1
+        - rule: DeleteWithoutDownloads
+        - rule: DeleteOlderThanNDaysWithoutDownloads
+          days: 1
+        - rule: DeleteNotUsedSince
+          days: 1
+        - rule: DeleteEmptyFolders
+
+    - name: keep
+      rules:
+        - rule: KeepLatestNupkgNVersions
+          count: 1
+        - rule: KeepLatestNFiles
+          count: 1
+        - rule: KeepLatestNFilesInFolder
+          count: 1
+        - rule: KeepLatestVersionNFilesInFolder
+          count: 1
+          custom_regexp: "[^\\d][\\._]((\\d+\\.)+\\d+)"
+
+    - name: filters
+      rules:
+        - rule: IncludePath
+          mask: "*production*"
+        - rule: IncludeDockerImages
+          masks: "*singlemask*"
+        - rule: IncludeDockerImages
+          masks:
+            - "*production*"
+            - "*release*"
+        - rule: ExcludeDockerImages
+          masks:
+            - "*production*"
+            - "*release*"
+        - rule: IncludeFilename
+          mask: "*-*"
+        - rule: ExcludePath
+          masks: "*singlemask*"
+        - rule: ExcludePath
+          masks:
+            - "*production*"
+            - "*release*"
+        - rule: ExcludeFilename
+          masks:
+            - "*production*"
+            - "*release*"
+            -
+    - name: docker
+      rules:
+        - rule: DeleteDockerImagesOlderThan
+          days: 1
+        - rule: DeleteDockerImagesOlderThanNDaysWithoutDownloads
+          days: 1
+        - rule: DeleteDockerImagesNotUsed
+          days: 1
+        - rule: KeepLatestNVersionImagesByProperty
+          count: 1
+          custom_regexp: "[^\\d][\\._]((\\d+\\.)+\\d+)"

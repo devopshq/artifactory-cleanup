@@ -36,6 +36,7 @@ setup(
         "treelib",
         "attrs",
         "pydash",
+        "pyyaml",
         'typing-extensions; python_version < "3.8.0"',
     ],
     classifiers=[
