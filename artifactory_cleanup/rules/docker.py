@@ -1,6 +1,6 @@
 import re
 from collections import defaultdict
-from datetime import timedelta, datetime
+from datetime import timedelta
 
 from artifactory import ArtifactoryPath
 from artifactory_cleanup.context_managers import get_context_managers
@@ -225,14 +225,25 @@ class KeepLatestNDockerTags(Rule):
 
         # Groups the artifacts by image name (ie the path without the tag)
         for artifact in result_artifact[:]:
-            if artifact["name"] != self.manifest_file or self.must_have_property not in artifact["properties"]:
+            if (
+                artifact["name"] != self.manifest_file
+                or self.must_have_property not in artifact["properties"]
+            ):
                 # Makes sure we're dealing with a Docker manifest to prevent wrong deletions
-                raise Exception("Wrong filter applied: we're looking for '{}' "
-                                "files with the property '{}'".format(self.manifest_file, self.must_have_property))
+                raise Exception(
+                    "Wrong filter applied: we're looking for '{}' "
+                    "files with the property '{}'".format(
+                        self.manifest_file, self.must_have_property
+                    )
+                )
 
             path_parts = artifact["path"].split("/")
             if len(path_parts) < 2:
-                print("Manifest {path}/{name} doesn't belong to an image tag, skipping.".format(**artifact))
+                print(
+                    "Manifest {path}/{name} doesn't belong to an image tag, skipping.".format(
+                        **artifact
+                    )
+                )
                 continue
 
             # The folder where the manifest.json resides is to be deleted.
@@ -247,7 +258,7 @@ class KeepLatestNDockerTags(Rule):
                 "path": path,
                 "name": tag,
                 "modified": artifact["modified"],
-                "size": 0
+                "size": 0,
             }
 
             artifacts_by_path[path].append(artifact)
