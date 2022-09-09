@@ -20,6 +20,6 @@ RULES = [
         "Remove all docker tags of every image except the most recent",
         rules.Repo("my-docker-repo"),
         rules.ExcludeDockerImages(['*:latest', '*:pre', '*:pro']),
-        rules.KeepLatestNVersionImagesByDate(3),
+        rules.KeepLatestNDockerTagsByDate(3),
     )
 ]
