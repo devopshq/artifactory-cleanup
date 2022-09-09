@@ -1,6 +1,6 @@
 import re
 from collections import defaultdict
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 from artifactory import ArtifactoryPath
 from artifactory_cleanup.context_managers import get_context_managers
@@ -198,6 +198,70 @@ class KeepLatestNVersionImagesByProperty(Rule):
                 self.remove_artifact(artifact[1], result_artifact)
 
         return result_artifact
+
+
+class KeepLatestNVersionImagesByDate(Rule):
+    """
+    Leaves then most recent ``count`` tags of each Docker image.
+    Uses the property "modified" of the manifest.json file to determine the age of the tag.
+    """
+
+    def __init__(self, count):
+        self.count = count
+        self.manifest_file = "manifest.json"
+        self.must_have_property = "docker.manifest"
+
+    def _aql_add_filter(self, aql_query_list):
+        update_dict = {
+            "name": {
+                "$eq": self.manifest_file,
+            }
+        }
+        aql_query_list.append(update_dict)
+        return aql_query_list
+
+    def _filter_result(self, result_artifact):
+        artifacts_by_path = defaultdict(list)
+
+        # Groups the artifacts by image name (ie the path without the tag)
+        for artifact in result_artifact[:]:
+            if artifact["name"] != self.manifest_file or self.must_have_property not in artifact["properties"]:
+                # Makes sure we're dealing with a Docker manifest to prevent wrong deletions
+                raise Exception("Wrong filter applied: we're looking for '{}' "
+                                "files with the property '{}'".format(self.manifest_file, self.must_have_property))
+
+            path_parts = artifact["path"].split("/")
+            if len(path_parts) < 2:
+                print("Manifest {path}/{name} doesn't belong to an image tag, skipping.".format(**artifact))
+                continue
+
+            # The folder where the manifest.json resides is to be deleted.
+            # To accomplish that, this modifies every artifact so that it points to its parent folder.
+            # Also, removes unneeded attributes to prevent mismatching with the modified ones.
+            # Size is set to zero because actual size of deleted image is unknown (usually layer files are shared
+            # among other images or tags, so the actual space freed cannot be determined without added complexity).
+            path = "/".join(path_parts[:-1])
+            tag = path_parts[-1]
+            artifact = {
+                "repo": artifact["repo"],
+                "path": path,
+                "name": tag,
+                "modified": artifact["modified"],
+                "size": 0
+            }
+
+            artifacts_by_path[path].append(artifact)
+
+        filtered_artifacts = []
+        for path in artifacts_by_path.keys():
+            # Sort the tags by modification date of their manifest
+            artifacts_by_path[path].sort(key=lambda x: x["modified"])
+            limit = len(artifacts_by_path[path]) - self.count
+            if limit > 0:
+                # Crops the ordered list of tags to the defined count
+                filtered_artifacts.extend(artifacts_by_path[path][0:limit])
+
+        return filtered_artifacts
 
 
 class DeleteDockerImageIfNotContainedInProperties(RuleForDocker):
