@@ -83,7 +83,9 @@ class RepoByType(Rule):
 
     def __init__(self, repo_type, max_repos=10):
         if not re.compile("^[a-z]+$").match(repo_type):
-            raise PolicyException("Bad repo type '{}': only lowercase letters allowed".format(repo_type))
+            raise PolicyException(
+                "Bad repo type '{}': only lowercase letters allowed".format(repo_type)
+            )
         self.package_type = repo_type
         self.max_repos = max_repos
 
@@ -91,18 +93,16 @@ class RepoByType(Rule):
         repo_names = self._fetch_repo_names()
         update_dict = {"$or": []}
         for repo_name in repo_names:
-            update_dict["$or"].append({
-                "repo": {
-                    "$eq": repo_name
-                }
-            })
+            update_dict["$or"].append({"repo": {"$eq": repo_name}})
         aql_query_list.append(update_dict)
 
         return aql_query_list
 
     def _fetch_repo_names(self):
         print("Getting all repositories of type {}".format(self.package_type))
-        request_url = "{}/api/repositories?type=local&packageType={}".format(self.artifactory_server, self.package_type)
+        request_url = "{}/api/repositories?type=local&packageType={}".format(
+            self.artifactory_server, self.package_type
+        )
         r = self.artifactory_session.get(request_url)
         r.raise_for_status()
         repos = [x["key"] for x in r.json()]

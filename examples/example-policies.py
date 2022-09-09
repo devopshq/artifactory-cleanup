@@ -19,7 +19,7 @@ RULES = [
     CleanupPolicy(
         "Remove all docker tags of every image except the most recent",
         rules.RepoByType("docker"),
-        rules.ExcludeDockerImages(['*:latest', '*:pre', '*:pro']),
+        rules.ExcludeDockerImages(["*:latest", "*:pre", "*:pro"]),
         rules.KeepLatestNDockerTags(3),
-    )
+    ),
 ]
