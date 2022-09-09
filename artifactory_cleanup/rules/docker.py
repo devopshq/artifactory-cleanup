@@ -200,7 +200,7 @@ class KeepLatestNVersionImagesByProperty(Rule):
         return result_artifact
 
 
-class KeepLatestNDockerTagsByDate(Rule):
+class KeepLatestNDockerTags(Rule):
     """
     Leaves then most recent ``count`` tags of each Docker image.
     Uses the property "modified" of the manifest.json file to determine the age of the tag.
