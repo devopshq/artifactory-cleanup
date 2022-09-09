@@ -15,6 +15,7 @@
 | `KeepLatestVersionNFilesInFolder(count, custom_regexp='some-regexp')` | Leaves the latest N (by version) files in each folder. The definition of the version is using regexp. By default `[^\d][\._]((\d+\.)+\d+)` |
 | `Repo('reponame')` | Apply the rule to one repository. If no name is specified, it is taken from the rule name (in `CleanupPolicy` definition) |
 | `RepoByMask('*.banned')` | Apply rule to repositories matching by mask |
+`RepoByType('docker')` | Apply rule to repositories of this type (ex: _docker_, _maven_, _npm_, ...).
 | `PropertyEq(property_key, property_value)`| Delete repository artifacts only with a specific property value (property_name is the name of the parameter, property_value is the value) |
 | `PropertyNeq(property_key, property_value)`| Delete repository artifacts only if the value != specified. If there is no value, delete it anyway. Allows you to specify the deletion flag `do_not_delete = 1`|
 

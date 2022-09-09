@@ -1,3 +1,4 @@
+import re
 from sys import stderr
 
 from requests import HTTPError
@@ -70,6 +71,46 @@ class RepoByMask(Rule):
         }
         aql_query_list.append(update_dict)
         return aql_query_list
+
+
+class RepoByType(Rule):
+    """
+    Apply rule to repositories of certain type. Only local repositories will be used.
+    Valid types:
+        bower|cargo|chef|cocoapods|composer|conan|cran|debian|docker|gems|gitlfs|go|gradle|helm|ivy|maven|
+        nuget|opkg|pub|puppet|pypi|rpm|sbt|terraform|vagrant|yum|generic
+    """
+
+    def __init__(self, repo_type, max_repos=10):
+        if not re.compile("^[a-z]+$").match(repo_type):
+            raise PolicyException("Bad repo type '{}': only lowercase letters allowed".format(repo_type))
+        self.package_type = repo_type
+        self.max_repos = max_repos
+
+    def _aql_add_filter(self, aql_query_list):
+        repo_names = self._fetch_repo_names()
+        update_dict = {"$or": []}
+        for repo_name in repo_names:
+            update_dict["$or"].append({
+                "repo": {
+                    "$eq": repo_name
+                }
+            })
+        aql_query_list.append(update_dict)
+
+        return aql_query_list
+
+    def _fetch_repo_names(self):
+        print("Getting all repositories of type {}".format(self.package_type))
+        request_url = "{}/api/repositories?type=local&packageType={}".format(self.artifactory_server, self.package_type)
+        r = self.artifactory_session.get(request_url)
+        r.raise_for_status()
+        repos = [x["key"] for x in r.json()]
+        if len(repos) < 1:
+            stderr.write("No repositories of type {} found".format(self.package_type))
+            exit(0)
+
+        return repos
 
 
 class PropertyEq(Rule):
