@@ -1,4 +1,4 @@
-from artifactory_cleanup import YamlConfigLoader
+from artifactory_cleanup.loaders import YamlConfigLoader
 
 
 class TestYamlLoader:
