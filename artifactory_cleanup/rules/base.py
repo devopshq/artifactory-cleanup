@@ -6,6 +6,7 @@ from datetime import date
 from typing import Optional, Union, List, Dict
 from urllib.parse import quote
 
+import cfgv
 import pydash
 
 from artifactory_cleanup.base_url_session import BaseUrlSession
@@ -73,6 +74,9 @@ class Rule(object):
 
     session: Optional[BaseUrlSession] = None
     today: date = None
+
+    # You can overwrite checks for config file
+    schema: Optional[List[cfgv.Conditional]] = None
 
     @classmethod
     def name(cls) -> str:

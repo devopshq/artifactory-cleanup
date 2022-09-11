@@ -55,7 +55,7 @@ class RuleForDocker(Rule):
 class DeleteDockerImagesOlderThan(RuleForDocker):
     """Removes Docker image older than ``days`` days"""
 
-    def __init__(self, *, days):
+    def __init__(self, *, days: int):
         self.days = timedelta(days=days)
 
     def aql_add_filter(self, filters):
@@ -86,7 +86,7 @@ class DeleteDockerImagesOlderThanNDaysWithoutDownloads(RuleForDocker):
     Deletes images that are older than n days and have not been downloaded.
     """
 
-    def __init__(self, *, days):
+    def __init__(self, *, days: int):
         self.days = timedelta(days=days)
 
     def aql_add_filter(self, filters):
@@ -114,7 +114,7 @@ class DeleteDockerImagesOlderThanNDaysWithoutDownloads(RuleForDocker):
 class DeleteDockerImagesNotUsed(RuleForDocker):
     """Removes Docker image not downloaded ``days`` days"""
 
-    def __init__(self, *, days):
+    def __init__(self, *, days: int):
         self.days = timedelta(days=days)
 
     def aql_add_filter(self, filters):
@@ -156,9 +156,9 @@ class KeepLatestNVersionImagesByProperty(Rule):
 
     def __init__(
         self,
-        count,
+        count: int,
         custom_regexp=r"(^\d*\.\d*\.\d*.\d+$)",
-        number_of_digits_in_version=1,
+        number_of_digits_in_version: int = 1,
     ):
         self.count = count
         self.custom_regexp = custom_regexp

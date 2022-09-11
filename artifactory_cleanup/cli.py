@@ -12,6 +12,7 @@ from artifactory_cleanup.artifactorycleanup import (
     ArtifactoryCleanup,
 )
 from artifactory_cleanup.base_url_session import BaseUrlSession
+from artifactory_cleanup.errors import InvalidConfigError
 from artifactory_cleanup.loaders import (
     PythonPoliciesLoader,
     CliConnectionLoader,
@@ -87,21 +88,27 @@ class ArtifactoryCleanupCLI(cli.Application):
         today = date.today()
         if self._days_in_future:
             today = today + timedelta(days=int(self._days_in_future))
-        print(f"Simulating cleanup actions that will occur on {today}")
+            print(f"Simulating cleanup actions that will occur on {today}")
         return today
 
     def main(self):
-        self._destroy_or_verbose()
         today = self._get_today()
-
         server, user, password = CliConnectionLoader(self).get_connection()
         session = BaseUrlSession(server)
         session.auth = HTTPBasicAuth(user, password)
         if self._config.endswith(".yaml"):
-            policies = YamlConfigLoader(self._config).get_policies()
+            loader = YamlConfigLoader(self._config)
         else:
-            policies = PythonPoliciesLoader(self._config).get_policies()
+            loader = PythonPoliciesLoader(self._config)
 
+        try:
+            policies = loader.get_policies()
+        except InvalidConfigError as err:
+            print("Failed to load config file")
+            print(str(err), file=sys.stderr)
+            sys.exit(1)
+
+        self._destroy_or_verbose()
         cleanup = ArtifactoryCleanup(
             session=session,
             policies=policies,

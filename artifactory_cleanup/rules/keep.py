@@ -8,7 +8,7 @@ from artifactory_cleanup.rules.base import Rule
 class KeepLatestNupkgNVersions(Rule):
     r"""Leaves ``count`` nupkg (adds * .nupkg filter) in release \ feature builds"""
 
-    def __init__(self, count):
+    def __init__(self, count: int):
         self.count = count
 
     def filter(self, artifacts):
@@ -95,7 +95,7 @@ class KeepLatestNupkgNVersions(Rule):
 class KeepLatestNFiles(Rule):
     """Leaves the last (by creation time) files in the amount of N pieces. WITHOUT accounting subfolders"""
 
-    def __init__(self, count):
+    def __init__(self, count: int):
         self.count = count
 
     def aql_add_text(self, aql_text):
@@ -119,7 +119,7 @@ class KeepLatestNFiles(Rule):
 class KeepLatestNFilesInFolder(Rule):
     """Leaves the last (by creation time) files in the number of ``count`` pieces in each folder"""
 
-    def __init__(self, count):
+    def __init__(self, count: int):
         self.count = count
 
     def aql_add_text(self, aql_text):

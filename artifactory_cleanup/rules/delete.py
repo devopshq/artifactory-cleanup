@@ -7,7 +7,7 @@ from artifactory_cleanup.rules.base import Rule
 class DeleteOlderThan(Rule):
     """Deletes artifacts older than `` days`` days"""
 
-    def __init__(self, *, days):
+    def __init__(self, *, days: int):
         self.days = timedelta(days=days)
 
     def aql_add_filter(self, filters):
@@ -40,7 +40,7 @@ class DeleteOlderThanNDaysWithoutDownloads(Rule):
     Deletes artifacts that are older than n days and have not been downloaded.
     """
 
-    def __init__(self, *, days):
+    def __init__(self, *, days: int):
         self.days = timedelta(days=days)
 
     def aql_add_filter(self, filters):
@@ -61,7 +61,7 @@ class DeleteNotUsedSince(Rule):
     Or not downloaded at all from the moment of creation and it's been N days.
     """
 
-    def __init__(self, days):
+    def __init__(self, days: int):
         self.days = timedelta(days=days)
 
     def aql_add_filter(self, filters):
