@@ -4,6 +4,7 @@
 - Support YAML configuration! #54 🎉
 - Introduce new and stable (from this point) API for Rules #33
 - Rename `DeleteEmptyFolder` to `DeleteEmptyFolders` (but keep old version as well)
+- Rename `--policy-name` flag to `--policy`
 
 ### Backward incompatible changes
 Keep these in mind if you create your own Rules and going to update from `0.4.1` to `1.0.0`.
