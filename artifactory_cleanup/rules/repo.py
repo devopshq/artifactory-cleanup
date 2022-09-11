@@ -2,8 +2,8 @@ from sys import stderr
 
 from requests import HTTPError
 
+from artifactory_cleanup.errors import InvalidConfigError
 from artifactory_cleanup.rules.base import Rule, ArtifactsList
-from artifactory_cleanup.rules.exception import PolicyException
 
 
 class Repo(Rule):
@@ -20,10 +20,12 @@ class Repo(Rule):
 
     """
 
+    schema = []
+
     def __init__(self, name: str):
         bad_sym = set("*/[]")
         if set(name) & bad_sym:
-            raise PolicyException(
+            raise InvalidConfigError(
                 "Bad name for repo: {name}, contains bad symbols: {bad_sym}\n"
                 "Check that your have repo() correct".format(
                     name=name, bad_sym="".join(bad_sym)
@@ -61,7 +63,7 @@ class RepoByMask(Rule):
     Apply rule to repositories matching by mask
     """
 
-    def __init__(self, mask):
+    def __init__(self, mask: str):
         self.mask = mask
 
     def aql_add_filter(self, filters):

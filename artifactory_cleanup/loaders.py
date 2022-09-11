@@ -5,33 +5,124 @@ import sys
 from pathlib import Path
 from typing import List, Tuple, Type, Dict, Union
 
+import cfgv
 import yaml
 
 from artifactory_cleanup import rules
+from artifactory_cleanup.errors import InvalidConfigError
 from artifactory_cleanup.rules import Repo
 from artifactory_cleanup.rules.base import CleanupPolicy, Rule
 
 logger = logging.getLogger("artifactory-cleanup")
 
+RULE_SCHEMA = cfgv.Map(
+    "Rule",
+    "rule",
+    cfgv.Required("rule", cfgv.check_string),
+)
+
+
+def _get_check_fn(annotation):
+    if annotation is int:
+        return cfgv.check_int
+    if annotation is str:
+        return cfgv.check_string
+    return cfgv.check_any
+
+
+class SchemaBuilder:
+    def _get_rule_conditionals(self, name, rule) -> List[cfgv.Conditional]:
+        if rule.schema is not None:
+            return rule.schema
+        conditionals = []
+        params = list(inspect.signature(rule.__init__).parameters.values())
+        ignore = {"self", "args", "kwargs"}
+        for param in params:
+            if param.name in ignore:
+                continue
+            if param.annotation is param.empty:
+                check_fn = cfgv.check_any
+            else:
+                check_fn = _get_check_fn(param.annotation)
+
+            if param.default is not param.empty:
+                cond = cfgv.ConditionalOptional(
+                    param.name,
+                    check_fn,
+                    param.default,
+                    "rule",
+                    cfgv.In(name),
+                    ensure_absent=False,
+                )
+            else:
+                cond = cfgv.Conditional(
+                    param.name,
+                    check_fn,
+                    "rule",
+                    cfgv.In(name),
+                    ensure_absent=False,
+                )
+            conditionals.append(cond)
+        return conditionals
+
+    def get_rules_conditionals(self, rules) -> List[cfgv.Conditional]:
+        conditionals = []
+        for name, rule in rules.items():
+            conditionals.extend(self._get_rule_conditionals(name, rule))
+        return conditionals
+
+    def get_root_schema(self, rules):
+        conditionals = self.get_rules_conditionals(rules)
+        rules_names = list(rules.keys())
+        rule_schema = cfgv.Map(
+            "Rule",
+            "rule",
+            cfgv.Required("rule", cfgv.check_string),
+            cfgv.Required("rule", cfgv.check_one_of(rules_names)),
+            *conditionals,
+        )
+        policy_schema = cfgv.Map(
+            "Policy",
+            "name",
+            cfgv.Required("name", cfgv.check_string),
+            cfgv.RequiredRecurse("rules", cfgv.Array(rule_schema)),
+        )
+
+        config_schema = cfgv.Map(
+            "Config",
+            None,
+            cfgv.Required("server", cfgv.check_string),
+            cfgv.Required("user", cfgv.check_string),
+            cfgv.Required("password", cfgv.check_string),
+            cfgv.RequiredRecurse("policies", cfgv.Array(policy_schema)),
+        )
+
+        root_schema = cfgv.Map(
+            "Artifactory Cleanup",
+            None,
+            cfgv.RequiredRecurse("artifactory-cleanup", config_schema),
+        )
+        return root_schema
+
 
 class RuleRegistry:
     def __init__(self):
-        self._rules: Dict[str, Type[Rule]] = {}
+        self.rules: Dict[str, Type[Rule]] = {}
 
     def get(self, name: str) -> Type[Rule]:
-        return self._rules[name]
+        return self.rules[name]
 
-    def register(self, rule: Type[Rule], name=None, warning=False):
+    def register(self, rule: Type[Rule], name=None, warning=True):
         name = name or rule.name()
-        if name in self._rules and warning:
+        if name in self.rules and warning:
             logger.warning(f"Rule with a name '{name}' has been registered before.")
             return
-        self._rules[name] = rule
+        self.rules[name] = rule
 
     def register_builtin_rules(self):
         for name, obj in vars(rules).items():
             if inspect.isclass(obj) and issubclass(obj, Rule):
-                self.register(obj, warning=True)
+                self.register(obj, warning=False)
 
 
 registry = RuleRegistry()
@@ -49,7 +140,7 @@ class YamlConfigLoader:
         self.filepath = Path(filepath)
 
     def get_policies(self) -> List[CleanupPolicy]:
-        config = yaml.safe_load(self.filepath.read_text())
+        config = self.load(self.filepath)
         policies = []
 
         for policy_data in config["artifactory-cleanup"]["policies"]:
@@ -70,6 +161,13 @@ class YamlConfigLoader:
             return rule_cls
 
         return rule_cls(**rule_data)
+
+    @staticmethod
+    def load(filename):
+        schema = SchemaBuilder().get_root_schema(registry.rules)
+        return cfgv.load_from_filename(
+            filename, schema, yaml.safe_load, InvalidConfigError
+        )
 
 
 class PythonPoliciesLoader:
