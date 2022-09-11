@@ -51,9 +51,9 @@ class ArtifactoryCleanupCLI(cli.Application):
         envname="ARTIFACTORY_PASSWORD",
     )
 
-    _policy_name = cli.SwitchAttr(
-        ["--policy-name"],
-        help="Name for a rule",
+    _policy = cli.SwitchAttr(
+        ["--policy"],
+        help="Name for a policy to execute",
         mandatory=False,
     )
 
@@ -110,8 +110,8 @@ class ArtifactoryCleanupCLI(cli.Application):
         )
 
         # Filter policies by name
-        if self._policy_name:
-            cleanup.only(self._policy_name)
+        if self._policy:
+            cleanup.only(self._policy)
 
         table = PrettyTable()
         table.field_names = ["Cleanup Policy", "Files count", "Size"]
