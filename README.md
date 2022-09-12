@@ -96,7 +96,7 @@ Looking for more examples? Check [examples](./examples) and [tests/data](./tests
 
 ## Notes
 
-- **Always** specify version of `artifactory-cleanup` when using it in the production. Do not use `1.0.0`), use the
+- **Always** specify version of `artifactory-cleanup` when using it in the production. Do not use `1.0.0`, use the
 latest in pypi: https://pypi.org/project/artifactory-cleanup/
 
 ```bash
@@ -109,7 +109,7 @@ python3 -mpip install artifactory-cleanup==1.0.0
 artifactory-cleanup --help
 ```
 - Use CI servers or cron-like utilities to run `artifactory-cleanup` every day (or every hour). TeamCity and GitHub have built-in support and show additional logs format
-- Do not save your credentials in the configuration file, use environment variables.
+- Do not save credentials in the configuration file, use environment variables.
 
 ## Commands ##
 
