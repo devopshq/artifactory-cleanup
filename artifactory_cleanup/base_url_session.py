@@ -12,10 +12,11 @@ class BaseUrlSession(requests.Session):
 
     def __init__(self, base_url=None):
         super(BaseUrlSession, self).__init__()
-        self.base_url = base_url.rstrip("/")
+        self.base_url = base_url.rstrip("/") + "/"
 
     def request(self, method, url, *args, **kwargs):
         if not url.startswith("http://") or url.startswith("https://"):
+            url = url.lstrip("/")
             url = urljoin(self.base_url, url)
 
         return super(BaseUrlSession, self).request(method, url, *args, **kwargs)

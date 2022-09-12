@@ -1,6 +1,7 @@
 import importlib
 import inspect
 import logging
+import os.path
 import sys
 from pathlib import Path
 from typing import List, Tuple, Type, Dict, Union
@@ -169,14 +170,25 @@ class YamlConfigLoader:
             filename, schema, yaml.safe_load, InvalidConfigError
         )
 
+    def get_connection(self) -> Tuple[str, str, str]:
+        config = self.load(self.filepath)
+        server = config["artifactory-cleanup"]["server"]
+        user = config["artifactory-cleanup"]["user"]
+        password = config["artifactory-cleanup"]["password"]
+
+        user = os.path.expandvars(user)
+        password = os.path.expandvars(password)
+        return server, user, password
+
 
 class PythonPoliciesLoader:
     """
-    Load policies and rules from python file
+    Load policies and rules from python file + connections settings from cli
     """
 
-    def __init__(self, filepath):
+    def __init__(self, filepath, cli):
         self.filepath = Path(filepath)
+        self.cli = cli
 
     def get_policies(self) -> List[CleanupPolicy]:
         try:
@@ -196,12 +208,21 @@ class PythonPoliciesLoader:
             print("Error: {}".format(error))
             sys.exit(1)
 
-
-class CliConnectionLoader:
-    """Get connection information from cli"""
-
-    def __init__(self, cli):
-        self.cli = cli
-
     def get_connection(self) -> Tuple[str, str, str]:
-        return self.cli._artifactory_server, self.cli._user, self.cli._password
+        server = self.cli._artifactory_server
+        user = self.cli._user
+        password = self.cli._password
+        if not server:
+            print("--artifactory-server is required for python config", file=sys.stdout)
+            self.cli.help()
+            exit(1)
+        if not user:
+            print("--user is required for python config", file=sys.stdout)
+            self.cli.help()
+            exit(1)
+        if not password:
+            print("--password is required for python config", file=sys.stdout)
+            self.cli.help()
+            exit(1)
+
+        return server, user, password
