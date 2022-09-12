@@ -35,7 +35,7 @@ As simple as one command!
 ```bash
 # docker
 docker pull devopshq/artifactory-cleanup
-docker run -rm devopshq/artifactory-cleanup artifactory-cleanup --version
+docker run -rm devopshq/artifactory-cleanup artifactory-cleanup --help
 
 # python (later we call it 'cli')
 python3 -mpip install artifactory-cleanup
@@ -509,5 +509,6 @@ artifactory-cleanup:
 In order to provide a new release of `artifactory-cleanup`, there are two steps involved.
 
 1. Bump the version in the [setup.py](setup.py)
-2. Create a Git release tag (e.g. `v0.3.3`) by creating a release on GitHub
+2. Bump the version in the [__init__.py](./artifactory_cleanup/__init__.py)
+3. Create a Git release tag (e.g. `v0.3.3`) by creating a release on GitHub
 
