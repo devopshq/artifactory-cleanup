@@ -6,17 +6,17 @@
 
 <!-- toc -->
 
-- [Artifactory cleanup](#artifactory-cleanup)
-- [Tables of Contents](#tables-of-contents)
 - [Installation](#installation)
 - [Usage](#usage)
-  - [Commands](#commands)
-  - [Available Rules](#available-rules)
-  - [Artifact cleanup policies](#artifact-cleanup-policies)
-  - [Docker Container Usage](#docker-container-usage)
+  * [Commands](#commands)
+  * [Available Rules](#available-rules)
+  * [Artifact cleanup policies](#artifact-cleanup-policies)
+  * [Docker Container Usage](#docker-container-usage)
 - [FAQ](#faq)
+  * [How to clean up Conan repository?](#how-to-clean-up-conan-repository)
+  * [How to keep latest N docker images?](#how-to-keep-latest-n-docker-images)
 - [Release](#release)
-  
+
 <!-- tocstop -->
 
 # Installation
