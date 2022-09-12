@@ -30,6 +30,13 @@ def init_logging():
 
 
 class ArtifactoryCleanupCLI(cli.Application):
+    @property
+    def VERSION(self):
+        # To prevent circular imports
+        from artifactory_cleanup import __version__
+
+        return __version__
+
     _artifactory_server = cli.SwitchAttr(
         ["--artifactory-server"],
         help="URL to artifactory, e.g: https://arti.example.com/artifactory",
