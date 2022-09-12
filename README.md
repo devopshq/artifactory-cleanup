@@ -1,6 +1,9 @@
 # Artifactory cleanup #
 
-`artifactory-cleanup` is a tool for cleaning artifacts in Jfrog Artifactory.
+`artifactory-cleanup` is an extended and flexible cleanup tool for JFrog Artifactory.
+
+The tool has simple YAML-defined cleanup configuration and can be extended with your own rules on Python.
+Everything must be as a code, even cleanup policies!
 
 # Tables of Contents
 
@@ -8,11 +11,17 @@
 
 - [Installation](#installation)
 - [Usage](#usage)
+  * [Notes](#notes)
   * [Commands](#commands)
-  * [Available Rules](#available-rules)
-  * [Artifact cleanup policies](#artifact-cleanup-policies)
-  * [Docker Container Usage](#docker-container-usage)
+- [Rules](#rules)
+  * [Common](#common)
+  * [Delete](#delete)
+  * [Keep](#keep)
+  * [Docker](#docker)
+  * [Filters](#filters)
+  * [Create your own rule](#create-your-own-rule)
 - [FAQ](#faq)
+  * [How to connect self-signed certificates for docker?](#how-to-connect-self-signed-certificates-for-docker)
   * [How to clean up Conan repository?](#how-to-clean-up-conan-repository)
   * [How to keep latest N docker images?](#how-to-keep-latest-n-docker-images)
 - [Release](#release)
@@ -20,191 +29,485 @@
 <!-- tocstop -->
 
 # Installation
-Upgrade/install to the newest available version:
+
+As simple as one command!
+
 ```bash
+# docker
+docker pull devopshq/artifactory-cleanup
+docker run -rm devopshq/artifactory-cleanup artifactory-cleanup --version
+
+# python (later we call it 'cli')
 python3 -mpip install artifactory-cleanup
-
-# Directly from git
-python3 -mpip install git+https://github.com/devopshq/artifactory-cleanup.git
-
-# To be able to change files
-git clone https://github.com/devopshq/artifactory-cleanup.git
-cd artifactory-cleanup
-python3 -mpip install -e .
+artifactory-cleanup --help
 ```
 
 # Usage
 
-Suppose you want to remove all artifacts older than N days from 'reponame'.
+Suppose you want to remove **all artifacts older than N days** from **reponame** repository.
 You should take the following steps:
 
-1. Install `artifactory-cleanup`
-2. Сreate a python file, for example, `reponame.py` with the following contents:
+1. Install `artifactory-cleanup` (see above)
+2. Create a configuration file `artifactory-cleanup.yaml`. variables.
 
-```python
-from artifactory_cleanup import rules
-from artifactory_cleanup import CleanupPolicy
+```yaml
+# artifactory-cleanup.yaml
+artifactory-cleanup:
+  server: https://repo.example.com/artifactory
+  # $VAR is auto populated from environment variables
+  user: $ARTIFACTORY_USERNAME
+  password: $ARTIFACTORY_PASSWORD
 
-RULES = [
-
-  # ------ ALL REPOS --------
-  CleanupPolicy(
-    'Delete files older than 30 days',
-    rules.Repo('reponame'),
-    rules.DeleteOlderThan(days=30),
-  ),
-]
+  policies:
+    - name: Remove all files from repo-name-here older then 7 days
+      rules:
+        - rule: Repo
+          name: "reponame"
+        - rule: DeleteOlderThan
+          days: 7
 ```
-3. Run the command to SHOW (not remove) artifacts that will be deleted:
+
+3. Run the command **TO SHOW** (not remove) artifacts that will be deleted. By default `artifacory-cleanup` uses "dry
+   mode".
+
 ```bash
-artifactory-cleanup --user user --password password --artifactory-server https://repo.example.com/artifactory --config reponame.py
+# Set the credentials with delete permissions
+export ARTIFACTORY_USERNAME=usernamehere
+export ARTIFACTORY_PASSWORD=password
+
+# docker
+docker run -rm -v "$(pwd)":/app -e ARTIFACTORY_USERNAME -e ARTIFACTORY_PASSWORD devopshq/artifactory-cleanup artifactory-cleanup
+
+# cli
+artifactory-cleanup
 ```
-4. Add `--destroy` flag to REMOVE artifacts
+
+4. Verify that right artifacts will be removed and add `--destroy` flag **TO REMOVE** artifacts:
+
 ```bash
-artifactory-cleanup --destroy --user user --password password --artifactory-server https://repo.example.com/artifactory --config reponame.py
+# docker
+docker run -rm -v "$(pwd)":/app -e ARTIFACTORY_USERNAME -e ARTIFACTORY_PASSWORD devopshq/artifactory-cleanup artifactory-cleanup --destroy
+
+# cli
+artifactory-cleanup --destroy
 ```
+
+Looking for more examples? Check [examples](./examples) and [tests/data](./tests/data) folders!
+
+## Notes
+
+- **Always** specify version of `artifactory-cleanup` when using it in the production. Do not use `1.0.0`), use the
+latest in pypi: https://pypi.org/project/artifactory-cleanup/
+
+```bash
+# docker
+docker pull devopshq/artifactory-cleanup:1.0.0
+docker run -rm devopshq/artifactory-cleanup:1.0.0 artifactory-cleanup --version
+
+# python (later we call it 'cli')
+python3 -mpip install artifactory-cleanup==1.0.0
+artifactory-cleanup --help
+```
+- Use CI servers or cron-like utilities to run `artifactory-cleanup` every day (or every hour). TeamCity and GitHub have built-in support and show additional logs format
+- Do not save your credentials in the configuration file, use environment variables.
 
 ## Commands ##
 
 ```bash
-# Debug
-# debug run - only print founded artifacts. it do not delete
-artifactory-cleanup --user user --password password --artifactory-server https://repo.example.com/artifactory --config reponame.py
+# Debug - "dry run" mode by default
+# debug run - only print artifacts. it does not delete any artifacts
+artifactory-cleanup 
 
-# Debug run only for policytestname. Find any *policytestname*
-# debug run - only print founded artifacts. it do not delete
-artifactory-cleanup --policy-name policytestname --user user --password password --artifactory-server https://repo.example.com/artifactory --config reponame.py
+# Debug run only for policytestname.
+artifactory-cleanup --policy-name policytestname 
 
 # REMOVE
 # For remove artifacts use --destroy
-artifactory-cleanup --destroy --user user --password password --artifactory-server https://repo.example.com/artifactory  --config reponame.py
+artifactory-cleanup --destroy
+
+# Specify config filename
+artifactory-cleanup --config artifactory-cleanup.yaml
+
+# Look in the future - shows what the tool WILL remove after 10 days
+artifactory-cleanup --days-in-future=10
+
+# Not satisfied with built-in rules? Write your own rules in python and connect them!
+artifactory-cleanup --load-rules=myrule.py
+docker run -v "$(pwd)":/app devopshq/artifactory-cleanup artifactory-cleanup --load-rules=myrule.py
 ```
 
-## Available Rules ##
+# Rules
 
-All rules are imported from the `rules` module.
-See also [List of available cleaning rules](docs/RULES)
+## Common
 
-## Artifact cleanup policies ##
+- `Repo` - Apply the rule to one repository. If no name is specified, it is taken from the rule name (in `CleanupPolicy`
+  definition)
 
-To add a cleaning policy you need:
+```yaml
+- rule: Repo
+  name: reponame
+```
 
-- Create a python file, for example, `reponame.py`. `artifacroty-cleanup` imports the variable `RULES`, so you can make a python package.
-- Add a cleanup rule from the [available cleanup rules](docs/RULES).
+```yaml
+# OR - if you have a single policy for the repo - you can name the policy as reponame
+# Both configurations are equal
+policies:
+  - name: reponame
+    rules:
+      - rule: Repo
+```
+
+- `RepoByMask` - Apply rule to repositories matching by mask
+
+```yaml
+- rule: RepoByMask
+  mask: "*.banned"
+```
+
+- `PropertyEq`- Delete repository artifacts only with a specific property value (property_name is the name of the
+  parameter, property_value is the value)
+
+```yaml
+- rule: PropertyEq
+  property_key: key-name
+  property_value: 1
+```
+
+- `PropertyNeq`- Delete repository artifacts only if the value != specified. If there is no value, delete it anyway.
+  Allows you to specify the deletion flag `do_not_delete = 1`
+
+```yaml
+- rule: PropertyNeq
+  property_key: key-name
+  property_value: 1
+```
+
+## Delete
+
+- `DeleteOlderThan` - deletes artifacts that are older than N days
+
+```yaml
+- rule: DeleteOlderThan
+  days: 1
+```
+
+- `DeleteWithoutDownloads`  - deletes artifacts that have never been downloaded (DownloadCount=0). Better to use
+  with `DeleteOlderThan` rule
+
+```yaml
+- rule: DeleteWithoutDownloads
+```
+
+- `DeleteOlderThanNDaysWithoutDownloads(days=N)` - deletes artifacts that are older than N days and have not been
+  downloaded
+
+```yaml
+- rule: DeleteOlderThanNDaysWithoutDownloads
+  days: 1
+```
+
+- `DeleteNotUsedSince(days=N)` - delete artifacts that were downloaded, but for a long time. N days passed. Or not
+  downloaded at all from the moment of creation and it's been N days
+
+```yaml
+- rule: DeleteNotUsedSince
+  days: 1
+```
+
+- `DeleteEmptyFolders()` - Clean up empty folders in given repository list
+
+```yaml
+- rule: DeleteEmptyFolders
+```
+
+## Keep
+
+- `KeepLatestNFiles(count=N)` - Leaves the last (by creation time) files in the amount of N pieces. WITHOUT accounting
+  subfolders
+
+```yaml
+- rule: KeepLatestNFiles
+  count: 1
+```
+
+- `KeepLatestNFilesInFolder(count=N)` - Leaves the last (by creation time) files in the number of N pieces in each
+  folder
+
+```yaml
+- rule: KeepLatestNFilesInFolder
+  count: 1
+```
+
+- `KeepLatestVersionNFilesInFolder(count, custom_regexp='some-regexp')` - Leaves the latest N (by version) files in each
+  folder. The definition of the version is using regexp. By default `[^\d][\._]((\d+\.)+\d+)`
+
+```yaml
+- rule: KeepLatestVersionNFilesInFolder
+  count: 1
+  custom_regexp: "[^\\d][\\._]((\\d+\\.)+\\d+)"
+```
+
+- `KeepLatestNupkgNVersions(count=N)` - Leaves N nupkg (adds `*.nupkg` filter) in release feature builds
+
+```yaml
+- rule: KeepLatestNupkgNVersions
+  count: 1
+```
+
+## Docker
+
+- `DeleteDockerImagesOlderThan(days=N)` - Delete docker images that are older than N days
+
+```yaml
+- rule: DeleteDockerImagesOlderThan
+  days: 1
+```
+
+- `DeleteDockerImagesOlderThanNDaysWithoutDownloads(days=N)` - Deletes docker images that are older than N days and have
+  not been downloaded
+
+```yaml
+- rule: DeleteDockerImagesOlderThanNDaysWithoutDownloads
+  days: 1
+```
+
+- `DeleteDockerImagesNotUsed(days=N)` - Removes Docker image not downloaded since N days
+
+```yaml
+- rule: DeleteDockerImagesNotUsed
+  days: 1
+```
+
+- `DeleteDockerImageIfNotContainedInProperties(docker_repo='docker-local', properties_prefix='my-prop', image_prefix=None, full_docker_repo_name=None)`
+  - Remove Docker image, if it is not found in the properties of the artifact repository.
+- `DeleteDockerImageIfNotContainedInPropertiesValue(docker_repo='docker-local', properties_prefix='my-prop', image_prefix=None, full_docker_repo_name=None)`
+  - Remove Docker image, if it is not found in the properties of the artifact repository.
+- `KeepLatestNVersionImagesByProperty(count=N, custom_regexp='some-regexp', number_of_digits_in_version=X)` - Leaves N
+  Docker images with the same major. `(^ \d*\.\d*\.\d*.\d+$)` is the default regexp how to determine version. If you
+  need to add minor then put 2 or if patch then put 3 (By default `1`)
+
+```yaml
+- rule: KeepLatestNVersionImagesByProperty
+  count: 1
+  custom_regexp: "[^\\d][\\._]((\\d+\\.)+\\d+)"
+```
+
+## Filters
+
+- `IncludePath('my-path/**')` - Apply to artifacts by path / mask. You can specify multiple
+  paths: `IncludePath('*production*'), IncludePath(['*release*', '*master*'])`
+
+```yaml
+- rule: IncludePath
+  mask: "*production*"
+```
+
+- `IncludeFilename('*.zip')` - Apply to artifacts by name/mask. You can specify multiple
+  paths: `IncludeFilename('*-*'), IncludeFilename(['*tar.gz', '*.nupkg'])`
+
+```yaml
+- rule: IncludeFilename
+  mask: "*-*"
+```
+
+- `IncludeDockerImages('*:latest*')` - Apply to docker images with the specified names and tags. You can specify
+  multiple names and tags: `IncludeDockerImages('*:production*'), IncludeDockerImages(['ubuntu:*', 'debian:9'])`
+
+```yaml
+- rule: IncludeDockerImages
+  masks: "*singlemask*"
+- rule: IncludeDockerImages
+  masks:
+    - "*production*"
+    - "*release*"
+```
+
+- `ExcludePath('my-path/**')` - Exclude artifacts by path/mask. You can specify multiple
+  paths: `ExcludePath('*production*'), ExcludePath(['*release*', '*master*'])`
+
+```yaml
+- rule: ExcludePath
+  masks: "*singlemask*"
+```
+
+- `ExcludeFilename('*.backup')` - Exclude artifacts by name/mask. You can specify multiple
+  paths: `ExcludeFilename('*-*'), ExcludeFilename(['*tar.gz', '*.nupkg'])`
+
+```yaml
+- rule: ExcludeFilename
+  masks:
+    - "*production*"
+    - "*release*"
+```
+
+- `ExcludeDockerImages('*:tag-*')` - Exclude Docker images by name and tags. You can specify multiple names and
+  tags: `ExcludePath('*:production*'), ExcludePath(['ubuntu:*', 'debian:9'])`
+
+```yaml
+- rule: ExcludeDockerImages
+  masks:
+    - "*production*"
+    - "*release*"
+```
+
+## Create your own rule
+If you want to create your own rule, you can do it!
+
+The basic flow how the tool calls Rules:
+
+1. `Rule.check(*args, **kwargs)` - verify that the Rule configured right. Call other services to get more information.
+2. `Rule.aql_add_filter(filters)` - add Artifactory Query Language expressions
+3. `Rule.aql_add_text(aql)` - add text to the result aql query
+4. `artifactory-cleanup` calls Artifactory with AQL and pass the result to the next step
+5. `Rule.filter(artifacts)` - filter out artifacts. The method returns **artifacts that will be removed!**.
+    - To keep artifacts use `artifacts.keep(artifact)` method
+
+Create `myrule.py` file at the same folder as `artifactory-cleanup.yaml`:
 
 ```python
-from artifactory_cleanup import rules
-from artifactory_cleanup import CleanupPolicy
+# myrule.py
+from typing import List
 
-RULES = [
+from artifactory_cleanup import register
+from artifactory_cleanup.rules import Rule, ArtifactsList
 
-  CleanupPolicy(
-    'Delete all * .tmp repositories older than 7 days',
-    rules.RepoByMask('*. tmp'),
-    rules.DeleteOlderThan(days=7),
-  ),
-  CleanupPolicy(
-    'Delete all images older than 30 days from docker-registry exclude latest, release',
-    rules.Repo('docker-registry'),
-    rules.ExcludeDockerImages(['*:latest', '*:release*']),
-    rules.DeleteDockerImagesNotUsed(days=30),
-  ),
-]
+
+class MySimpleRule(Rule):
+    """For more methods look at Rule source code"""
+
+    def __init__(self, my_param: str, value: int):
+        self.my_param = my_param
+        self.value = value
+
+    def aql_add_filter(self, filters: List) -> List:
+        print(f"Today is {self.today}")
+        print(self.my_param)
+        print(self.value)
+        return filters
+
+    def filter(self, artifacts: ArtifactsList) -> ArtifactsList:
+        """I'm here just to print the list"""
+        print(self.my_param)
+        print(self.value)
+        # You can make requests to artifactory by using self.session:
+        # url = f"/api/storage/{self.repo}"
+        # r = self.session.get(url)
+        # r.raise_for_status()
+        return artifacts
+
+
+# Register your rule in the system
+register(MySimpleRule)
 ```
 
-## Docker Container Usage ##
-The below command assumes you to have your rules configuration file `rules.py` in the current working directory.
+Use `rule: MySimpleRule` in configuration:
 
-To run the container use the following command:
+```yaml
+# artifactory-cleanup.yaml
+- rule: MySimpleRule
+  my_param: "Hello, world!"
+  value: 42
+```
+
+Specify `--load-rules` to the command:
 
 ```bash
-# Dry mode - log artifacts that will be removed
-docker run \
-    --mount type=bind,source=./rules.py,target=/tmp/rules.py \
-    -e ARTIFACTORY_USER=<username> \
-    -e ARTIFACTORY_PASSWORD=<password> \
-    -e ARTIFACTORY_URL=<artifactory url> \
-    -e ARTIFACTORY_RULES_CONFIG=/tmp/rules.py \
-    devopshq/artifactory-cleanup:latest
+# docker
+docker run -v "$(pwd)":/app devopshq/artifactory-cleanup artifactory-cleanup --load-rules=myrule.py
 
-# Destroy mode - remove artifacts
-docker run \
-    --mount type=bind,source=./rules.py,target=/tmp/rules.py \
-    -e ARTIFACTORY_USER=<username> \
-    -e ARTIFACTORY_PASSWORD=<password> \
-    -e ARTIFACTORY_URL=<artifactory url> \
-    -e ARTIFACTORY_RULES_CONFIG=/tmp/rules.py \
-    -e ARTIFACTORY_DESTROY_MODE_ENABLED="true" \
-    devopshq/artifactory-cleanup:latest
+# cli
+artifactory-cleanup --load-rules=myrule.py
 ```
 
-The environment variables specify the necessary `artifactory-cleanup` arguments.    
-
-In case you have set up your Artifactory self-signed certificates, place all certificates of the chain of trust into the `docker/certificates/` folder and add an additional argument `--mount type=bind,source=./certificates/,target=/mnt/self-signed-certs/` to a command.
-
-To build the container image locally run the following command in the folder of the `Dockerfile`.
-
-
-```bash
-docker build . --tag artifactory-cleanup
-```
 # FAQ
 
+## How to connect self-signed certificates for docker?
+
+In case you have set up your Artifactory self-signed certificates, place all certificates of the chain of trust into
+the `certificates` folder and add additional argument to the command:
+
+```bash
+docker run -v "$(pwd)":/app -v "$(pwd)/certificates":/mnt/self-signed-certs/ devopshq/artifactory-cleanup artifactory-cleanup
+```
+
 ## How to clean up Conan repository?
+
 We can handle conan's metadata by creating two policies:
+
 1. First one removes files but keep all metadata.
-2. Second one look at folders and if it contains only medata files - removes it (because there's no associated with metadata files)
+2. Second one look at folders and if it contains only medata files - removes it (because there's no associated with
+   metadata files)
 
 The idea came from https://github.com/devopshq/artifactory-cleanup/issues/47
 
-```python
-from artifactory_cleanup import rules
-from artifactory_cleanup import CleanupPolicy
-RULES = [
-    CleanupPolicy(
-       'Delete files older than 60 days',
-        rules.repo('conan-testing'),
-        rules.delete_not_used_since(days=60),
-        # Keep conan metadata
-        rules.exclude_filename(['.timestamp', 'index.json']),
-    ),
-    CleanupPolicy(
-       'Delete empty folders',
-        rules.repo('conan-testing'),
-        rules.delete_empty_folders(),
-        # Exclude metadata files
-        # If a folder only contains these files, consider it as empty
-        rules.exclude_filename(['.timestamp', 'index.json']),
-    ),
-]
+```yaml
+# artifactory-cleanup.yaml
+artifactory-cleanup:
+  server: https://repo.example.com/artifactory
+  user: $ARTIFACTORY_USERNAME
+  password: $ARTIFACTORY_PASSWORD
+
+  policies:
+    - name: Conan - delete files older than 60 days
+      rules:
+        - rule: Repo
+          name: "conan-testing"
+        - rule: DeleteNotUsedSince
+          days: 60
+        - rule: ExcludeFilename
+          masks:
+            - ".timestamp"
+            - "index.json"
+    - name: Conan - delete empty folders (to fix the index)
+      rules:
+        - rule: Repo
+          name: "conan-testing"
+        - rule: DeleteEmptyFolders
+        - rule: ExcludeFilename
+          masks:
+            - ".timestamp"
+            - "index.json"
 ```
 
 ## How to keep latest N docker images?
+
 We can combine docker rules with usual "files" rules!
 
 The idea came from https://github.com/devopshq/artifactory-cleanup/issues/61
 
-```python
-CleanupPolicy(
-    'docker-demo-cleanup',
-    # Select repo
-    rules.repo('docker-demo'),
-    # Delete docker images older than 30 days
-    rules.DeleteDockerImagesOlderThan(days=30),
-    # Keep these tags for all images
-    rules.ExcludeDockerImages(['*:latest', '*:release*']),
-    # Exclude these docker tags
-    rules.ExcludePath("base-tools*"),
-    # Keep 3 docker tags for all images
-    rules.KeepLatestNFilesInFolder(count=3),
-)
-```
+```yaml
+# artifactory-cleanup.yaml
+artifactory-cleanup:
+  server: https://repo.example.com/artifactory
+  user: $ARTIFACTORY_USERNAME
+  password: $ARTIFACTORY_PASSWORD
 
+  policies:
+    - name: Remove docker images, but keep last 3
+      rules:
+        # Select repo
+        - rule: Repo
+          name: docker-demo
+        # Delete docker images older than 30 days
+        - rule: DeleteDockerImagesOlderThan
+          days: 30
+        # Keep these tags for all images
+        - rule: ExcludeDockerImages
+          masks:
+            - "*:latest"
+            - "*:release*"
+        # Exclude these docker tags
+        - rule: ExcludePath
+          masks: "*base-tools*"
+        # Keep 3 docker tags for all images
+        - rule: KeepLatestNFilesInFolder
+          count: 3
+```
 
 # Release
 
 In order to provide a new release of `artifactory-cleanup`, there are two steps involved.
 
 1. Bump the version in the [setup.py](setup.py)
-2. Create a Git release tag (e.g. `v0.3.3`) by creating a release on Github
+2. Create a Git release tag (e.g. `v0.3.3`) by creating a release on GitHub
 
