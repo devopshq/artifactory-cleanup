@@ -1,6 +1,3 @@
-# Proposal: https://github.com/devopshq/artifactory-cleanup/issues/54
-# Please leave a comment if you'd enjoy using this format!
-
 artifactory-cleanup:
   server: https://repo.example.com/artifactory
   # $VAR is auto populated from environment variables
@@ -8,28 +5,16 @@ artifactory-cleanup:
   password: $ARTIFACTORY_PASSWORD
 
   policies:
-    - name: Remove all .tmp files older than 7 days
+    - name: Remove all files from repo-name-here older then 7 days
       rules:
-        - rule: RepoByMask
-          mask: "*.tmp"
+        - rule: Repo
+          name: "repo-name-here"
         - rule: DeleteOlderThan
           days: 7
 
-    - name: My Docker Cleanup Policies
+    - name: Use your own rules!
       rules:
-        - rule: RepoByMask
-          mask: "docker-*-tmp"
-        - rule: DeleteOlderThan
-          days: 7
-
-    - name: My Docker Cleanup Policies
-      rules:
-        - rule: RepoByMask
-          mask: "docker-*-tmp"
-        - rule: ExcludeDockerImages
-          masks:
-            - '*:latest'
-            - '*:release*'
-        - rule: DeleteOlderThan
-          days: 7
-
+        - rule: Repo
+          name: "repo-name-here"
+        - rule: MySimpleRule
+          my_param: "Hello, world!"
