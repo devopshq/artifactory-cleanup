@@ -8,16 +8,7 @@ from artifactory_cleanup.rules.base import Rule, ArtifactsList
 
 class Repo(Rule):
     """
-    Apply the rule to one repository.
-    If no name is specified, it is taken from the rule name::
-
-        CleanupPolicy(
-           'myrepo.snapshot',
-           # if the there's only one policy for the repository - you can skip duplicate name
-           rules.repo,
-           ...
-        ),
-
+    Apply the policy to one repository.
     """
 
     schema = []
