@@ -4,7 +4,7 @@ from datetime import timedelta
 
 from artifactory import ArtifactoryPath
 from artifactory_cleanup.context_managers import get_context_managers
-from artifactory_cleanup.rules.base import Rule
+from artifactory_cleanup.rules.base import ArtifactsList, Rule
 
 ctx_mgr_block, ctx_mgr_test = get_context_managers()
 
@@ -29,27 +29,45 @@ class RuleForDocker(Rule):
         content = r.json()
         return content["tags"]
 
-    def _collect_docker_size(self, new_result):
-        docker_repos = list(set(x["repo"] for x in new_result))
+    def _manifest_to_docker_images(self, artifacts: ArtifactsList):
+        """
+        Convert manifest.json path to folder path
+        Docker rules get path to "manifest.json" file,
+        in order to remove the whole image we have to "up" one leve
+        """
+        for artifact in artifacts:
+            artifact["path"], docker_tag = artifact["path"].rsplit("/", 1)
+            artifact["name"] = docker_tag
+        return artifacts
+
+    def _collect_docker_size(self, artifacts):
+        docker_repos = list(set(x["repo"] for x in artifacts))
 
         if docker_repos:
             aql = ArtifactoryPath(self.session.base_url, session=self.session)
             args = ["items.find", {"$or": [{"repo": repo} for repo in docker_repos]}]
             artifacts_list = aql.aql(*args)
 
-            images_dict = defaultdict(int)
+            images_sizes = defaultdict(int)
             for docker_layer in artifacts_list:
-                images_dict[docker_layer["path"]] += docker_layer["size"]
+                image_key = (docker_layer["repo"], docker_layer["path"])
+                images_sizes[image_key] += docker_layer["size"]
 
-            for artifact in new_result:
+            for artifact in artifacts:
                 image = f"{artifact['path']}/{artifact['name']}"
-                artifact["size"] = images_dict[image]
+                image_key = (artifact["repo"], image)
+                artifact["size"] = images_sizes.get(image_key, 0)
+
+    def aql_add_filter(self, filters):
+        filters.append({"name": {"$match": "manifest.json"}})
+        return filters
 
     def filter(self, artifacts):
         """Determines the size of deleted images"""
-        new_result = super(RuleForDocker, self).filter(artifacts)
-        self._collect_docker_size(new_result)
-        return new_result
+        artifacts = self._manifest_to_docker_images(artifacts)
+        artifacts = super(RuleForDocker, self).filter(artifacts)
+        self._collect_docker_size(artifacts)
+        return artifacts
 
 
 class DeleteDockerImagesOlderThan(RuleForDocker):
@@ -62,23 +80,9 @@ class DeleteDockerImagesOlderThan(RuleForDocker):
         older_than_date = self.today - self.days
         older_than_date_txt = older_than_date.isoformat()
         print("Delete docker images older than {}".format(older_than_date_txt))
-        filter_ = {
-            "modified": {
-                "$lt": older_than_date_txt,
-            },
-            "name": {
-                "$match": "manifest.json",
-            },
-        }
+        filter_ = {"modified": {"$lt": older_than_date_txt}}
         filters.append(filter_)
-        return filters
-
-    def filter(self, artifacts):
-        for artifact in artifacts:
-            artifact["path"], docker_tag = artifact["path"].rsplit("/", 1)
-            artifact["name"] = docker_tag
-
-        return artifacts
+        return super().aql_add_filter(filters)
 
 
 class DeleteDockerImagesOlderThanNDaysWithoutDownloads(RuleForDocker):
@@ -92,23 +96,11 @@ class DeleteDockerImagesOlderThanNDaysWithoutDownloads(RuleForDocker):
     def aql_add_filter(self, filters):
         last_day = self.today - self.days
         filter_ = {
-            "name": {
-                "$match": "manifest.json",
-            },
-            "$and": [
-                {"stat.downloads": {"$eq": None}},
-                {"created": {"$lte": last_day.isoformat()}},
-            ],
+            {"stat.downloads": {"$eq": None}},
+            {"created": {"$lte": last_day.isoformat()}},
         }
         filters.append(filter_)
-        return filters
-
-    def filter(self, artifacts):
-        for artifact in artifacts:
-            artifact["path"], docker_tag = artifact["path"].rsplit("/", 1)
-            artifact["name"] = docker_tag
-
-        return artifacts
+        return super().aql_add_filter(filters)
 
 
 class DeleteDockerImagesNotUsed(RuleForDocker):
@@ -121,9 +113,6 @@ class DeleteDockerImagesNotUsed(RuleForDocker):
         last_day = self.today - self.days
         print("Delete docker images not used from {}".format(last_day.isoformat()))
         filter_ = {
-            "name": {
-                "$match": "manifest.json",
-            },
             "$or": [
                 {"stat.downloaded": {"$lte": last_day.isoformat()}},
                 {
@@ -135,14 +124,7 @@ class DeleteDockerImagesNotUsed(RuleForDocker):
             ],
         }
         filters.append(filter_)
-        return filters
-
-    def filter(self, artifacts):
-        for artifact in artifacts:
-            artifact["path"], docker_tag = artifact["path"].rsplit("/", 1)
-            artifact["name"] = docker_tag
-
-        return artifacts
+        return super().aql_add_filter(filters)
 
 
 class KeepLatestNVersionImagesByProperty(Rule):
