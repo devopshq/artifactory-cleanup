@@ -79,12 +79,6 @@ def test_yaml_config(capsys, shared_datadir, requests_mock):
     _, code = ArtifactoryCleanupCLI.run(
         [
             "ArtifactoryCleanupCLI",
-            "--user",
-            "user",
-            "--password",
-            "password",
-            "--artifactory-server",
-            "http://example.com/",
             "--config",
             str(shared_datadir / "cleanup.yaml"),
         ],

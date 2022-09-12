@@ -9,11 +9,11 @@ def requests_mock_all(requests_mock):
     """
 
 
-@pytest.fixture()
-def requests_repo_name_here(requests_mock):
-    requests_mock.get("http://example.com/api/storage/repo-name-here")
-    requests_mock.post(
-        "http://example.com/api/search/aql",
+def attach_requests_mock_to(mock, server):
+    server = server.rstrip("/")
+    mock.get(f"{server}/api/storage/repo-name-here")
+    mock.post(
+        f"{server}/api/search/aql",
         json={
             "results": [
                 {
@@ -43,7 +43,12 @@ def requests_repo_name_here(requests_mock):
             "range": {"start_pos": 0, "end_pos": 12, "total": 12},
         },
     )
-    requests_mock.delete(
-        "http://example.com/repo-name-here/path/to/file/filename1.json"
-    )
+    mock.delete(f"{server}/repo-name-here/path/to/file/filename1.json")
+    return mock
+
+
+@pytest.fixture()
+def requests_repo_name_here(requests_mock):
+    attach_requests_mock_to(requests_mock, "http://example.com/")
+    attach_requests_mock_to(requests_mock, "https://repo.example.com/artifactory")
     return requests_mock

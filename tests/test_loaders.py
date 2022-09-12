@@ -6,3 +6,14 @@ class TestYamlLoader:
         loader = YamlConfigLoader(shared_datadir / "all-built-in-rules.yaml")
         policies = loader.get_policies()
         assert len(policies) == 6, "5 rules files + 1 special for repo-without-name"
+
+    def test_load_env_variables(self, shared_datadir, monkeypatch):
+        monkeypatch.setenv("ARTIFACTORY_USERNAME", "UserName")
+        monkeypatch.setenv("ARTIFACTORY_PASSWORD", "P@ssw0rd")
+
+        loader = YamlConfigLoader(shared_datadir / "all-built-in-rules.yaml")
+        server, user, password = loader.get_connection()
+
+        assert server == "https://repo.example.com/artifactory"
+        assert user == "UserName"
+        assert password == "P@ssw0rd"

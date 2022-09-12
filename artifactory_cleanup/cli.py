@@ -15,7 +15,6 @@ from artifactory_cleanup.base_url_session import BaseUrlSession
 from artifactory_cleanup.errors import InvalidConfigError
 from artifactory_cleanup.loaders import (
     PythonPoliciesLoader,
-    CliConnectionLoader,
     YamlConfigLoader,
 )
 from artifactory_cleanup.context_managers import get_context_managers
@@ -34,21 +33,21 @@ class ArtifactoryCleanupCLI(cli.Application):
     _artifactory_server = cli.SwitchAttr(
         ["--artifactory-server"],
         help="URL to artifactory, e.g: https://arti.example.com/artifactory",
-        mandatory=True,
+        mandatory=False,
         envname="ARTIFACTORY_SERVER",
     )
 
     _user = cli.SwitchAttr(
         ["--user"],
         help="Login to access to the artifactory",
-        mandatory=True,
+        mandatory=False,
         envname="ARTIFACTORY_USER",
     )
 
     _password = cli.SwitchAttr(
         ["--password"],
         help="Password to access to the artifactory",
-        mandatory=True,
+        mandatory=False,
         envname="ARTIFACTORY_PASSWORD",
     )
 
@@ -61,7 +60,8 @@ class ArtifactoryCleanupCLI(cli.Application):
     _config = cli.SwitchAttr(
         ["--config"],
         help="Name of config with list of policies",
-        mandatory=True,
+        mandatory=False,
+        default="artifactory-cleanup.yaml",
     )
 
     _destroy = cli.Flag(
@@ -93,13 +93,10 @@ class ArtifactoryCleanupCLI(cli.Application):
 
     def main(self):
         today = self._get_today()
-        server, user, password = CliConnectionLoader(self).get_connection()
-        session = BaseUrlSession(server)
-        session.auth = HTTPBasicAuth(user, password)
         if self._config.endswith(".yaml"):
             loader = YamlConfigLoader(self._config)
         else:
-            loader = PythonPoliciesLoader(self._config)
+            loader = PythonPoliciesLoader(filepath=self._config, cli=self)
 
         try:
             policies = loader.get_policies()
@@ -107,6 +104,10 @@ class ArtifactoryCleanupCLI(cli.Application):
             print("Failed to load config file")
             print(str(err), file=sys.stderr)
             sys.exit(1)
+
+        server, user, password = loader.get_connection()
+        session = BaseUrlSession(server)
+        session.auth = HTTPBasicAuth(user, password)
 
         self._destroy_or_verbose()
         cleanup = ArtifactoryCleanup(
