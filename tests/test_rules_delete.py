@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from artifactory_cleanup.rules import delete_empty_folders
+from artifactory_cleanup.rules import DeleteEmptyFolders
 
 
 @pytest.fixture
@@ -70,7 +70,7 @@ def artifacts_list(shared_datadir):
 def test_delete_empty_folders(artifacts_list):
     artifacts = artifacts_list
 
-    rule = delete_empty_folders()
+    rule = DeleteEmptyFolders()
     artifacts_to_remove = rule.filter(artifacts)
 
     expected_empty_folders = [
