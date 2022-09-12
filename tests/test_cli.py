@@ -81,6 +81,8 @@ def test_yaml_config(capsys, shared_datadir, requests_mock):
             "ArtifactoryCleanupCLI",
             "--config",
             str(shared_datadir / "cleanup.yaml"),
+            "--load-rules",
+            str(shared_datadir / "myrule.py"),
         ],
         exit=False,
     )
@@ -92,5 +94,5 @@ def test_yaml_config(capsys, shared_datadir, requests_mock):
     )
 
     assert (
-        requests_mock.call_count == 2
-    ), "Requests: check repository exists, AQL, NO DELETE"
+        requests_mock.call_count == 4
+    ), "Requests: check repository exists, AQL, NO DELETE  - 2 times"

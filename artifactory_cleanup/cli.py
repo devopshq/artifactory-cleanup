@@ -14,7 +14,7 @@ from artifactory_cleanup.artifactorycleanup import (
 from artifactory_cleanup.base_url_session import BaseUrlSession
 from artifactory_cleanup.errors import InvalidConfigError
 from artifactory_cleanup.loaders import (
-    PythonPoliciesLoader,
+    PythonLoader,
     YamlConfigLoader,
 )
 from artifactory_cleanup.context_managers import get_context_managers
@@ -77,6 +77,12 @@ class ArtifactoryCleanupCLI(cli.Application):
         excludes=["--destroy"],
     )
 
+    _load_rules = cli.SwitchAttr(
+        "--load-rules",
+        help="Load rules from python file",
+        mandatory=False,
+    )
+
     def _destroy_or_verbose(self):
         print("*" * 80)
         if self._destroy:
@@ -93,10 +99,13 @@ class ArtifactoryCleanupCLI(cli.Application):
 
     def main(self):
         today = self._get_today()
+        if self._load_rules:
+            PythonLoader.import_module(self._load_rules)
+
         if self._config.endswith(".yaml"):
             loader = YamlConfigLoader(self._config)
         else:
-            loader = PythonPoliciesLoader(filepath=self._config, cli=self)
+            loader = PythonLoader(filepath=self._config, cli=self)
 
         try:
             policies = loader.get_policies()

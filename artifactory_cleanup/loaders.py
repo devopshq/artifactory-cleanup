@@ -3,6 +3,7 @@ import inspect
 import logging
 import os.path
 import sys
+from copy import deepcopy
 from pathlib import Path
 from typing import List, Tuple, Type, Dict, Union
 
@@ -148,20 +149,30 @@ class YamlConfigLoader:
             policy_name = policy_data["name"]
             rules = []
             for rule_data in policy_data["rules"]:
-                rule = self._build_rule(rule_data)
+                try:
+                    rule = self._build_rule(rule_data)
+                except Exception as exc:
+                    print(
+                        f"Failed to initialize '{rule_data['rule']}' in {policy_name}:",
+                        file=sys.stdout,
+                    )
+                    print(exc, file=sys.stdout)
+                    sys.exit(1)
+
                 rules.append(rule)
             policy = CleanupPolicy(policy_name, *rules)
             policies.append(policy)
         return policies
 
     def _build_rule(self, rule_data: Dict) -> Union[Rule, Type[Rule]]:
-        rule_cls = registry.get(rule_data.pop("rule"))
+        kwargs = deepcopy(rule_data)
+        rule_cls = registry.get(kwargs.pop("rule"))
 
         # For Repo rule, CleanupPolicy initialize it later with the name of the policy
-        if rule_cls == Repo and not rule_data:
+        if rule_cls == Repo and not kwargs:
             return rule_cls
 
-        return rule_cls(**rule_data)
+        return rule_cls(**kwargs)
 
     @staticmethod
     def load(filename):
@@ -181,7 +192,7 @@ class YamlConfigLoader:
         return server, user, password
 
 
-class PythonPoliciesLoader:
+class PythonLoader:
     """
     Load policies and rules from python file + connections settings from cli
     """
@@ -190,13 +201,19 @@ class PythonPoliciesLoader:
         self.filepath = Path(filepath)
         self.cli = cli
 
+    @staticmethod
+    def import_module(filename):
+        filepath = Path(filename)
+        directory = filepath.parent
+        sys.path.append(str(directory))
+        # Get module name without the py suffix: policies.py => policies
+        module_name = filepath.stem
+        return importlib.import_module(module_name)
+
     def get_policies(self) -> List[CleanupPolicy]:
         try:
-            policies_directory = self.filepath.parent
-            # Get module name without the py suffix: policies.py => policies
-            module_name = self.filepath.stem
-            sys.path.append(str(policies_directory))
-            policies = getattr(importlib.import_module(module_name), "RULES")
+            policies_module = self.import_module(self.filepath)
+            policies = getattr(policies_module, "RULES")
 
             # Validate that all policies is CleanupPolicy
             for policy in policies:
