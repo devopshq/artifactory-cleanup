@@ -12,3 +12,7 @@ repos:
         args:
           - --in-place
           - --remove-all-unused-imports
+  -   repo: https://github.com/Lucas-C/pre-commit-hooks-nodejs
+      rev: v1.1.2
+      hooks:
+      -   id: markdown-toc
