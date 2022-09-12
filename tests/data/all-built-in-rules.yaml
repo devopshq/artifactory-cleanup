@@ -70,7 +70,6 @@ artifactory-cleanup:
           masks:
             - "*production*"
             - "*release*"
-            -
     - name: docker
       rules:
         - rule: DeleteDockerImagesOlderThan

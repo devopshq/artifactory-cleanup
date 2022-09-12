@@ -76,7 +76,7 @@ class KeepLatestNupkgNVersions(Rule):
                                 **locals()
                             )
                         )
-                        artifacts.remove(artifact)
+                        artifacts.keep(artifact)
         return artifacts
 
     @staticmethod
@@ -109,10 +109,7 @@ class KeepLatestNFiles(Rule):
             good_artifact_count = 0
 
         good_artifacts = artifacts[good_artifact_count:]
-        for artifact in good_artifacts:
-            print("Filter package {path}/{name}".format(**artifact))
-            artifacts.remove(artifact)
-
+        artifacts.keep(good_artifacts)
         return artifacts
 
 
@@ -140,9 +137,7 @@ class KeepLatestNFilesInFolder(Rule):
                 good_artifact_count = 0
 
             good_artifacts = _artifacts[good_artifact_count:]
-            for artifact in good_artifacts:
-                print("Filter package {path}/{name}".format(**artifact))
-                artifacts.remove(artifact)
+            artifacts.keep(good_artifacts)
 
         return artifacts
 
@@ -175,7 +170,7 @@ class KeepLatestVersionNFilesInFolder(Rule):
                 key = path + "/" + name_without_version
                 artifacts_by_path_and_name[key].append(artifactory_with_version)
             else:
-                artifacts.remove(artifact)
+                artifacts.keep(artifact)
 
         for artifactory_with_version in artifacts_by_path_and_name.values():
             artifactory_with_version.sort(
@@ -188,7 +183,7 @@ class KeepLatestVersionNFilesInFolder(Rule):
                 good_artifact_count = 0
 
             good_artifacts = artifactory_with_version[good_artifact_count:]
-            artifacts.remove(good_artifacts)
+            artifacts.keep(good_artifacts)
 
         return artifacts
 

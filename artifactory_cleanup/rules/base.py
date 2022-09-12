@@ -26,6 +26,10 @@ class ArtifactDict(TypedDict):
 
 
 class ArtifactsList(List[ArtifactDict]):
+    def keep(self, artifacts):
+        """Just a shortcut for better readability"""
+        return self.remove(artifacts)
+
     def remove(self, artifacts: Union[ArtifactDict, List[ArtifactDict]]) -> None:
         """
         Remove artifacts (or one artifact) and log that.
@@ -97,6 +101,12 @@ class Rule(object):
         self.session = session
         self.today = today
 
+    def check(self, *args, **kwargs):
+        """
+        Checks that Rule is configured right.
+        Make sure to add args, kwargs, because we can add more options there in the future
+        """
+
     def aql_add_filter(self, filters: List) -> List:
         """
         Add one or more filters to `<domain>.find(<filters>)` AQL part.
@@ -132,12 +142,6 @@ class Rule(object):
         :return List of artifacts that you are going to remove
         """
         return artifacts
-
-    def check(self, *args, **kwargs):
-        """
-        Checks that Rule is configured right.
-        Make sure to add args, kwargs, because we can add more options there in the future
-        """
 
 
 class CleanupPolicy(object):
