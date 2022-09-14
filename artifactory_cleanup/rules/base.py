@@ -7,7 +7,6 @@ from typing import Optional, Union, List, Dict
 from urllib.parse import quote
 
 import cfgv
-import pydash
 
 from artifactory_cleanup.base_url_session import BaseUrlSession
 
@@ -270,7 +269,6 @@ class CleanupPolicy(object):
         r.raise_for_status()
         content = r.json()
         artifacts = content["results"]
-        artifacts = pydash.sort(artifacts, key=lambda x: x["path"])
         return ArtifactsList.from_response(artifacts)
 
     def filter(self, artifacts: ArtifactsList) -> ArtifactsList:
