@@ -47,19 +47,17 @@ artifactory-cleanup:
     - name: filters
       rules:
         - rule: IncludePath
-          mask: "*production*"
-        - rule: IncludeDockerImages
-          masks: "*singlemask*"
-        - rule: IncludeDockerImages
+          masks: "*production*"
+        - rule: IncludePath
           masks:
             - "*production*"
-            - "*release*"
-        - rule: ExcludeDockerImages
-          masks:
-            - "*production*"
-            - "*release*"
+            - "*test*"
         - rule: IncludeFilename
-          mask: "*-*"
+          masks: "*-*"
+        - rule: IncludeFilename
+          masks:
+            - "*production*"
+            - "*release*"
         - rule: ExcludePath
           masks: "*singlemask*"
         - rule: ExcludePath
@@ -67,9 +65,12 @@ artifactory-cleanup:
             - "*production*"
             - "*release*"
         - rule: ExcludeFilename
+          masks: "*filename*"
+        - rule: ExcludeFilename
           masks:
             - "*production*"
             - "*release*"
+
     - name: docker
       rules:
         - rule: DeleteDockerImagesOlderThan
@@ -78,6 +79,18 @@ artifactory-cleanup:
           days: 1
         - rule: DeleteDockerImagesNotUsed
           days: 1
+        - rule: IncludeDockerImages
+          masks: "*singlemask*"
+        - rule: IncludeDockerImages
+          masks:
+            - "*production*"
+            - "*release*"
+        - rule: ExcludeDockerImages
+          masks: "*singlemask*"
+        - rule: ExcludeDockerImages
+          masks:
+            - "*production*"
+            - "*release*"
         - rule: KeepLatestNVersionImagesByProperty
           count: 1
           custom_regexp: "[^\\d][\\._]((\\d+\\.)+\\d+)"

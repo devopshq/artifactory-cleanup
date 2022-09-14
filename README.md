@@ -97,7 +97,7 @@ Looking for more examples? Check [examples](./examples) and [tests/data](./tests
 ## Notes
 
 - **Always** specify version of `artifactory-cleanup` when using it in the production. Do not use `1.0.0`, use the
-latest in pypi: https://pypi.org/project/artifactory-cleanup/
+  latest in pypi: https://pypi.org/project/artifactory-cleanup/
 
 ```bash
 # docker
@@ -108,7 +108,9 @@ docker run -rm devopshq/artifactory-cleanup:1.0.0 artifactory-cleanup --version
 python3 -mpip install artifactory-cleanup==1.0.0
 artifactory-cleanup --help
 ```
-- Use CI servers or cron-like utilities to run `artifactory-cleanup` every day (or every hour). TeamCity and GitHub have built-in support and show additional logs format
+
+- Use CI servers or cron-like utilities to run `artifactory-cleanup` every day (or every hour). TeamCity and GitHub have
+  built-in support and show additional logs format
 - Do not save credentials in the configuration file, use environment variables.
 
 ## Commands ##
@@ -278,10 +280,32 @@ policies:
   days: 1
 ```
 
+- `IncludeDockerImages('*:latest*')` - Apply to docker images with the specified names and tags. You can specify
+  multiple names and tags: `IncludeDockerImages('*:production*'), IncludeDockerImages(['ubuntu:*', 'debian:9'])`
+
+```yaml
+- rule: IncludeDockerImages
+  masks: "*singlemask*"
+- rule: IncludeDockerImages
+  masks:
+    - "*production*"
+    - "*release*"
+```
+
+- `ExcludeDockerImages('*:tag-*')` - Exclude Docker images by name and tags. You can specify multiple names and
+  tags: `ExcludePath('*:production*'), ExcludePath(['ubuntu:*', 'debian:9'])`
+
+```yaml
+- rule: ExcludeDockerImages
+  masks:
+    - "*production*"
+    - "*release*"
+```
+
 - `DeleteDockerImageIfNotContainedInProperties(docker_repo='docker-local', properties_prefix='my-prop', image_prefix=None, full_docker_repo_name=None)`
-  - Remove Docker image, if it is not found in the properties of the artifact repository.
+    - Remove Docker image, if it is not found in the properties of the artifact repository.
 - `DeleteDockerImageIfNotContainedInPropertiesValue(docker_repo='docker-local', properties_prefix='my-prop', image_prefix=None, full_docker_repo_name=None)`
-  - Remove Docker image, if it is not found in the properties of the artifact repository.
+    - Remove Docker image, if it is not found in the properties of the artifact repository.
 - `KeepLatestNVersionImagesByProperty(count=N, custom_regexp='some-regexp', number_of_digits_in_version=X)` - Leaves N
   Docker images with the same major. `(^ \d*\.\d*\.\d*.\d+$)` is the default regexp how to determine version. If you
   need to add minor then put 2 or if patch then put 3 (By default `1`)
@@ -310,18 +334,6 @@ policies:
   mask: "*-*"
 ```
 
-- `IncludeDockerImages('*:latest*')` - Apply to docker images with the specified names and tags. You can specify
-  multiple names and tags: `IncludeDockerImages('*:production*'), IncludeDockerImages(['ubuntu:*', 'debian:9'])`
-
-```yaml
-- rule: IncludeDockerImages
-  masks: "*singlemask*"
-- rule: IncludeDockerImages
-  masks:
-    - "*production*"
-    - "*release*"
-```
-
 - `ExcludePath('my-path/**')` - Exclude artifacts by path/mask. You can specify multiple
   paths: `ExcludePath('*production*'), ExcludePath(['*release*', '*master*'])`
 
@@ -340,17 +352,8 @@ policies:
     - "*release*"
 ```
 
-- `ExcludeDockerImages('*:tag-*')` - Exclude Docker images by name and tags. You can specify multiple names and
-  tags: `ExcludePath('*:production*'), ExcludePath(['ubuntu:*', 'debian:9'])`
-
-```yaml
-- rule: ExcludeDockerImages
-  masks:
-    - "*production*"
-    - "*release*"
-```
-
 ## Create your own rule
+
 If you want to create your own rule, you can do it!
 
 The basic flow how the tool calls Rules:

@@ -4,7 +4,9 @@ from datetime import timedelta
 
 from artifactory import ArtifactoryPath
 from artifactory_cleanup.context_managers import get_context_managers
-from artifactory_cleanup.rules.base import ArtifactsList, Rule
+from artifactory_cleanup.rules import Rule
+from artifactory_cleanup.rules.base import ArtifactsList
+from artifactory_cleanup.rules.utils import to_masks
 
 ctx_mgr_block, ctx_mgr_test = get_context_managers()
 
@@ -125,6 +127,58 @@ class DeleteDockerImagesNotUsed(RuleForDocker):
         }
         filters.append(filter_)
         return super().aql_add_filter(filters)
+
+
+class FilterDockerImages(RuleForDocker):
+    operator = None
+    boolean_operator = None
+
+    def __init__(self, masks):
+        if not self.operator:
+            raise AttributeError("Attribute 'operator' must be specified")
+        if not self.boolean_operator:
+            raise AttributeError("Attribute 'boolean_operator' must be specified")
+
+        self.masks = to_masks(masks)
+
+    def get_masks(self):
+        # alpine:2.4 => alpine/2.4
+        return [mask.replace(":", "/") for mask in self.masks]
+
+    def check(self, masks):
+        for mask in self.masks:
+            if ":" not in mask:
+                raise AttributeError(f"Mask '{mask}' must contain ':' in docker rules")
+
+    def aql_add_filter(self, filters):
+        rule_list = []
+        for mask in self.get_masks():
+            filter_ = {
+                "path": {
+                    self.operator: mask,
+                }
+            }
+            rule_list.append(filter_)
+        filters.append({self.boolean_operator: rule_list})
+        return super().aql_add_filter(filters)
+
+
+class IncludeDockerImages(FilterDockerImages):
+    """
+    Apply to docker images with the specified names and tags.
+    """
+
+    operator = "$match"
+    boolean_operator = "$or"
+
+
+class ExcludeDockerImages(FilterDockerImages):
+    """
+    Exclude Docker images by name and tags.
+    """
+
+    operator = "$nmatch"
+    boolean_operator = "$and"
 
 
 class KeepLatestNVersionImagesByProperty(Rule):
