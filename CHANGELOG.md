@@ -1,7 +1,9 @@
 # Changelog
 
 ## 1.0.0
-- Support YAML configuration! #54 🎉
+- [BREAKING CHANGE] The version does not support python configuration anymore, use YAML `artifactory-cleanup.yaml` config file to specify policies and rules.
+- [BREAKING CHANGE] No `under_score` names for rules, only `CamelCase`
+- Support YAML configuration! #54 🎉 
 - Introduce new and stable (from this point) API for Rules #33
 - Rename `DeleteEmptyFolder` to `DeleteEmptyFolders` (but keep old version as well)
 - Rename `--policy-name` flag to `--policy`

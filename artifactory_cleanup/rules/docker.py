@@ -321,19 +321,3 @@ class DeleteDockerImageIfNotContainedInPropertiesValue(RuleForDocker):
                         )
 
         return result_docker_images
-
-
-# under_score - old style of naming
-# Keep it for backward compatibility
-delete_docker_images_older_than = DeleteDockerImagesOlderThan
-delete_docker_images_older_than_n_days_without_downloads = (
-    DeleteDockerImagesOlderThanNDaysWithoutDownloads
-)
-delete_docker_images_not_used = DeleteDockerImagesNotUsed
-keep_latest_n_version_images_by_property = KeepLatestNVersionImagesByProperty
-delete_docker_image_if_not_contained_in_properties = (
-    DeleteDockerImageIfNotContainedInProperties
-)
-delete_docker_image_if_not_contained_in_properties_value = (
-    DeleteDockerImageIfNotContainedInPropertiesValue
-)

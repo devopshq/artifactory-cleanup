@@ -170,13 +170,3 @@ class ExcludeFilename(_ExcludeMask):
     """
 
     attribute_name = "name"
-
-
-# under_score - old style of naming
-# Keep it for backward compatibility
-include_path = IncludePath
-include_docker_images = IncludeDockerImages
-exclude_docker_images = ExcludeDockerImages
-include_filename = IncludeFilename
-exclude_path = ExcludePath
-exclude_filename = ExcludeFilename
