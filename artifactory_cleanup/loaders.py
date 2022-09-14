@@ -86,6 +86,7 @@ class SchemaBuilder:
         policy_schema = cfgv.Map(
             "Policy",
             "name",
+            cfgv.NoAdditionalKeys(["name", "rules"]),
             cfgv.Required("name", cfgv.check_string),
             cfgv.RequiredRecurse("rules", cfgv.Array(rule_schema)),
         )
@@ -93,6 +94,7 @@ class SchemaBuilder:
         config_schema = cfgv.Map(
             "Config",
             None,
+            cfgv.NoAdditionalKeys(["server", "user", "password", "policies"]),
             cfgv.Required("server", cfgv.check_string),
             cfgv.Required("user", cfgv.check_string),
             cfgv.Required("password", cfgv.check_string),
@@ -102,6 +104,7 @@ class SchemaBuilder:
         root_schema = cfgv.Map(
             "Artifactory Cleanup",
             None,
+            cfgv.NoAdditionalKeys(["artifactory-cleanup"]),
             cfgv.RequiredRecurse("artifactory-cleanup", config_schema),
         )
         return root_schema
@@ -153,7 +156,7 @@ class YamlConfigLoader:
                     rule = self._build_rule(rule_data)
                 except Exception as exc:
                     print(
-                        f"Failed to initialize '{rule_data['rule']}' in {policy_name}:",
+                        f"Failed to initialize rule '{rule_data['rule']}' in policy '{policy_name}'.",
                         file=sys.stdout,
                     )
                     print(exc, file=sys.stdout)
