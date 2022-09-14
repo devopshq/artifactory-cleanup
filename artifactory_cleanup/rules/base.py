@@ -53,9 +53,10 @@ class ArtifactsList(List[ArtifactDict]):
         Convert properties, stat from the list format to the dict format
         """
         if "properties" in artifact:
-            artifact["properties"] = {
-                x["key"]: x.get("value") for x in artifact["properties"]
-            }
+            if not isinstance(artifact["properties"], dict):
+                artifact["properties"] = {
+                    x["key"]: x.get("value") for x in artifact["properties"]
+                }
         else:
             artifact["properties"] = {}
 
