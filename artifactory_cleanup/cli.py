@@ -30,45 +30,17 @@ def init_logging():
 
 
 class ArtifactoryCleanupCLI(cli.Application):
-    @property
-    def VERSION(self):
-        # To prevent circular imports
-        from artifactory_cleanup import __version__
-
-        return __version__
-
-    _artifactory_server = cli.SwitchAttr(
-        ["--artifactory-server"],
-        help="URL to artifactory, e.g: https://arti.example.com/artifactory",
+    _config = cli.SwitchAttr(
+        ["--config"],
+        help="Name of config with list of policies",
         mandatory=False,
-        envname="ARTIFACTORY_SERVER",
-    )
-
-    _user = cli.SwitchAttr(
-        ["--user"],
-        help="Login to access to the artifactory",
-        mandatory=False,
-        envname="ARTIFACTORY_USER",
-    )
-
-    _password = cli.SwitchAttr(
-        ["--password"],
-        help="Password to access to the artifactory",
-        mandatory=False,
-        envname="ARTIFACTORY_PASSWORD",
+        default="artifactory-cleanup.yaml",
     )
 
     _policy = cli.SwitchAttr(
         ["--policy"],
         help="Name for a policy to execute",
         mandatory=False,
-    )
-
-    _config = cli.SwitchAttr(
-        ["--config"],
-        help="Name of config with list of policies",
-        mandatory=False,
-        default="artifactory-cleanup.yaml",
     )
 
     _destroy = cli.Flag(
@@ -90,6 +62,13 @@ class ArtifactoryCleanupCLI(cli.Application):
         mandatory=False,
     )
 
+    @property
+    def VERSION(self):
+        # To prevent circular imports
+        from artifactory_cleanup import __version__
+
+        return __version__
+
     def _destroy_or_verbose(self):
         print("*" * 80)
         if self._destroy:
@@ -109,11 +88,7 @@ class ArtifactoryCleanupCLI(cli.Application):
         if self._load_rules:
             PythonLoader.import_module(self._load_rules)
 
-        if self._config.endswith(".yaml"):
-            loader = YamlConfigLoader(self._config)
-        else:
-            loader = PythonLoader(filepath=self._config, cli=self)
-
+        loader = YamlConfigLoader(self._config)
         try:
             policies = loader.get_policies()
         except InvalidConfigError as err:

@@ -108,11 +108,3 @@ class PropertyNeq(Rule):
         ]
         artifacts.remove(good_artifact)
         return artifacts
-
-
-# under_score - old style of naming
-# Keep it for backward compatibility
-repo = Repo
-repo_by_mask = RepoByMask
-property_eq = PropertyEq
-property_neq = PropertyNeq

@@ -194,12 +194,8 @@ class YamlConfigLoader:
 
 class PythonLoader:
     """
-    Load policies and rules from python file + connections settings from cli
+    Load rules from a python file
     """
-
-    def __init__(self, filepath, cli):
-        self.filepath = Path(filepath)
-        self.cli = cli
 
     @staticmethod
     def import_module(filename):
@@ -209,37 +205,3 @@ class PythonLoader:
         # Get module name without the py suffix: policies.py => policies
         module_name = filepath.stem
         return importlib.import_module(module_name)
-
-    def get_policies(self) -> List[CleanupPolicy]:
-        try:
-            policies_module = self.import_module(self.filepath)
-            policies = getattr(policies_module, "RULES")
-
-            # Validate that all policies is CleanupPolicy
-            for policy in policies:
-                if not isinstance(policy, CleanupPolicy):
-                    sys.exit(f"Policy '{policy}' is not CleanupPolicy, check it please")
-
-            return policies
-        except ImportError as error:
-            print("Error: {}".format(error))
-            sys.exit(1)
-
-    def get_connection(self) -> Tuple[str, str, str]:
-        server = self.cli._artifactory_server
-        user = self.cli._user
-        password = self.cli._password
-        if not server:
-            print("--artifactory-server is required for python config", file=sys.stdout)
-            self.cli.help()
-            exit(1)
-        if not user:
-            print("--user is required for python config", file=sys.stdout)
-            self.cli.help()
-            exit(1)
-        if not password:
-            print("--password is required for python config", file=sys.stdout)
-            self.cli.help()
-            exit(1)
-
-        return server, user, password

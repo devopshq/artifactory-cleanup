@@ -102,14 +102,3 @@ class DeleteEmptyFolders(Rule):
         repositories = utils.build_repositories(artifacts)
         folders = utils.get_empty_folders(repositories)
         return folders
-
-
-# under_score - old style of naming
-# Keep it for backward compatibility
-delete_older_than = DeleteOlderThan
-delete_without_downloads = DeleteWithoutDownloads
-delete_older_than_n_days_without_downloads = DeleteOlderThanNDaysWithoutDownloads
-delete_not_used_since = DeleteNotUsedSince
-delete_empty_folders = DeleteEmptyFolders
-DeleteEmptyFolder = DeleteEmptyFolders
-delete_empty_folder = DeleteEmptyFolder

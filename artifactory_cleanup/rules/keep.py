@@ -186,11 +186,3 @@ class KeepLatestVersionNFilesInFolder(Rule):
             artifacts.keep(good_artifacts)
 
         return artifacts
-
-
-# under_score - old style of naming
-# Keep it for backward compatibility
-keep_latest_nupkg_n_version = KeepLatestNupkgNVersions
-keep_latest_n_file = KeepLatestNFiles
-keep_latest_n_file_in_folder = KeepLatestNFilesInFolder
-keep_latest_version_n_file_in_folder = KeepLatestVersionNFilesInFolder
