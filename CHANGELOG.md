@@ -5,7 +5,8 @@
 - [BREAKING CHANGE] No `under_score` names for rules, only `CamelCase`
 - Support YAML configuration! #54 🎉 
 - Introduce new and stable (from this point) API for Rules #33
-- Rename `DeleteEmptyFolder` to `DeleteEmptyFolders` (but keep old version as well)
+- Fix `KeepLatestNVersionImagesByProperty` wrong behaviour #60
+- Rename `DeleteEmptyFolder` to `DeleteEmptyFolders`
 - Rename `--policy-name` flag to `--policy`
 
 ### Backward incompatible changes

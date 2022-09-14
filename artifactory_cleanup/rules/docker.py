@@ -1,7 +1,9 @@
 import re
 from collections import defaultdict
 from datetime import timedelta
+from typing import Tuple
 
+import pydash
 from artifactory import ArtifactoryPath
 from artifactory_cleanup.context_managers import get_context_managers
 from artifactory_cleanup.rules import Rule
@@ -39,11 +41,14 @@ class RuleForDocker(Rule):
         """
         for artifact in artifacts:
             # already done it or it's just a folder
-            if artifact["name"] != "manifest.json":
+            if "name" not in artifact or artifact["name"] != "manifest.json":
                 continue
 
             artifact["path"], docker_tag = artifact["path"].rsplit("/", 1)
             artifact["name"] = docker_tag
+            # We're going to collect docker size later
+            if "size" in artifact:
+                del artifact["size"]
         return artifacts
 
     def _collect_docker_size(self, artifacts):
@@ -201,7 +206,7 @@ class KeepLatestNVersionImagesByProperty(RuleForDocker):
     def __init__(
         self,
         count: int,
-        custom_regexp=r"(^\d*\.\d*\.\d*.\d+$)",
+        custom_regexp=r"(^\d+\.\d+\.\d+$)",
         number_of_digits_in_version: int = 1,
     ):
         self.count = count
@@ -209,28 +214,32 @@ class KeepLatestNVersionImagesByProperty(RuleForDocker):
         self.property = r"docker.manifest"
         self.number_of_digits_in_version = number_of_digits_in_version
 
+    def get_version(self, artifact) -> Tuple:
+        """Parse property and get version from it"""
+        value = artifact["properties"][self.property]
+        match = re.match(self.custom_regexp, value)
+        if not match:
+            raise ValueError(f"Can not find version in '{artifact}'")
+        version_str = match.group()
+        version = tuple(map(int, version_str.split(".")))
+        return version
+
     def filter(self, artifacts):
-        artifacts_by_path_and_name = defaultdict(list)
-        for artifact in artifacts[:]:
-            property = artifact["properties"][self.property]
-            version = re.findall(self.custom_regexp, property)
-            if len(version) == 1:
-                version_splitted = version[0].split(".")
-                key = artifact["path"] + "/" + version_splitted[0]
-                key += ".".join(version_splitted[: self.number_of_digits_in_version])
-                artifacts_by_path_and_name[key].append([version_splitted[0], artifact])
+        artifacts.sort(key=lambda x: x["path"])
 
-        for artifactory_with_version in artifacts_by_path_and_name.values():
-            artifactory_with_version.sort(
-                key=lambda x: [int(x) for x in x[0].split(".")]
-            )
+        def _groupby(artifact):
+            """Group by major/minor/patch version"""
+            return self.get_version(artifact)[: self.number_of_digits_in_version]
 
-            good_artifact_count = len(artifactory_with_version) - self.count
-            if good_artifact_count < 0:
-                good_artifact_count = 0
+        # Group artifacts by major/minor or patch
+        grouped = pydash.group_by(artifacts, iteratee=_groupby)
 
-            good_artifacts = artifactory_with_version[good_artifact_count:]
-            artifacts.keep(good_artifacts)
+        for main_version, artifacts_ in grouped.items():
+            artifacts_ = list(artifacts_)
+            artifacts_.sort(key=self.get_version, reverse=True)
+            # Keep latest N artifacts
+            artifacts.keep(artifacts_[: self.count])
+
         return super().filter(artifacts)
 
 

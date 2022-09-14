@@ -302,13 +302,14 @@ policies:
     - "*release*"
 ```
 
+- `KeepLatestNVersionImagesByProperty(count=N, custom_regexp='some-regexp', number_of_digits_in_version=X)` - Leaves N
+  Docker images with the same major. `(^\d+\.\d+\.\d+$)` is the default regexp how to determine version which matches semver `1.1.1`. If you
+  need to add minor then set `number_of_digits_in_version` to 2 or if patch then set to 3 (by default we match major, which 1)
+
 - `DeleteDockerImageIfNotContainedInProperties(docker_repo='docker-local', properties_prefix='my-prop', image_prefix=None, full_docker_repo_name=None)`
     - Remove Docker image, if it is not found in the properties of the artifact repository.
 - `DeleteDockerImageIfNotContainedInPropertiesValue(docker_repo='docker-local', properties_prefix='my-prop', image_prefix=None, full_docker_repo_name=None)`
     - Remove Docker image, if it is not found in the properties of the artifact repository.
-- `KeepLatestNVersionImagesByProperty(count=N, custom_regexp='some-regexp', number_of_digits_in_version=X)` - Leaves N
-  Docker images with the same major. `(^ \d*\.\d*\.\d*.\d+$)` is the default regexp how to determine version. If you
-  need to add minor then put 2 or if patch then put 3 (By default `1`)
 
 ```yaml
 - rule: KeepLatestNVersionImagesByProperty
