@@ -2,6 +2,7 @@ import re
 from collections import defaultdict
 from itertools import groupby
 
+
 from artifactory_cleanup.rules.base import Rule
 
 
@@ -98,11 +99,8 @@ class KeepLatestNFiles(Rule):
     def __init__(self, count: int):
         self.count = count
 
-    def aql_add_text(self, aql_text):
-        aql_text = "{}.sort({})".format(aql_text, r'{"$asc" : ["created"]}')
-        return aql_text
-
     def filter(self, artifacts):
+        artifacts.sort(key=lambda x: x["created"], reverse=True)
         artifact_count = len(artifacts)
         good_artifact_count = artifact_count - self.count
         if good_artifact_count < 0:
@@ -119,11 +117,8 @@ class KeepLatestNFilesInFolder(Rule):
     def __init__(self, count: int):
         self.count = count
 
-    def aql_add_text(self, aql_text):
-        aql_text = "{}.sort({})".format(aql_text, r'{"$asc" : ["created"]}')
-        return aql_text
-
     def filter(self, artifacts):
+        artifacts.sort(key=lambda x: x["created"], reverse=True)
         artifacts_by_path = defaultdict(list)
 
         for artifact in artifacts:
