@@ -38,13 +38,21 @@ class RuleForDocker(Rule):
         in order to remove the whole image we have to "up" one leve
         """
         for artifact in artifacts:
+            # already done it or it's just a folder
+            if artifact["name"] != "manifest.json":
+                continue
+
             artifact["path"], docker_tag = artifact["path"].rsplit("/", 1)
             artifact["name"] = docker_tag
         return artifacts
 
     def _collect_docker_size(self, artifacts):
-        docker_repos = list(set(x["repo"] for x in artifacts))
+        # skip if already get the size
+        sizes_collected = all("size" in artifact for artifact in artifacts)
+        if sizes_collected:
+            return
 
+        docker_repos = list(set(x["repo"] for x in artifacts))
         if docker_repos:
             aql = ArtifactoryPath(self.session.base_url, session=self.session)
             args = ["items.find", {"$or": [{"repo": repo} for repo in docker_repos]}]
@@ -181,7 +189,7 @@ class ExcludeDockerImages(FilterDockerImages):
     boolean_operator = "$and"
 
 
-class KeepLatestNVersionImagesByProperty(Rule):
+class KeepLatestNVersionImagesByProperty(RuleForDocker):
     r"""
     Leaves ``count`` Docker images with the same major.
     If you need to add minor then put 2 or if patch then put 3.
@@ -222,8 +230,8 @@ class KeepLatestNVersionImagesByProperty(Rule):
                 good_artifact_count = 0
 
             good_artifacts = artifactory_with_version[good_artifact_count:]
-            artifacts.remove(good_artifacts)
-        return artifacts
+            artifacts.keep(good_artifacts)
+        return super().filter(artifacts)
 
 
 class DeleteDockerImageIfNotContainedInProperties(RuleForDocker):
@@ -306,7 +314,7 @@ class DeleteDockerImageIfNotContainedInProperties(RuleForDocker):
                             }
                         )
 
-        return result_docker_images
+        return super().filter(artifacts)
 
 
 class DeleteDockerImageIfNotContainedInPropertiesValue(RuleForDocker):
