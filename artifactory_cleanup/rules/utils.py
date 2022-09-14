@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional, Union
 
 from treelib import Node, Tree
 
@@ -178,3 +178,13 @@ def get_empty_folders(repositories: List[RepositoryTree]) -> ArtifactsList:
             raise ValueError("Can not remove repository root")
 
     return artifacts
+
+
+def to_masks(masks: Union[str, List[str]]):
+    """Ensure masks passed as string OR List"""
+    if isinstance(masks, str):
+        return [masks]
+    elif isinstance(masks, list):
+        return masks
+    else:
+        raise AttributeError("'masks' argument must by list of string OR string")

@@ -186,8 +186,16 @@ class CleanupPolicy(object):
         like have no contradictory rules in one set
         """
         for rule in self.rules:
-            rule.check(*args, **kwargs)
             self._check_rules_are_updated(rule)
+            try:
+                rule.check(*args, **kwargs)
+            except Exception as exc:
+                print(
+                    f"Check failed for rule '{rule.name()}' in policy '{self.name}':",
+                    file=sys.stdout,
+                )
+                print(exc, file=sys.stdout)
+                sys.exit(1)
 
     def _check_rules_are_updated(self, rule):
         # Make sure people update their own rules to the latest interface
