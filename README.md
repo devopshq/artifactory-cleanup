@@ -92,7 +92,7 @@ docker run -rm -v "$(pwd)":/app -e ARTIFACTORY_USERNAME -e ARTIFACTORY_PASSWORD 
 artifactory-cleanup --destroy
 ```
 
-Looking for more examples? Check [examples](./examples) and [tests/data](./tests/data) folders!
+Looking for more examples? Check [examples](./examples) folder!
 
 ## Notes
 
