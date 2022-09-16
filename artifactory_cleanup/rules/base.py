@@ -7,6 +7,7 @@ from typing import Optional, Union, List, Dict
 from urllib.parse import quote
 
 import cfgv
+from hurry.filesize import size
 
 from artifactory_cleanup.base_url_session import BaseUrlSession
 
@@ -22,6 +23,7 @@ class ArtifactDict(TypedDict):
     name: str
     properties: dict
     stats: dict
+    size: int
 
 
 class ArtifactsList(List[ArtifactDict]):
@@ -299,11 +301,12 @@ class CleanupPolicy(object):
         path = "{repo}/{name}" if artifact["path"] == "." else "{repo}/{path}/{name}"
         artifact_path = path.format(**artifact)
         artifact_path = quote(artifact_path)
+        artifact_size = artifact.get("size", 0) or 0
 
         if not destroy:
-            print(f"DEBUG - we would delete '{artifact_path}'")
+            print(f"DEBUG - we would delete '{artifact_path}' - {size(artifact_size)}")
             return
 
-        print(f"DESTROY MODE - delete '{artifact_path}'")
+        print(f"DESTROY MODE - delete '{artifact_path} - {size(artifact_size)}'")
         r = self.session.delete(artifact_path)
         r.raise_for_status()
