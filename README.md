@@ -92,7 +92,7 @@ docker run -rm -v "$(pwd)":/app -e ARTIFACTORY_USERNAME -e ARTIFACTORY_PASSWORD 
 artifactory-cleanup --destroy
 ```
 
-Looking for more examples? Check [examples](./examples) and [tests/data](./tests/data) folders!
+Looking for more examples? Check [examples](./examples) folder!
 
 ## Notes
 
@@ -200,7 +200,7 @@ policies:
 - rule: DeleteWithoutDownloads
 ```
 
-- `DeleteOlderThanNDaysWithoutDownloads(days=N)` - deletes artifacts that are older than N days and have not been
+- `DeleteOlderThanNDaysWithoutDownloads` - deletes artifacts that are older than N days and have not been
   downloaded
 
 ```yaml
@@ -208,7 +208,7 @@ policies:
   days: 1
 ```
 
-- `DeleteNotUsedSince(days=N)` - delete artifacts that were downloaded, but for a long time. N days passed. Or not
+- `DeleteNotUsedSince` - delete artifacts that were downloaded, but for a long time. N days passed. Or not
   downloaded at all from the moment of creation and it's been N days
 
 ```yaml
@@ -216,7 +216,7 @@ policies:
   days: 1
 ```
 
-- `DeleteEmptyFolders()` - Clean up empty folders in given repository list
+- `DeleteEmptyFolders` - Clean up empty folders in given repository list
 
 ```yaml
 - rule: DeleteEmptyFolders
@@ -224,7 +224,7 @@ policies:
 
 ## Keep
 
-- `KeepLatestNFiles(count=N)` - Leaves the last (by creation time) files in the amount of N pieces. WITHOUT accounting
+- `KeepLatestNFiles` - Leaves the last (by creation time) files in the amount of N pieces. WITHOUT accounting
   subfolders
 
 ```yaml
@@ -232,7 +232,7 @@ policies:
   count: 1
 ```
 
-- `KeepLatestNFilesInFolder(count=N)` - Leaves the last (by creation time) files in the number of N pieces in each
+- `KeepLatestNFilesInFolder` - Leaves the last (by creation time) files in the number of N pieces in each
   folder
 
 ```yaml
@@ -240,7 +240,7 @@ policies:
   count: 1
 ```
 
-- `KeepLatestVersionNFilesInFolder(count, custom_regexp='some-regexp')` - Leaves the latest N (by version) files in each
+- `KeepLatestVersionNFilesInFolder` - Leaves the latest N (by version) files in each
   folder. The definition of the version is using regexp. By default `[^\d][\._]((\d+\.)+\d+)`
 
 ```yaml
@@ -249,7 +249,7 @@ policies:
   custom_regexp: "[^\\d][\\._]((\\d+\\.)+\\d+)"
 ```
 
-- `KeepLatestNupkgNVersions(count=N)` - Leaves N nupkg (adds `*.nupkg` filter) in release feature builds
+- `KeepLatestNupkgNVersions` - Leaves N nupkg (adds `*.nupkg` filter) in release feature builds
 
 ```yaml
 - rule: KeepLatestNupkgNVersions
@@ -258,14 +258,14 @@ policies:
 
 ## Docker
 
-- `DeleteDockerImagesOlderThan(days=N)` - Delete docker images that are older than N days
+- `DeleteDockerImagesOlderThan` - Delete docker images that are older than N days
 
 ```yaml
 - rule: DeleteDockerImagesOlderThan
   days: 1
 ```
 
-- `DeleteDockerImagesOlderThanNDaysWithoutDownloads(days=N)` - Deletes docker images that are older than N days and have
+- `DeleteDockerImagesOlderThanNDaysWithoutDownloads` - Deletes docker images that are older than N days and have
   not been downloaded
 
 ```yaml
@@ -273,15 +273,14 @@ policies:
   days: 1
 ```
 
-- `DeleteDockerImagesNotUsed(days=N)` - Removes Docker image not downloaded since N days
+- `DeleteDockerImagesNotUsed` - Removes Docker image not downloaded since N days
 
 ```yaml
 - rule: DeleteDockerImagesNotUsed
   days: 1
 ```
 
-- `IncludeDockerImages('*:latest*')` - Apply to docker images with the specified names and tags. You can specify
-  multiple names and tags: `IncludeDockerImages('*:production*'), IncludeDockerImages(['ubuntu:*', 'debian:9'])`
+- `IncludeDockerImages` - Apply to docker images with the specified names and tags
 
 ```yaml
 - rule: IncludeDockerImages
@@ -292,8 +291,7 @@ policies:
     - "*release*"
 ```
 
-- `ExcludeDockerImages('*:tag-*')` - Exclude Docker images by name and tags. You can specify multiple names and
-  tags: `ExcludePath('*:production*'), ExcludePath(['ubuntu:*', 'debian:9'])`
+- `ExcludeDockerImages` - Exclude Docker images by name and tags.
 
 ```yaml
 - rule: ExcludeDockerImages
@@ -319,38 +317,42 @@ policies:
 
 ## Filters
 
-- `IncludePath('my-path/**')` - Apply to artifacts by path / mask. You can specify multiple
-  paths: `IncludePath('*production*'), IncludePath(['*release*', '*master*'])`
+- `IncludePath` - Apply to artifacts by path / mask.
 
 ```yaml
 - rule: IncludePath
-  mask: "*production*"
+  masks: "*production*"
+- rule: IncludePath
+  masks: 
+   - "*production*"
+   - "*develop*"
 ```
 
-- `IncludeFilename('*.zip')` - Apply to artifacts by name/mask. You can specify multiple
-  paths: `IncludeFilename('*-*'), IncludeFilename(['*tar.gz', '*.nupkg'])`
+- `IncludeFilename` - Apply to artifacts by name/mask
 
 ```yaml
 - rule: IncludeFilename
-  mask: "*-*"
+  masks: 
+   - "*production*"
+   - "*develop*"
 ```
 
-- `ExcludePath('my-path/**')` - Exclude artifacts by path/mask. You can specify multiple
-  paths: `ExcludePath('*production*'), ExcludePath(['*release*', '*master*'])`
+- `ExcludePath` - Exclude artifacts by path/mask
 
 ```yaml
 - rule: ExcludePath
-  masks: "*singlemask*"
+  masks: 
+   - "*production*"
+   - "*develop*"
 ```
 
-- `ExcludeFilename('*.backup')` - Exclude artifacts by name/mask. You can specify multiple
-  paths: `ExcludeFilename('*-*'), ExcludeFilename(['*tar.gz', '*.nupkg'])`
+- `ExcludeFilename` - Exclude artifacts by name/mask
 
 ```yaml
 - rule: ExcludeFilename
   masks:
-    - "*production*"
-    - "*release*"
+    - "*.tag.gz"
+    - "*.zip"
 ```
 
 ## Create your own rule
