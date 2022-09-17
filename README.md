@@ -20,7 +20,7 @@ Everything must be as a code, even cleanup policies!
   * [Docker](#docker)
   * [Filters](#filters)
   * [Create your own rule](#create-your-own-rule)
-- [FAQ](#faq)
+- [How to](#how-to)
   * [How to connect self-signed certificates for docker?](#how-to-connect-self-signed-certificates-for-docker)
   * [How to clean up Conan repository?](#how-to-clean-up-conan-repository)
   * [How to keep latest N docker images?](#how-to-keep-latest-n-docker-images)
@@ -425,7 +425,7 @@ docker run -v "$(pwd)":/app devopshq/artifactory-cleanup artifactory-cleanup --l
 artifactory-cleanup --load-rules=myrule.py
 ```
 
-# FAQ
+# How to
 
 ## How to connect self-signed certificates for docker?
 
