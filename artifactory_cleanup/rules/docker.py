@@ -37,7 +37,7 @@ class RuleForDocker(Rule):
         """
         Convert manifest.json path to folder path
         Docker rules get path to "manifest.json" file,
-        in order to remove the whole image we have to "up" one leve
+        in order to remove the whole image we have to "up" one level
         """
         for artifact in artifacts:
             # already done it or it's just a folder
