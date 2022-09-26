@@ -59,7 +59,7 @@ artifactory-cleanup:
   password: $ARTIFACTORY_PASSWORD
 
   policies:
-    - name: Remove all files from repo-name-here older then 7 days
+    - name: Remove all files from repo-name-here older than 7 days
       rules:
         - rule: Repo
           name: "reponame"
