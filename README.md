@@ -96,8 +96,7 @@ Looking for more examples? Check [examples](./examples) folder!
 
 ## Notes
 
-- **Always** specify version of `artifactory-cleanup` when using it in the production. Do not use `1.0.0`, use the
-  latest in pypi: https://pypi.org/project/artifactory-cleanup/
+- **Always** specify version of `artifactory-cleanup` when using it in the production. `1.0.0` is just an example, find the latest version in pypi: https://pypi.org/project/artifactory-cleanup/
 
 ```bash
 # docker
