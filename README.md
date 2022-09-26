@@ -516,5 +516,5 @@ In order to provide a new release of `artifactory-cleanup`, there are two steps 
 
 1. Bump the version in the [setup.py](setup.py)
 2. Bump the version in the [__init__.py](./artifactory_cleanup/__init__.py)
-3. Create a Git release tag (e.g. `v0.3.3`) by creating a release on GitHub
+3. Create a Git release tag (in format `1.0.1`) by creating a release on GitHub
 
