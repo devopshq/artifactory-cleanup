@@ -100,7 +100,7 @@ class KeepLatestNFiles(Rule):
         self.count = count
 
     def filter(self, artifacts):
-        artifacts.sort(key=lambda x: x["created"], reverse=True)
+        artifacts.sort(key=lambda x: x["created"])
         artifact_count = len(artifacts)
         good_artifact_count = artifact_count - self.count
         if good_artifact_count < 0:
@@ -118,7 +118,7 @@ class KeepLatestNFilesInFolder(Rule):
         self.count = count
 
     def filter(self, artifacts):
-        artifacts.sort(key=lambda x: x["created"], reverse=True)
+        artifacts.sort(key=lambda x: x["created"])
         artifacts_by_path = defaultdict(list)
 
         for artifact in artifacts:
