@@ -1,9 +1,10 @@
 from sys import stderr
+from typing import List
 
 from requests import HTTPError
 
 from artifactory_cleanup.errors import InvalidConfigError
-from artifactory_cleanup.rules.base import Rule, ArtifactsList
+from artifactory_cleanup.rules.base import Rule
 
 
 class Repo(Rule):
@@ -16,12 +17,8 @@ class Repo(Rule):
     def __init__(self, name: str):
         bad_sym = set("*/[]")
         if set(name) & bad_sym:
-            raise InvalidConfigError(
-                "Bad name for repo: {name}, contains bad symbols: {bad_sym}\n"
-                "Check that your have repo() correct".format(
-                    name=name, bad_sym="".join(bad_sym)
-                )
-            )
+            msg = f"Bad name for repo: {name}, contains bad symbols: {''.join(bad_sym)}"
+            raise InvalidConfigError(msg)
         self.repo = name
 
     def check(self, *args, **kwargs):
@@ -45,8 +42,21 @@ class Repo(Rule):
         filters.append(filter_)
         return filters
 
-    def filter(self, artifacts: ArtifactsList):
-        return artifacts
+
+class RepoList(Rule):
+    def __init__(self, repos: List[str]):
+        self.repos = [Repo(name) for name in repos]
+
+    def check(self, *args, **kwargs):
+        for repo in self.repos:
+            repo.check(*args, **kwargs)
+
+    def aql_add_filter(self, filters):
+        repos_filters = []
+        for repo in self.repos:
+            repo.aql_add_filter(repos_filters)
+        filters.append({"$or": repos_filters})
+        return filters
 
 
 class RepoByMask(Rule):

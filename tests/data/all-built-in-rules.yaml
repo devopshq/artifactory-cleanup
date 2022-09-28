@@ -12,6 +12,11 @@ artifactory-cleanup:
       rules:
         - rule: Repo
           name: "repo-name-here"
+        - rule: RepoList
+          repos:
+            - "repo1"
+            - "repo2"
+            - "repo3"
         - rule: RepoByMask
           mask: "*-tmp"
         - rule: PropertyEq

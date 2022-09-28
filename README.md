@@ -158,6 +158,16 @@ policies:
       - rule: Repo
 ```
 
+- `RepoList` - Apply the policy to list of repositories.
+
+```yaml
+- rule: RepoList
+  repos:
+    - repo1
+    - repo2
+    - repo3
+```
+
 - `RepoByMask` - Apply rule to repositories matching by mask
 
 ```yaml
