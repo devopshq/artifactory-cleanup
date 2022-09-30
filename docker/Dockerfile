@@ -9,7 +9,9 @@ ENV REQUESTS_CA_BUNDLE /etc/ssl/certs/ca-certificates.crt
 ENV SSL_CERT_FILE /etc/ssl/certs/ca-certificates.crt
 
 COPY . /src
+COPY docker/run.sh /opt/docker/run.sh
+
 RUN pip install /src && rm -rf /src
 WORKDIR /app
 
-CMD ["bash", "/app/docker/run.sh"]
+ENTRYPOINT ["bash", "/opt/docker/run.sh"]
