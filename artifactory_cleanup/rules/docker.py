@@ -110,11 +110,11 @@ class DeleteDockerImagesOlderThanNDaysWithoutDownloads(RuleForDocker):
 
     def aql_add_filter(self, filters):
         last_day = self.today - self.days
-        filter_ = {
+        filter_ = [
             {"stat.downloads": {"$eq": None}},
             {"created": {"$lte": last_day.isoformat()}},
-        }
-        filters.append(filter_)
+        ]
+        filters.extend(filter_)
         return super().aql_add_filter(filters)
 
 
