@@ -143,7 +143,7 @@ class KeepLatestVersionNFilesInFolder(Rule):
     The definition of the version is using regexp. By default ``r'[^ \d][[\._]]()((\d+\.)+\d+)')``
     """
 
-    def __init__(self, count, custom_regexp=r"[^\d][\._]((\d+\.)+\d+)"):
+    def __init__(self, count, custom_regexp=r"([\d]+\.[\d]+\.[\d]+)"):
         self.count = count
         self.custom_regexp = custom_regexp
 
@@ -165,6 +165,7 @@ class KeepLatestVersionNFilesInFolder(Rule):
                 key = path + "/" + name_without_version
                 artifacts_by_path_and_name[key].append(artifactory_with_version)
             else:
+                print("Warning: Could not identify version for {}/{}".format(artifact["path"], artifact["name"]))
                 artifacts.keep(artifact)
 
         for artifactory_with_version in artifacts_by_path_and_name.values():
