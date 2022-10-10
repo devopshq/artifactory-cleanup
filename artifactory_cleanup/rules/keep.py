@@ -177,7 +177,13 @@ class KeepLatestVersionNFilesInFolder(Rule):
             if good_artifact_count < 0:
                 good_artifact_count = 0
 
-            good_artifacts = artifactory_with_version[good_artifact_count:]
+            good_sets = artifactory_with_version[good_artifact_count:]
+  
+            good_artifacts = []
+  
+            for good_set in good_sets:
+              good_artifacts.append(good_set[1])
+
             artifacts.keep(good_artifacts)
 
         return artifacts
