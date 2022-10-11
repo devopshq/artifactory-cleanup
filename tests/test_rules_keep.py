@@ -91,6 +91,7 @@ def test_KeepLatestNFilesInFolder():
     ]
     assert makeas(remove_these, expected) == expected
 
+
 def test_KeepLatestVersionNFilesInFolderDefault():
     data = [
         {
@@ -128,6 +129,7 @@ def test_KeepLatestVersionNFilesInFolderDefault():
         {"name": "0.0.1.zip", "path": "folder2"},
     ]
     assert makeas(remove_these, expected) == expected
+
 
 def test_KeepLatestVersionNFilesInFolderRegexWork():
     data = [
@@ -170,13 +172,16 @@ def test_KeepLatestVersionNFilesInFolderRegexWork():
 
     artifacts = ArtifactsList.from_response(data)
 
-    remove_these = KeepLatestVersionNFilesInFolder(1, "[\\d]+\\.([\\d]+\\.[\\d]+)").filter(artifacts)
+    remove_these = KeepLatestVersionNFilesInFolder(
+        1, "[\\d]+\\.([\\d]+\\.[\\d]+)"
+    ).filter(artifacts)
     expected = [
         {"name": "0.0.1.zip", "path": "folder1"},
         {"name": "0.0.1.zip", "path": "folder2"},
         {"name": "1.0.1.zip", "path": "folder3"},
     ]
     assert makeas(remove_these, expected) == expected
+
 
 def test_KeepLatestVersionNFilesInFolderRegexFail():
     data = [
@@ -209,7 +214,8 @@ def test_KeepLatestVersionNFilesInFolderRegexFail():
 
     artifacts = ArtifactsList.from_response(data)
 
-    remove_these = KeepLatestVersionNFilesInFolder(1, "[^\\d][\\._]((\\d+\\.)+\\d+)").filter(artifacts)
-    expected = [
-    ]
+    remove_these = KeepLatestVersionNFilesInFolder(
+        1, "[^\\d][\\._]((\\d+\\.)+\\d+)"
+    ).filter(artifacts)
+    expected = []
     assert makeas(remove_these, expected) == expected

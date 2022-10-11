@@ -165,7 +165,11 @@ class KeepLatestVersionNFilesInFolder(Rule):
                 key = path + "/" + name_without_version
                 artifacts_by_path_and_name[key].append(artifactory_with_version)
             else:
-                print("Warning: Could not identify version for {}/{}".format(artifact["path"], artifact["name"]))
+                print(
+                    "Warning: Could not identify version for {}/{}".format(
+                        artifact["path"], artifact["name"]
+                    )
+                )
                 artifacts.keep(artifact)
 
         for artifactory_with_version in artifacts_by_path_and_name.values():
@@ -179,11 +183,11 @@ class KeepLatestVersionNFilesInFolder(Rule):
                 good_artifact_count = 0
 
             good_sets = artifactory_with_version[good_artifact_count:]
-  
+
             good_artifacts = []
-  
+
             for good_set in good_sets:
-              good_artifacts.append(good_set[1])
+                good_artifacts.append(good_set[1])
 
             artifacts.keep(good_artifacts)
 
