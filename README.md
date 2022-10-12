@@ -250,7 +250,7 @@ policies:
 ```
 
 - `KeepLatestVersionNFilesInFolder` - Leaves the latest N (by version) files in each
-  folder. The definition of the version is using regexp. By default `[^\d][\._]((\d+\.)+\d+)`
+  folder. The definition of the version is using regexp. By default it parses [semver](https://semver.org/) using the regex - `([\d]+\.[\d]+\.[\d]+)")`
 
 ```yaml
 - rule: KeepLatestVersionNFilesInFolder
