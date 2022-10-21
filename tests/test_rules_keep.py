@@ -219,4 +219,40 @@ class TestKeepLatestVersionNFilesInFolderDefault:
             1, "[^\\d][\\._]((\\d+\\.)+\\d+)"
         ).filter(artifacts)
         expected = []
+        assert remove_these == expected
+
+    def test_regexp_with_hyphen(self):
+        data = [
+            # bootstrap-gui
+            {
+                "path": "folder1",
+                "name": "bootstrap-gui-3.10-39.src.rpm",
+                "created": "2021-03-20T13:54:52.383+02:00",
+            },
+            {
+                "path": "folder1",
+                "name": "bootstrap-gui-3.10-33.src.rpm",
+                "created": "2021-03-20T13:54:52.383+02:00",
+            },
+            {
+                "path": "folder1",
+                "name": "bootstrap-gui-3.11-33.src.rpm",
+                "created": "2021-03-19T13:53:52.383+02:00",
+            },
+            {
+                "path": "folder1",
+                "name": "bootstrap-gui-4.11-33.src.rpm",
+                "created": "2021-03-20T13:54:52.383+02:00",
+            },
+        ]
+
+        artifacts = ArtifactsList.from_response(data)
+
+        remove_these = KeepLatestVersionNFilesInFolder(
+            2, "bootstrap-gui-([\\d]+\\.[\\d]+\\-[\\d]+).*\\.rpm"
+        ).filter(artifacts)
+        expected = [
+            {"name": "bootstrap-gui-3.10-39.src.rpm", "path": "folder1"},
+            {"name": "bootstrap-gui-3.10-33.src.rpm", "path": "folder1"},
+        ]
         assert makeas(remove_these, expected) == expected

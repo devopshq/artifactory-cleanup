@@ -173,9 +173,7 @@ class KeepLatestVersionNFilesInFolder(Rule):
                 artifacts.keep(artifact)
 
         for artifactory_with_version in artifacts_by_path_and_name.values():
-            artifactory_with_version.sort(
-                key=lambda x: [int(x) for x in x[0].split(".")]
-            )
+            artifactory_with_version.sort()
 
             artifact_count = len(artifactory_with_version)
             good_artifact_count = artifact_count - self.count
