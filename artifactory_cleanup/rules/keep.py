@@ -158,7 +158,7 @@ class KeepLatestVersionNFilesInFolder(Rule):
                 version_str = (
                     version[0][0] if isinstance(version[0], tuple) else version[0]
                 )
-                artifactory_with_version = [version_str, artifact]
+                artifactory_with_version = (version_str, artifact)
                 name_without_version = artifact["name"][
                     : artifact["name"].find(version_str)
                 ]
@@ -173,7 +173,8 @@ class KeepLatestVersionNFilesInFolder(Rule):
                 artifacts.keep(artifact)
 
         for artifactory_with_version in artifacts_by_path_and_name.values():
-            artifactory_with_version.sort()
+            # List of pairs: [version, ArtifactDict]
+            artifactory_with_version.sort(key=lambda pair: pair[0])
 
             artifact_count = len(artifactory_with_version)
             good_artifact_count = artifact_count - self.count

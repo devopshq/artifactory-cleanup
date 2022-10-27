@@ -94,7 +94,7 @@ class TestKeepLatestNFilesInFolder:
         assert makeas(remove_these, expected) == expected
 
 
-class TestKeepLatestVersionNFilesInFolderDefault:
+class TestKeepLatestVersionNFilesInFolder:
     def test_default_regexp(self):
         data = [
             {
