@@ -76,7 +76,7 @@ export ARTIFACTORY_USERNAME=usernamehere
 export ARTIFACTORY_PASSWORD=password
 
 # docker
-docker run -rm -v "$(pwd)":/app -e ARTIFACTORY_USERNAME -e ARTIFACTORY_PASSWORD devopshq/artifactory-cleanup artifactory-cleanup
+docker run --rm -v "$(pwd)":/app -e ARTIFACTORY_USERNAME -e ARTIFACTORY_PASSWORD devopshq/artifactory-cleanup artifactory-cleanup
 
 # cli
 artifactory-cleanup
@@ -86,7 +86,7 @@ artifactory-cleanup
 
 ```bash
 # docker
-docker run -rm -v "$(pwd)":/app -e ARTIFACTORY_USERNAME -e ARTIFACTORY_PASSWORD devopshq/artifactory-cleanup artifactory-cleanup --destroy
+docker run --rm -v "$(pwd)":/app -e ARTIFACTORY_USERNAME -e ARTIFACTORY_PASSWORD devopshq/artifactory-cleanup artifactory-cleanup --destroy
 
 # cli
 artifactory-cleanup --destroy
@@ -101,7 +101,7 @@ Looking for more examples? Check [examples](./examples) folder!
 ```bash
 # docker
 docker pull devopshq/artifactory-cleanup:1.0.0
-docker run -rm devopshq/artifactory-cleanup:1.0.0 artifactory-cleanup --version
+docker run --rm devopshq/artifactory-cleanup:1.0.0 artifactory-cleanup --version
 
 # python (later we call it 'cli')
 python3 -mpip install artifactory-cleanup==1.0.0
