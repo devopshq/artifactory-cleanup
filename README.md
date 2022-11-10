@@ -35,7 +35,7 @@ As simple as one command!
 ```bash
 # docker
 docker pull devopshq/artifactory-cleanup
-docker run -rm devopshq/artifactory-cleanup artifactory-cleanup --help
+docker run --rm devopshq/artifactory-cleanup artifactory-cleanup --help
 
 # python (later we call it 'cli')
 python3 -mpip install artifactory-cleanup
