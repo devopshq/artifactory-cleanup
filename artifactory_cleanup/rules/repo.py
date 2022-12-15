@@ -44,8 +44,19 @@ class Repo(Rule):
 
 
 class RepoList(Rule):
+    """
+    Apply the policy to a list of repositories.
+    """
+
     def __init__(self, repos: List[str]):
         self.repos = [Repo(name) for name in repos]
+
+    def init(self, session, today, *args, **kwargs) -> None:
+        """
+        Init the rule for each repo in our list.
+        """
+        for repo in self.repos:
+            repo.init(session, today, *args, **kwargs)
 
     def check(self, *args, **kwargs):
         for repo in self.repos:
