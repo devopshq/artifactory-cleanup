@@ -7,8 +7,9 @@ artifactory-cleanup:
   policies:
     - name: Remove all files from repo-name-here older then 7 days
       rules:
-        - rule: Repo
-          name: "repo-name-here"
+        - rule: RepoList
+          repos:
+            - "repo-name-here"
         - rule: DeleteOlderThan
           days: 7
 
