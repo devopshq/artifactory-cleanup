@@ -12,7 +12,7 @@ def test_help(capsys):
         exit=False,
     )
     stdout, stderr = capsys.readouterr()
-    assert 'Usage:' in stdout
+    assert "Usage:" in stdout
     assert not stderr
     assert code == 0
 

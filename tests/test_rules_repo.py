@@ -16,7 +16,7 @@ def test_RepoList():
     ]
     session = "session"
     today = "today"
-    rule.init(session, today, 'arg1', 'arg2', 'arg3', abc=123)
+    rule.init(session, today, "arg1", "arg2", "arg3", abc=123)
     assert rule.session is None
     assert rule.today is None
     for repo in rule.repos:
