@@ -11,6 +11,9 @@ def test_help(capsys):
         ],
         exit=False,
     )
+    stdout, stderr = capsys.readouterr()
+    assert "Usage:" in stdout
+    assert not stderr
     assert code == 0
 
 
@@ -29,6 +32,7 @@ def test_dry_mode(capsys, shared_datadir, requests_mock):
     stdout, stderr = capsys.readouterr()
     assert code == 0, stdout
     assert "Verbose MODE" in stdout
+    assert "Destroy MODE" not in stdout
     assert (
         "DEBUG - we would delete 'repo-name-here/path/to/file/filename1.json'" in stdout
     )
@@ -54,6 +58,7 @@ def test_destroy(capsys, shared_datadir, requests_mock):
     stdout, stderr = capsys.readouterr()
     assert code == 0, stdout
     assert "Destroy MODE" in stdout
+    assert "Verbose MODE" not in stdout
 
     assert (
         requests_mock.call_count == 6
