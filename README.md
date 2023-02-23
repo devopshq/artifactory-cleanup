@@ -388,7 +388,11 @@ from artifactory_cleanup.rules import Rule, ArtifactsList
 
 
 class MySimpleRule(Rule):
-    """For more methods look at Rule source code"""
+    """
+    This doc string is used as rule title
+
+    For more methods look at Rule source code
+    """
 
     def __init__(self, my_param: str, value: int):
         self.my_param = my_param
