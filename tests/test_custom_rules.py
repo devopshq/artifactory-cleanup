@@ -2,7 +2,7 @@ from artifactory_cleanup.rules import Rule
 
 
 class CustomRuleWithDocs(Rule):
-    """ Example with doc string """
+    """Example with doc string"""
 
 
 class CustomRuleWithoutDocs(Rule):
