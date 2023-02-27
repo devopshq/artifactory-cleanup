@@ -91,8 +91,9 @@ class Rule(object):
     @classmethod
     def title(cls) -> str:
         """Cut the docstring to show only the very first important line"""
-        docs = [x.strip() for x in cls.__doc__.splitlines() if x][0]
-        return docs
+        if not cls.__doc__:
+            return ""
+        return [x.strip() for x in cls.__doc__.splitlines() if x][0]
 
     def init(self, session, today, *args, **kwargs) -> None:
         """
