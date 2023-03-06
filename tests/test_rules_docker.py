@@ -76,6 +76,12 @@ class TestKeepLatestNVersionImagesByProperty:
         )
         assert policy.filter(artifacts) == [
             {
+                "name": "0.1.83",
+                "path": "baz",
+                "properties": {"docker.manifest": "0.1.83"},
+                "stats": {},
+            },
+            {
                 "name": "0.1.99",
                 "path": "foobar",
                 "properties": {"docker.manifest": "0.1.99"},
@@ -85,12 +91,6 @@ class TestKeepLatestNVersionImagesByProperty:
                 "name": "1.1.1",
                 "path": "foobar",
                 "properties": {"docker.manifest": "1.1.1"},
-                "stats": {},
-            },
-            {
-                "name": "0.1.83",
-                "path": "baz",
-                "properties": {"docker.manifest": "0.1.83"},
                 "stats": {},
             },
         ]
