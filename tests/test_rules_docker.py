@@ -48,6 +48,21 @@ class TestKeepLatestNVersionImagesByProperty:
                 "path": "foobar/2.1.1",
                 "name": "manifest.json",
             },
+            {
+                "properties": {"docker.manifest": "0.1.86"},
+                "path": "baz/0.1.86",
+                "name": "manifest.json",
+            },
+            {
+                "properties": {"docker.manifest": "0.1.87"},
+                "path": "baz/0.1.87",
+                "name": "manifest.json",
+            },
+            {
+                "properties": {"docker.manifest": "0.1.83"},
+                "path": "baz/0.1.83",
+                "name": "manifest.json",
+            },
         ]
         artifacts = ArtifactsList.from_response(data)
         policy = CleanupPolicy(
@@ -70,6 +85,12 @@ class TestKeepLatestNVersionImagesByProperty:
                 "name": "1.1.1",
                 "path": "foobar",
                 "properties": {"docker.manifest": "1.1.1"},
+                "stats": {},
+            },
+            {
+                "name": "0.1.83",
+                "path": "baz",
+                "properties": {"docker.manifest": "0.1.83"},
                 "stats": {},
             },
         ]
