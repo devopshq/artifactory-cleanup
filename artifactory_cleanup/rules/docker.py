@@ -229,7 +229,10 @@ class KeepLatestNVersionImagesByProperty(RuleForDocker):
 
         def _groupby(artifact):
             """Group by major/minor/patch version"""
-            return self.get_version(artifact)[: self.number_of_digits_in_version]
+            return (
+                artifact["path"],
+                self.get_version(artifact)[: self.number_of_digits_in_version],
+            )
 
         # Group artifacts by major/minor or patch
         grouped = pydash.group_by(artifacts, iteratee=_groupby)
