@@ -309,5 +309,14 @@ class CleanupPolicy(object):
             return
 
         print(f"DESTROY MODE - delete '{artifact_path} - {size(artifact_size)}'")
+        try:
+            r = self.session.head(artifact_path)
+            r.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 404:
+                print(f"File not found: {artifact_path}")
+                return
+            else:
+                raise e
         r = self.session.delete(artifact_path)
         r.raise_for_status()
