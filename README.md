@@ -9,21 +9,23 @@ Everything must be as a code, even cleanup policies!
 
 <!-- toc -->
 
+- [Artifactory cleanup](#artifactory-cleanup)
+- [Tables of Contents](#tables-of-contents)
 - [Installation](#installation)
 - [Usage](#usage)
-  * [Notes](#notes)
-  * [Commands](#commands)
+  - [Notes](#notes)
+  - [Commands](#commands)
 - [Rules](#rules)
-  * [Common](#common)
-  * [Delete](#delete)
-  * [Keep](#keep)
-  * [Docker](#docker)
-  * [Filters](#filters)
-  * [Create your own rule](#create-your-own-rule)
+  - [Common](#common)
+  - [Delete](#delete)
+  - [Keep](#keep)
+  - [Docker](#docker)
+  - [Filters](#filters)
+  - [Create your own rule](#create-your-own-rule)
 - [How to](#how-to)
-  * [How to connect self-signed certificates for docker?](#how-to-connect-self-signed-certificates-for-docker)
-  * [How to clean up Conan repository?](#how-to-clean-up-conan-repository)
-  * [How to keep latest N docker images?](#how-to-keep-latest-n-docker-images)
+  - [How to connect self-signed certificates for docker?](#how-to-connect-self-signed-certificates-for-docker)
+  - [How to clean up Conan repository?](#how-to-clean-up-conan-repository)
+  - [How to keep latest N docker images?](#how-to-keep-latest-n-docker-images)
 - [Release](#release)
 
 <!-- tocstop -->
@@ -135,6 +137,12 @@ artifactory-cleanup --days-in-future=10
 # Not satisfied with built-in rules? Write your own rules in python and connect them!
 artifactory-cleanup --load-rules=myrule.py
 docker run -v "$(pwd)":/app devopshq/artifactory-cleanup artifactory-cleanup --load-rules=myrule.py
+
+# Save the table summary in a file
+artifactory-cleanup --output=myfile.txt
+
+# Save the summary in a Json file
+artifactory-cleanup --output=myfile.txt --output-format=json
 ```
 
 # Rules
