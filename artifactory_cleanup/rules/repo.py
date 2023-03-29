@@ -1,6 +1,6 @@
 from sys import stderr
 from typing import List
-
+import os
 from requests import HTTPError
 
 from artifactory_cleanup.errors import InvalidConfigError
@@ -15,7 +15,13 @@ class Repo(Rule):
     schema = []
 
     def __init__(self, name: str):
+        """
+        Checks if the name of the repo starts with an $, indicating a variable. substitutes with the variable if it exists.
+        otherwise assume that the $ is part of the repo name
+        """
         bad_sym = set("*/[]")
+        if name.startswith("$") & (os.path.expandvars(name) != ""):
+            name = os.path.expandvars(name)
         if set(name) & bad_sym:
             msg = f"Bad name for repo: {name}, contains bad symbols: {''.join(bad_sym)}"
             raise InvalidConfigError(msg)
