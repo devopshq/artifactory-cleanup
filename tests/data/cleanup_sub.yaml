@@ -1,0 +1,21 @@
+artifactory-cleanup:
+  server: https://repo.example.com/artifactory
+  # $VAR is auto populated from environment variables
+  user: $ARTIFACTORY_USERNAME
+  password: $ARTIFACTORY_PASSWORD
+
+  policies:
+    - name: Remove all files from repo-name-here older then 7 days
+      rules:
+        - rule: RepoList
+          repos:
+            - "repo-name-here"
+        - rule: DeleteOlderThan
+          days: 7
+
+    - name: Use your own rules!
+      rules:
+        - rule: Repo
+          name: $REPO_NAME
+        - rule: MySimpleRule
+          my_param: "Hello, world!"

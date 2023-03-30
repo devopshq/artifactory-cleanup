@@ -41,6 +41,30 @@ def test_dry_mode(capsys, shared_datadir, requests_mock):
         requests_mock.call_count == 4
     ), "Requests: check repository exists, AQL, NO DELETE  - 2 times"
 
+@pytest.mark.usefixtures("requests_repo_name_here")
+def test_dry_mode_with_substitution(capsys, shared_datadir, requests_mock, monkeypatch):
+    monkeypatch.setenv("$REPO_NAME", "repo-name-here")
+    _, code = ArtifactoryCleanupCLI.run(
+        [
+            "ArtifactoryCleanupCLI",
+            "--config",
+            str(shared_datadir / "cleanup_sub.yaml"),
+            "--load-rules",
+            str(shared_datadir / "myrule.py"),
+        ],
+        exit=False,
+    )
+    stdout, stderr = capsys.readouterr()
+    assert code == 0, stdout
+    assert "Verbose MODE" in stdout
+    assert "Destroy MODE" not in stdout
+    assert (
+        "DEBUG - we would delete 'repo-name-here/path/to/file/filename1.json'" in stdout
+    )
+
+    assert (
+        requests_mock.call_count == 4
+    ), "Requests: check repository exists, AQL, NO DELETE  - 2 times"
 
 @pytest.mark.usefixtures("requests_repo_name_here")
 def test_destroy(capsys, shared_datadir, requests_mock):
