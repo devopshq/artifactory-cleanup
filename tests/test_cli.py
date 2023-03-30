@@ -41,6 +41,7 @@ def test_dry_mode(capsys, shared_datadir, requests_mock):
         requests_mock.call_count == 4
     ), "Requests: check repository exists, AQL, NO DELETE  - 2 times"
 
+
 @pytest.mark.usefixtures("requests_repo_name_here")
 def test_dry_mode_with_substitution(capsys, shared_datadir, requests_mock, monkeypatch):
     monkeypatch.setenv("$REPO_NAME", "repo-name-here")
@@ -65,6 +66,7 @@ def test_dry_mode_with_substitution(capsys, shared_datadir, requests_mock, monke
     assert (
         requests_mock.call_count == 4
     ), "Requests: check repository exists, AQL, NO DELETE  - 2 times"
+
 
 @pytest.mark.usefixtures("requests_repo_name_here")
 def test_destroy(capsys, shared_datadir, requests_mock):
