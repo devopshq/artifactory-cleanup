@@ -135,6 +135,12 @@ artifactory-cleanup --days-in-future=10
 # Not satisfied with built-in rules? Write your own rules in python and connect them!
 artifactory-cleanup --load-rules=myrule.py
 docker run -v "$(pwd)":/app devopshq/artifactory-cleanup artifactory-cleanup --load-rules=myrule.py
+
+# Save the table summary in a file
+artifactory-cleanup --output=myfile.txt
+
+# Save the summary in a Json file
+artifactory-cleanup --output=myfile.txt --output-format=json
 ```
 
 # Rules
