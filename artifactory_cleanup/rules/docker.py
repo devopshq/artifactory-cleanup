@@ -12,12 +12,12 @@ from artifactory_cleanup.rules.utils import to_masks
 
 ctx_mgr_block, ctx_mgr_test = get_context_managers()
 
-MANIFEST_FILENAME = "manifest.json"
 
 class RuleForDocker(Rule):
     """
     Parent class for Docker rules
     """
+    MANIFEST_FILENAME = "manifest.json"
 
     def get_docker_images_list(self, docker_repo):
         url = f"/api/docker/{docker_repo}/v2/_catalog"
@@ -42,7 +42,7 @@ class RuleForDocker(Rule):
         """
         for artifact in artifacts:
             # already done it or it's just a folder
-            if "name" not in artifact or artifact["name"] != MANIFEST_FILENAME:
+            if "name" not in artifact or artifact["name"] != self.MANIFEST_FILENAME:
                 continue
 
             artifact["path"], docker_tag = artifact["path"].rsplit("/", 1)
@@ -75,7 +75,7 @@ class RuleForDocker(Rule):
                 artifact["size"] = images_sizes.get(image_key, 0)
 
     def aql_add_filter(self, filters):
-        filters.append({"name": {"$match": MANIFEST_FILENAME}})
+        filters.append({"name": {"$match": self.MANIFEST_FILENAME}})
         return filters
 
     def filter(self, artifacts):
