@@ -12,6 +12,7 @@ from artifactory_cleanup.rules.utils import to_masks
 
 ctx_mgr_block, ctx_mgr_test = get_context_managers()
 
+MANIFEST_FILENAME = "manifest.json"
 
 class RuleForDocker(Rule):
     """
@@ -36,12 +37,12 @@ class RuleForDocker(Rule):
     def _manifest_to_docker_images(self, artifacts: ArtifactsList):
         """
         Convert manifest.json path to folder path
-        Docker rules get path to "manifest.json" file,
+        Docker rules get path to MANIFEST_FILENAME file,
         in order to remove the whole image we have to "up" one level
         """
         for artifact in artifacts:
             # already done it or it's just a folder
-            if "name" not in artifact or artifact["name"] != "manifest.json":
+            if "name" not in artifact or artifact["name"] != MANIFEST_FILENAME:
                 continue
 
             artifact["path"], docker_tag = artifact["path"].rsplit("/", 1)
@@ -74,7 +75,7 @@ class RuleForDocker(Rule):
                 artifact["size"] = images_sizes.get(image_key, 0)
 
     def aql_add_filter(self, filters):
-        filters.append({"name": {"$match": "manifest.json"}})
+        filters.append({"name": {"$match": MANIFEST_FILENAME}})
         return filters
 
     def filter(self, artifacts):
