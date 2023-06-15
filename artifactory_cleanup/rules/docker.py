@@ -17,6 +17,7 @@ class RuleForDocker(Rule):
     """
     Parent class for Docker rules
     """
+
     MANIFEST_FILENAME = "manifest.json"
 
     def get_docker_images_list(self, docker_repo):
