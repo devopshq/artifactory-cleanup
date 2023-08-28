@@ -67,7 +67,7 @@ artifactory-cleanup:
           days: 7
 ```
 
-3. Run the command **TO SHOW** (not remove) artifacts that will be deleted. By default `artifacory-cleanup` uses "dry
+3. Run the command **TO SHOW** (not remove) artifacts that will be deleted. By default `artifactory-cleanup` uses "dry
    mode".
 
 ```bash
