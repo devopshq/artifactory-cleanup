@@ -223,8 +223,12 @@ class KeepLatestNVersionImagesByProperty(RuleForDocker):
         if not match:
             raise ValueError(f"Can not find version in '{artifact}'")
         version_str = match.group()
+        if version_str.startswith("v"):
+            version_str = version_str[1:]
+            return tuple(["v"] + list(map(int, version_str.split("."))))
         version = tuple(map(int, version_str.split(".")))
         return version
+
 
     def filter(self, artifacts):
         artifacts.sort(key=lambda x: x["path"])

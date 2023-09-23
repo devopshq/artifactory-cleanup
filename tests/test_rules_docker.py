@@ -63,6 +63,21 @@ class TestKeepLatestNVersionImagesByProperty:
                 "path": "baz/0.1.83",
                 "name": "manifest.json",
             },
+            {
+                "properties": {"docker.manifest": "v0.1.100"},
+                "path": "qux/v0.1.100",
+                "name": "manifest.json",
+            },
+            {
+                "properties": {"docker.manifest": "v0.1.200"},
+                "path": "qux/v0.1.200",
+                "name": "manifest.json",
+            },
+            {
+                "properties": {"docker.manifest": "v0.1.99"},
+                "path": "qux/v0.1.99",
+                "name": "manifest.json",
+            },
         ]
         artifacts = ArtifactsList.from_response(data)
         policy = CleanupPolicy(
@@ -72,6 +87,7 @@ class TestKeepLatestNVersionImagesByProperty:
             KeepLatestNVersionImagesByProperty(
                 count=2,
                 number_of_digits_in_version=1,
+                custom_regexp=r"(^v?\d+\.\d+\.\d+$)",
             ),
         )
         assert policy.filter(artifacts) == [
@@ -91,6 +107,12 @@ class TestKeepLatestNVersionImagesByProperty:
                 "name": "1.1.1",
                 "path": "foobar",
                 "properties": {"docker.manifest": "1.1.1"},
+                "stats": {},
+            },
+            {
+                "name" : "v0.1.99",
+                "path": "qux",
+                "properties": {"docker.manifest": "v0.1.99"},
                 "stats": {},
             },
         ]
