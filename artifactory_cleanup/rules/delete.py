@@ -1,7 +1,8 @@
 from datetime import timedelta
+import re
 
 from artifactory_cleanup.rules import utils
-from artifactory_cleanup.rules.base import Rule
+from artifactory_cleanup.rules.base import ArtifactsList, Rule
 
 
 class DeleteOlderThan(Rule):
@@ -102,3 +103,23 @@ class DeleteEmptyFolders(Rule):
         repositories = utils.build_repositories(artifacts)
         folders = utils.get_empty_folders(repositories)
         return folders
+
+
+class DeleteByRegex(Rule):
+    """
+    Remove artifacts by regex pattern.
+    """
+
+    def __init__(self, regex_pattern):
+        self.regex_pattern = rf"{regex_pattern}"
+
+    def aql_add_filter(self, filters):
+        print(filters)
+        print(type(filters))
+        return filters
+
+    def filter(self, artifacts: ArtifactsList) -> ArtifactsList:
+        for  val in artifacts[:]:
+            if re.match(self.regex_pattern, val["name"]) is None:
+                artifacts.remove(val)
+        return artifacts
