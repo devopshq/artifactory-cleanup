@@ -118,7 +118,7 @@ class DeleteByRegexpName(Rule):
         return filters
 
     def filter(self, artifacts: ArtifactsList) -> ArtifactsList:
-        for  val in artifacts[:]:
-            if re.match(self.regex_pattern, val["name"]) is None:
-                artifacts.remove(val)
+        for artifact in artifacts[:]:
+            if re.match(self.regex_pattern, artifact["name"]) is None:
+                artifacts.remove(artifact)
         return artifacts
