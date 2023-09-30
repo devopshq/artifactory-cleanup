@@ -237,6 +237,13 @@ policies:
 - rule: DeleteEmptyFolders
 ```
 
+- `DeleteByRegexpName` - delete artifacts whose name matches the specified regexp
+
+```yaml
+- rule: DeleteByRegexpName
+  regex_pattern: "\d"
+```
+
 ## Keep
 
 - `KeepLatestNFiles` - Leaves the last (by creation time) files in the amount of N pieces. WITHOUT accounting

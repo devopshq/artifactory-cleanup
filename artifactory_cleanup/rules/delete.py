@@ -105,7 +105,7 @@ class DeleteEmptyFolders(Rule):
         return folders
 
 
-class DeleteByRegex(Rule):
+class DeleteByRegexpName(Rule):
     """
     Remove artifacts by regex pattern.
     """
@@ -114,8 +114,7 @@ class DeleteByRegex(Rule):
         self.regex_pattern = rf"{regex_pattern}"
 
     def aql_add_filter(self, filters):
-        print(filters)
-        print(type(filters))
+        print("Here's filters that we get\n", filters)
         return filters
 
     def filter(self, artifacts: ArtifactsList) -> ArtifactsList:
