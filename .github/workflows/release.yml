@@ -15,9 +15,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: '3.7'
 
@@ -51,7 +51,7 @@ jobs:
 
     needs: deploy-pypi
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Docker meta
         id: meta
@@ -66,13 +66,13 @@ jobs:
 
       - name: Login to image repository
         if: github.ref_type == 'tag'
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DEVOPSHQ_DOCKER_USER }}
           password: ${{ secrets.DEVOPSHQ_DOCKER_TOKEN }}
 
       - name: Build and push
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: docker/Dockerfile
