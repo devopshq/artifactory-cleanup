@@ -181,7 +181,7 @@ policies:
   mask: "*.banned"
 ```
 
-- `PropertyEq`- Delete repository artifacts only with a specific property value (property_name is the name of the
+- `PropertyEq`- Delete repository artifacts only with a specific property value (property_key is the name of the
   parameter, property_value is the value)
 
 ```yaml
