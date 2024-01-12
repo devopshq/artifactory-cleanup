@@ -9,21 +9,23 @@ Everything must be as a code, even cleanup policies!
 
 <!-- toc -->
 
+- [Artifactory cleanup](#artifactory-cleanup)
+- [Tables of Contents](#tables-of-contents)
 - [Installation](#installation)
 - [Usage](#usage)
-  * [Notes](#notes)
-  * [Commands](#commands)
+  - [Notes](#notes)
+  - [Commands](#commands)
 - [Rules](#rules)
-  * [Common](#common)
-  * [Delete](#delete)
-  * [Keep](#keep)
-  * [Docker](#docker)
-  * [Filters](#filters)
-  * [Create your own rule](#create-your-own-rule)
+  - [Common](#common)
+  - [Delete](#delete)
+  - [Keep](#keep)
+  - [Docker](#docker)
+  - [Filters](#filters)
+  - [Create your own rule](#create-your-own-rule)
 - [How to](#how-to)
-  * [How to connect self-signed certificates for docker?](#how-to-connect-self-signed-certificates-for-docker)
-  * [How to clean up Conan repository?](#how-to-clean-up-conan-repository)
-  * [How to keep latest N docker images?](#how-to-keep-latest-n-docker-images)
+  - [How to connect self-signed certificates for docker?](#how-to-connect-self-signed-certificates-for-docker)
+  - [How to clean up Conan repository?](#how-to-clean-up-conan-repository)
+  - [How to keep latest N docker images?](#how-to-keep-latest-n-docker-images)
 - [Release](#release)
 
 <!-- tocstop -->
@@ -126,7 +128,15 @@ artifactory-cleanup --policy-name policytestname
 # For remove artifacts use --destroy
 artifactory-cleanup --destroy
 
+# For remove artifacts use environment variable
+export ARTIFACTORY_CLEANUP_DESTROY=True
+artifactory-cleanup
+
 # Specify config filename
+artifactory-cleanup --config artifactory-cleanup.yaml
+
+# Specify config filename using environment variable
+export ARTIFACTORY_CLEANUP_CONFIG_FILE=artifactory-cleanup.yaml
 artifactory-cleanup --config artifactory-cleanup.yaml
 
 # Look in the future - shows what the tool WILL remove after 10 days

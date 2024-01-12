@@ -36,6 +36,7 @@ class ArtifactoryCleanupCLI(cli.Application):
         ["--config"],
         help="Name of config with list of policies",
         mandatory=False,
+        envname="ARTIFACTORY_CLEANUP_CONFIG_FILE",
         default="artifactory-cleanup.yaml",
     )
 
@@ -49,6 +50,7 @@ class ArtifactoryCleanupCLI(cli.Application):
         "--destroy",
         help="Remove artifacts",
         mandatory=False,
+        envname="ARTIFACTORY_CLEANUP_DESTROY",
     )
 
     _days_in_future = cli.SwitchAttr(
