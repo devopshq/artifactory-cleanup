@@ -109,9 +109,6 @@ class ArtifactoryCleanupCLI(cli.Application):
         else:
             print("Verbose MODE")
 
-    def _print_worker_num(self):
-        print(f"Using {self._worker_count} workers")
-
     def _get_today(self):
         today = date.today()
         if self._days_in_future:
@@ -167,7 +164,7 @@ class ArtifactoryCleanupCLI(cli.Application):
         session.auth = HTTPBasicAuth(user, password)
 
         self._destroy_or_verbose()
-        self._print_worker_num()
+        print(f"Using {self._worker_count} workers")
         cleanup = ArtifactoryCleanup(
             session=session,
             policies=policies,
