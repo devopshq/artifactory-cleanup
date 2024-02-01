@@ -422,24 +422,24 @@ class MySimpleRule(Rule):
     """
 
     def __init__(self, my_param: str, value: int):
-       self.my_param = my_param
-       self.value = value
+        self.my_param = my_param
+        self.value = value
 
     def aql_add_filter(self, filters: List) -> List:
-       print(f"Today is {self.today}")
-       print(self.my_param)
-       print(self.value)
-       return filters
+        print(f"Today is {self.today}")
+        print(self.my_param)
+        print(self.value)
+        return filters
 
     def filter(self, artifacts: ArtifactsList) -> ArtifactsList:
-       """I'm here just to print the list"""
-       print(self.my_param)
-       print(self.value)
-       # You can make requests to artifactory by using self.session:
-       # url = f"/api/storage/{self.repo}"
-       # r = self.session.get(url)
-       # r.raise_for_status()
-       return artifacts
+        """I'm here just to print the list"""
+        print(self.my_param)
+        print(self.value)
+        # You can make requests to artifactory by using self.session:
+        # url = f"/api/storage/{self.repo}"
+        # r = self.session.get(url)
+        # r.raise_for_status()
+        return artifacts
 
 
 # Register your rule in the system
