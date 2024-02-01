@@ -20,6 +20,7 @@ from artifactory_cleanup.loaders import (
     YamlConfigLoader,
 )
 from artifactory_cleanup.context_managers import get_context_managers
+import signal
 
 requests.packages.urllib3.disable_warnings()
 
@@ -51,6 +52,22 @@ class ArtifactoryCleanupCLI(cli.Application):
         help="Remove artifacts",
         mandatory=False,
         envname="ARTIFACTORY_CLEANUP_DESTROY",
+    )
+
+    _ignore_not_found = cli.Flag(
+        "--ignore-not-found",
+        help="Ignores 404 errors when deleting artifacts",
+        mandatory=False,
+        default=False,
+        envname="IGNORE_NOT_FOUND",
+    )
+
+    _worker_count = cli.SwitchAttr(
+        "--worker-count",
+        help="Number of workers to use",
+        mandatory=False,
+        default=1,
+        envname="WORKER_COUNT",
     )
 
     _days_in_future = cli.SwitchAttr(
@@ -92,6 +109,9 @@ class ArtifactoryCleanupCLI(cli.Application):
             print("Destroy MODE")
         else:
             print("Verbose MODE")
+
+    def _print_worker_num(self):
+        print(f"Using {self._worker_count} workers")
 
     def _get_today(self):
         today = date.today()
@@ -148,11 +168,14 @@ class ArtifactoryCleanupCLI(cli.Application):
         session.auth = HTTPBasicAuth(user, password)
 
         self._destroy_or_verbose()
+        self._print_worker_num()
         cleanup = ArtifactoryCleanup(
             session=session,
             policies=policies,
             destroy=self._destroy,
             today=today,
+            ignore_not_found=self._ignore_not_found,
+            worker_count=self._worker_count,
         )
 
         # Filter policies by name
@@ -164,7 +187,7 @@ class ArtifactoryCleanupCLI(cli.Application):
 
         block_ctx_mgr, test_ctx_mgr = get_context_managers()
         for summary in cleanup.cleanup(
-            block_ctx_mgr=block_ctx_mgr, test_ctx_mgr=test_ctx_mgr
+                block_ctx_mgr=block_ctx_mgr, test_ctx_mgr=test_ctx_mgr
         ):
             if summary is None:
                 continue

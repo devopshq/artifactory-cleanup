@@ -8,6 +8,7 @@ from urllib.parse import quote
 
 import cfgv
 from hurry.filesize import size
+from requests import HTTPError
 
 from artifactory_cleanup.base_url_session import BaseUrlSession
 
@@ -293,21 +294,30 @@ class CleanupPolicy(object):
                 print()
         return artifacts
 
-    def delete(self, artifact: ArtifactDict, destroy: bool) -> None:
+    def delete(self, artifact: dict, destroy: bool, ignore_not_found: bool) -> None:
         """
         Delete the artifact
         :param artifact: artifact to remove
         :param destroy: if False - just log the action, do not actually remove the artifact
+        :param ignore_not_found: if True - ignore 404 errors during deletion
         """
-        path = "{repo}/{name}" if artifact["path"] == "." else "{repo}/{path}/{name}"
-        artifact_path = path.format(**artifact)
+        if artifact["path"] == ".":
+            artifact_path = f"{artifact['repo']}/{artifact['name']}"
+        else:
+            artifact_path = f"{artifact['repo']}/{artifact['path']}/{artifact['name']}"
         artifact_path = quote(artifact_path)
-        artifact_size = artifact.get("size", 0) or 0
+        artifact_size = artifact.get("size", 0)
 
         if not destroy:
             print(f"DEBUG - we would delete '{artifact_path}' - {size(artifact_size)}")
             return
 
-        print(f"DESTROY MODE - delete '{artifact_path} - {size(artifact_size)}'")
-        r = self.session.delete(artifact_path)
-        r.raise_for_status()
+        try:
+            print(f"DESTROY MODE - delete '{artifact_path}' - {size(artifact_size)}'")
+            response = self.session.delete(artifact_path)
+            response.raise_for_status()
+        except HTTPError as e:
+            if e.response.status_code == 404 and ignore_not_found:
+                print(f"NOT FOUND - '{artifact_path}' was not found, so not deleted.")
+            else:
+                raise

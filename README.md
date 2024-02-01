@@ -113,6 +113,8 @@ artifactory-cleanup --help
 - Use CI servers or cron-like utilities to run `artifactory-cleanup` every day (or every hour). TeamCity and GitHub have
   built-in support and show additional logs format
 - Do not save credentials in the configuration file, use environment variables.
+- Use `--ignore-not-found` flag to ignore errors when the repository is not found
+- If you want to run with threads, use `--worker-count=<WORKER_NUM>` flag. By default, it uses 1 thread.
 
 ## Commands ##
 
@@ -358,8 +360,8 @@ policies:
   masks: "*production*"
 - rule: IncludePath
   masks:
-   - "*production*"
-   - "*develop*"
+    - "*production*"
+    - "*develop*"
 ```
 
 - `IncludeFilename` - Apply to artifacts by name/mask
@@ -367,8 +369,8 @@ policies:
 ```yaml
 - rule: IncludeFilename
   masks:
-   - "*production*"
-   - "*develop*"
+    - "*production*"
+    - "*develop*"
 ```
 
 - `ExcludePath` - Exclude artifacts by path/mask
@@ -376,8 +378,8 @@ policies:
 ```yaml
 - rule: ExcludePath
   masks:
-   - "*production*"
-   - "*develop*"
+    - "*production*"
+    - "*develop*"
 ```
 
 - `ExcludeFilename` - Exclude artifacts by name/mask
@@ -400,7 +402,7 @@ The basic flow how the tool calls Rules:
 3. `Rule.aql_add_text(aql)` - add text to the result aql query
 4. `artifactory-cleanup` calls Artifactory with AQL and pass the result to the next step
 5. `Rule.filter(artifacts)` - filter out artifacts. The method returns **artifacts that will be removed!**.
-    - To keep artifacts use `artifacts.keep(artifact)` method
+  - To keep artifacts use `artifacts.keep(artifact)` method
 
 Create `myrule.py` file at the same folder as `artifactory-cleanup.yaml`:
 
@@ -413,31 +415,31 @@ from artifactory_cleanup.rules import Rule, ArtifactsList
 
 
 class MySimpleRule(Rule):
-    """
-    This doc string is used as rule title
+  """
+  This doc string is used as rule title
 
-    For more methods look at Rule source code
-    """
+  For more methods look at Rule source code
+  """
 
-    def __init__(self, my_param: str, value: int):
-        self.my_param = my_param
-        self.value = value
+  def __init__(self, my_param: str, value: int):
+    self.my_param = my_param
+    self.value = value
 
-    def aql_add_filter(self, filters: List) -> List:
-        print(f"Today is {self.today}")
-        print(self.my_param)
-        print(self.value)
-        return filters
+  def aql_add_filter(self, filters: List) -> List:
+    print(f"Today is {self.today}")
+    print(self.my_param)
+    print(self.value)
+    return filters
 
-    def filter(self, artifacts: ArtifactsList) -> ArtifactsList:
-        """I'm here just to print the list"""
-        print(self.my_param)
-        print(self.value)
-        # You can make requests to artifactory by using self.session:
-        # url = f"/api/storage/{self.repo}"
-        # r = self.session.get(url)
-        # r.raise_for_status()
-        return artifacts
+  def filter(self, artifacts: ArtifactsList) -> ArtifactsList:
+    """I'm here just to print the list"""
+    print(self.my_param)
+    print(self.value)
+    # You can make requests to artifactory by using self.session:
+    # url = f"/api/storage/{self.repo}"
+    # r = self.session.get(url)
+    # r.raise_for_status()
+    return artifacts
 
 
 # Register your rule in the system
