@@ -415,31 +415,31 @@ from artifactory_cleanup.rules import Rule, ArtifactsList
 
 
 class MySimpleRule(Rule):
-  """
-  This doc string is used as rule title
+   """
+   This doc string is used as rule title
 
-  For more methods look at Rule source code
-  """
+   For more methods look at Rule source code
+   """
 
-  def __init__(self, my_param: str, value: int):
-    self.my_param = my_param
-    self.value = value
+   def __init__(self, my_param: str, value: int):
+     self.my_param = my_param
+     self.value = value
 
-  def aql_add_filter(self, filters: List) -> List:
-    print(f"Today is {self.today}")
-    print(self.my_param)
-    print(self.value)
-    return filters
+   def aql_add_filter(self, filters: List) -> List:
+     print(f"Today is {self.today}")
+     print(self.my_param)
+     print(self.value)
+     return filters
 
-  def filter(self, artifacts: ArtifactsList) -> ArtifactsList:
-    """I'm here just to print the list"""
-    print(self.my_param)
-    print(self.value)
-    # You can make requests to artifactory by using self.session:
-    # url = f"/api/storage/{self.repo}"
-    # r = self.session.get(url)
-    # r.raise_for_status()
-    return artifacts
+   def filter(self, artifacts: ArtifactsList) -> ArtifactsList:
+     """I'm here just to print the list"""
+     print(self.my_param)
+     print(self.value)
+     # You can make requests to artifactory by using self.session:
+     # url = f"/api/storage/{self.repo}"
+     # r = self.session.get(url)
+     # r.raise_for_status()
+     return artifacts
 
 
 # Register your rule in the system
