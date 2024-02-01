@@ -186,7 +186,7 @@ class ArtifactoryCleanupCLI(cli.Application):
 
         block_ctx_mgr, test_ctx_mgr = get_context_managers()
         for summary in cleanup.cleanup(
-                block_ctx_mgr=block_ctx_mgr, test_ctx_mgr=test_ctx_mgr
+            block_ctx_mgr=block_ctx_mgr, test_ctx_mgr=test_ctx_mgr
         ):
             if summary is None:
                 continue
