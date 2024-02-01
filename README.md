@@ -402,7 +402,7 @@ The basic flow how the tool calls Rules:
 3. `Rule.aql_add_text(aql)` - add text to the result aql query
 4. `artifactory-cleanup` calls Artifactory with AQL and pass the result to the next step
 5. `Rule.filter(artifacts)` - filter out artifacts. The method returns **artifacts that will be removed!**.
-  - To keep artifacts use `artifacts.keep(artifact)` method
+    - To keep artifacts use `artifacts.keep(artifact)` method
 
 Create `myrule.py` file at the same folder as `artifactory-cleanup.yaml`:
 
