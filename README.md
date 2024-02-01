@@ -360,8 +360,8 @@ policies:
   masks: "*production*"
 - rule: IncludePath
   masks:
-    - "*production*"
-    - "*develop*"
+   - "*production*"
+   - "*develop*"
 ```
 
 - `IncludeFilename` - Apply to artifacts by name/mask
@@ -369,8 +369,8 @@ policies:
 ```yaml
 - rule: IncludeFilename
   masks:
-    - "*production*"
-    - "*develop*"
+   - "*production*"
+   - "*develop*"
 ```
 
 - `ExcludePath` - Exclude artifacts by path/mask
@@ -378,8 +378,8 @@ policies:
 ```yaml
 - rule: ExcludePath
   masks:
-    - "*production*"
-    - "*develop*"
+   - "*production*"
+   - "*develop*"
 ```
 
 - `ExcludeFilename` - Exclude artifacts by name/mask

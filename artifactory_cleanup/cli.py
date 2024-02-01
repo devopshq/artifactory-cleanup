@@ -20,7 +20,6 @@ from artifactory_cleanup.loaders import (
     YamlConfigLoader,
 )
 from artifactory_cleanup.context_managers import get_context_managers
-import signal
 
 requests.packages.urllib3.disable_warnings()
 
