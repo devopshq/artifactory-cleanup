@@ -294,7 +294,7 @@ class CleanupPolicy(object):
                 print()
         return artifacts
 
-    def delete(self, artifact: dict, destroy: bool, ignore_not_found: bool) -> None:
+    def delete(self, artifact: ArtifactDict, destroy: bool, ignore_not_found: bool) -> None:
         """
         Delete the artifact
         :param artifact: artifact to remove
