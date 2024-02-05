@@ -302,10 +302,10 @@ class CleanupPolicy(object):
         :param ignore_not_found: if True - ignore 404 errors during deletion
         """
         if artifact["path"] == ".":
-            artifact_path = f"{artifact['repo']}/{artifact['name']}"
+            path = "{repo}/{name}"
         else:
-            artifact_path = f"{artifact['repo']}/{artifact['path']}/{artifact['name']}"
-        artifact_path = quote(artifact_path)
+            path = "{repo}/{path}/{name}"
+        artifact_path = path.format(**artifact)
         artifact_size = artifact.get("size", 0)
 
         if not destroy:
