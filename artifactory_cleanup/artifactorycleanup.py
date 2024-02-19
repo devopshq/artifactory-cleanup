@@ -22,10 +22,12 @@ class ArtifactoryCleanup:
         policies: List[CleanupPolicy],
         destroy: bool,
         today: date,
+        ignore_not_found: bool,
     ):
         self.session = session
         self.policies = policies
         self.destroy = destroy
+        self.ignore_not_found = ignore_not_found
 
         self._init_policies(today)
 

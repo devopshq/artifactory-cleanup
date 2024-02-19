@@ -53,6 +53,14 @@ class ArtifactoryCleanupCLI(cli.Application):
         envname="ARTIFACTORY_CLEANUP_DESTROY",
     )
 
+    _ignore_not_found = cli.Flag(
+        "--ignore-not-found",
+        help="Ignores 404 errors when deleting artifacts",
+        mandatory=False,
+        default=False,
+        envname="ARTIFACTORY_CLEANUP_IGNORE_NOT_FOUND",
+    )
+
     _days_in_future = cli.SwitchAttr(
         "--days-in-future",
         help="Simulate future behaviour",
@@ -153,6 +161,7 @@ class ArtifactoryCleanupCLI(cli.Application):
             policies=policies,
             destroy=self._destroy,
             today=today,
+            ignore_not_found=self._ignore_not_found,
         )
 
         # Filter policies by name
