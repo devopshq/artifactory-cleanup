@@ -308,7 +308,8 @@ class CleanupPolicy(object):
             path = "{repo}/{path}/{name}"
 
         artifact_path = path.format(**artifact)
-        artifact_size = artifact.get("size", 0)
+        artifact_path = quote(artifact_path)
+        artifact_size = artifact.get("size", 0) or 0
 
         if not destroy:
             print(f"DEBUG - we would delete '{artifact_path}' - {size(artifact_size)}")
