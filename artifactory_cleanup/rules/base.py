@@ -4,7 +4,6 @@ import sys
 from copy import deepcopy
 from datetime import date
 from typing import Optional, Union, List, Dict
-from urllib.parse import quote
 
 import cfgv
 from hurry.filesize import size
