@@ -313,13 +313,12 @@ class CleanupPolicy(object):
         if not destroy:
             print(f"DEBUG - we would delete '{artifact_path}' - {size(artifact_size)}")
             return
+        print(f"DESTROY MODE - delete '{artifact_path} - {size(artifact_size)}'")
+        r = self.session.delete(artifact_path)
         try:
-            print(f"DESTROY MODE - delete '{artifact_path} - {size(artifact_size)}'")
-            r = self.session.delete(artifact_path)
             r.raise_for_status()
         except HTTPError as e:
             if e.response.status_code == 404 and ignore_not_found:
                 print(f"NOT FOUND - '{artifact_path}' was not found, so not deleted.")
-            else:
-                raise
+            raise
 
