@@ -58,7 +58,7 @@ class ArtifactoryCleanupCLI(cli.Application):
         help="Ignores 404 errors when deleting artifacts",
         mandatory=False,
         default=False,
-        envname="IGNORE_NOT_FOUND",
+        envname="ARTIFACTORY_CLEANUP_IGNORE_NOT_FOUND",
     )
 
     _days_in_future = cli.SwitchAttr(
