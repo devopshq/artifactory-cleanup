@@ -61,6 +61,14 @@ class ArtifactoryCleanupCLI(cli.Application):
         envname="ARTIFACTORY_CLEANUP_IGNORE_NOT_FOUND",
     )
 
+    _worker_count = cli.SwitchAttr(
+        "--worker-count",
+        help="Number of workers to use",
+        mandatory=False,
+        default=1,
+        envname="WORKER_COUNT",
+    )
+
     _days_in_future = cli.SwitchAttr(
         "--days-in-future",
         help="Simulate future behaviour",
@@ -156,12 +164,14 @@ class ArtifactoryCleanupCLI(cli.Application):
         session.auth = HTTPBasicAuth(user, password)
 
         self._destroy_or_verbose()
+        print(f"Using {self._worker_count} workers")
         cleanup = ArtifactoryCleanup(
             session=session,
             policies=policies,
             destroy=self._destroy,
             today=today,
             ignore_not_found=self._ignore_not_found,
+            worker_count=self._worker_count,
         )
 
         # Filter policies by name

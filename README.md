@@ -113,6 +113,10 @@ artifactory-cleanup --help
 - Use CI servers or cron-like utilities to run `artifactory-cleanup` every day (or every hour). TeamCity and GitHub have
   built-in support and show additional logs format
 - Do not save credentials in the configuration file, use environment variables.
+- Use `--ignore-not-found` flag to ignore errors when the repository is not found. It's useful when you have a
+  configuration for multiple repositories and some of them are not found.
+- use `--worker-count=<WORKER_NUM>` to increase the number of workers. By default, it's 1. It's useful when you have a lot of
+  artifacts and you want to speed up the process.
 
 ## Commands ##
 
