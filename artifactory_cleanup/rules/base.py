@@ -5,6 +5,7 @@ from copy import deepcopy
 from datetime import date
 from typing import Optional, Union, List, Dict
 from urllib.parse import quote
+from requests import HTTPError
 
 import cfgv
 from hurry.filesize import size
@@ -293,21 +294,32 @@ class CleanupPolicy(object):
                 print()
         return artifacts
 
-    def delete(self, artifact: ArtifactDict, destroy: bool) -> None:
+    def delete(self, artifact: ArtifactDict, destroy: bool, ignore_not_found: bool) -> None:
         """
         Delete the artifact
         :param artifact: artifact to remove
         :param destroy: if False - just log the action, do not actually remove the artifact
+        :param ignore_not_found: if True - do not raise an error if the artifact is not found
         """
-        path = "{repo}/{name}" if artifact["path"] == "." else "{repo}/{path}/{name}"
+
+        if artifact["path"] == ".":
+            path = "{repo}/{name}"
+        else:
+            path = "{repo}/{path}/{name}"
+
         artifact_path = path.format(**artifact)
-        artifact_path = quote(artifact_path)
-        artifact_size = artifact.get("size", 0) or 0
+        artifact_size = artifact.get("size", 0)
 
         if not destroy:
             print(f"DEBUG - we would delete '{artifact_path}' - {size(artifact_size)}")
             return
+        try:
+            print(f"DESTROY MODE - delete '{artifact_path} - {size(artifact_size)}'")
+            r = self.session.delete(artifact_path)
+            r.raise_for_status()
+        except HTTPError as e:
+            if e.response.status_code == 404 and ignore_not_found:
+                print(f"NOT FOUND - '{artifact_path}' was not found, so not deleted.")
+            else:
+                raise
 
-        print(f"DESTROY MODE - delete '{artifact_path} - {size(artifact_size)}'")
-        r = self.session.delete(artifact_path)
-        r.raise_for_status()
