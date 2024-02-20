@@ -66,7 +66,7 @@ class ArtifactoryCleanupCLI(cli.Application):
         help="Number of workers to use",
         mandatory=False,
         default=1,
-        envname="WORKER_COUNT",
+        envname="ARTIFACTORY_CLEANUP_WORKER_COUNT",
     )
 
     _days_in_future = cli.SwitchAttr(
