@@ -160,11 +160,6 @@ class FilterDockerImages(RuleForDocker):
         # alpine:2.4 => alpine/2.4
         return [mask.replace(":", "/") for mask in self.masks]
 
-    def check(self):
-        for mask in self.masks:
-            if ":" not in mask:
-                raise AttributeError(f"Mask '{mask}' must contain ':' in docker rules")
-
     def aql_add_filter(self, filters):
         rule_list = []
         for mask in self.get_masks():
