@@ -1,3 +1,5 @@
+import json
+import os.path
 from datetime import date
 from typing import List, Iterator
 
@@ -23,11 +25,16 @@ class ArtifactoryCleanup:
         destroy: bool,
         today: date,
         ignore_not_found: bool,
+        save_removed_artifacts_list: bool,
+        save_removed_artifacts_path: str,
+
     ):
         self.session = session
         self.policies = policies
         self.destroy = destroy
         self.ignore_not_found = ignore_not_found
+        self.save_removed_artifacts_list = save_removed_artifacts_list
+        self.save_removed_artifacts_path = save_removed_artifacts_path
 
         self._init_policies(today)
 
@@ -75,6 +82,9 @@ class ArtifactoryCleanup:
                 print("Summary size not defined")
                 yield None
             print()
+            if self.save_removed_artifacts_list:
+                with open(os.path.join(self.save_removed_artifacts_path, f"{policy.name}.json"), 'w') as file:
+                    json.dump(artifacts_to_remove, file)
 
     def only(self, policy_name: str):
         """

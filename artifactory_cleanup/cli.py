@@ -87,6 +87,23 @@ class ArtifactoryCleanupCLI(cli.Application):
         mandatory=False,
     )
 
+    _save_removed_artifacts_list = cli.Flag(
+        "--save-removed-artifacts-list",
+        help="Save removed artifacts list to file",
+        mandatory=False,
+        default=False,
+        envname="ARTIFACTORY_CLEANUP_SAVE_REMOVED_ARTIFACTS_LIST",
+    )
+
+    _save_removed_artifacts_path = cli.SwitchAttr(
+        "--save-removed-artifacts-path",
+        help="Path to save removed artifacts list",
+        mandatory=False,
+        default="output",
+        requires=["--save-removed-artifacts-list"],
+        envname="ARTIFACTORY_CLEANUP_SAVE_REMOVED_ARTIFACTS_PATH",
+    )
+
     @property
     def VERSION(self):
         # To prevent circular imports
@@ -162,6 +179,10 @@ class ArtifactoryCleanupCLI(cli.Application):
             destroy=self._destroy,
             today=today,
             ignore_not_found=self._ignore_not_found,
+            save_removed_artifacts_list=self._save_removed_artifacts_list,
+            save_removed_artifacts_path=self._save_removed_artifacts_path,
+
+
         )
 
         # Filter policies by name
