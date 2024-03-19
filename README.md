@@ -151,6 +151,9 @@ artifactory-cleanup --output=myfile.txt
 
 # Save the summary in a Json file
 artifactory-cleanup --output=myfile.txt --output-format=json
+
+# Save the summary and removed artifacts list in a Json file
+artifactory-cleanup --output=myfile.txt --output-format=json --save-removed-artifacts
 ```
 
 # Rules
