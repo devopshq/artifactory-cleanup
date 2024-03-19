@@ -88,11 +88,17 @@ class ArtifactoryCleanupCLI(cli.Application):
 
     _output_format = cli.SwitchAttr(
         "--output-format",
-        Set("table", "json", "json-with-artifact-list", case_sensitive=False),
+        Set("table", "json", case_sensitive=False),
         help="Choose the output format",
         default="table",
         requires=["--output"],
         mandatory=False,
+    )
+
+    _output_artifacts = cli.Flag(
+        "--output-artifacts", help="When --output-format is json, append the list of all deleted artifacts to --output.",
+        mandatory=False,
+        default=False,
     )
 
     @property
@@ -140,7 +146,7 @@ class ArtifactoryCleanupCLI(cli.Application):
         text = None
         if format == "table":
             text = self._format_table(result).get_string()
-        elif format == "json" or format == "json-with-artifact-list":
+        elif format == "json":
             text = json.dumps(result)
 
         with open(filename, "w") as file:
@@ -173,6 +179,7 @@ class ArtifactoryCleanupCLI(cli.Application):
             ignore_not_found=self._ignore_not_found,
             worker_count=self._worker_count,
             output_format=self._output_format,
+            output_artifacts=self._output_artifacts,
         )
 
         # Filter policies by name
