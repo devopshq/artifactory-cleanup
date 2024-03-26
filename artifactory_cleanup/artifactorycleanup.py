@@ -15,7 +15,7 @@ class CleanupSummary:
     policy_name: str
     artifacts_removed: int
     artifacts_size: int
-    removed_artifacts_list: Optional[dict]
+    removed_artifacts_list: Optional[dict] = None
 
 
 class ArtifactoryCleanup:
@@ -71,13 +71,14 @@ class ArtifactoryCleanup:
             try:
                 artifacts_size = sum([x["size"] for x in artifacts_to_remove])
                 print("Summary size: {}".format(artifacts_size))
-                yield CleanupSummary(
+                summary = CleanupSummary(
                     policy_name=policy.name,
                     artifacts_size=artifacts_size,
                     artifacts_removed=len(artifacts_to_remove),
-                    removed_artifacts_list=artifacts_to_remove if self.save_removed_artifacts_list else None,
                 )
-
+                if self.save_removed_artifacts_list:
+                    summary.removed_artifacts_list = artifacts_to_remove
+                yield summary
             except KeyError:
                 print("Summary size not defined")
                 yield None

@@ -4,7 +4,6 @@ import sys
 from datetime import timedelta, date
 
 import requests
-import yaml
 from hurry.filesize import size
 from plumbum import cli
 from plumbum.cli.switches import Set
@@ -15,12 +14,12 @@ from artifactory_cleanup.artifactorycleanup import (
     ArtifactoryCleanup,
 )
 from artifactory_cleanup.base_url_session import BaseUrlSession
+from artifactory_cleanup.context_managers import get_context_managers
 from artifactory_cleanup.errors import InvalidConfigError
 from artifactory_cleanup.loaders import (
     PythonLoader,
     YamlConfigLoader,
 )
-from artifactory_cleanup.context_managers import get_context_managers
 
 requests.packages.urllib3.disable_warnings()
 
@@ -88,13 +87,13 @@ class ArtifactoryCleanupCLI(cli.Application):
         mandatory=False,
     )
 
-    _save_removed_artifacts_list = cli.Flag(
-        "--save-removed-artifacts-list",
-        help="Save removed artifacts list to file",
+    _output_artifacts = cli.Flag(
+        "--output-artifacts",
+        help="Save artifacts list to file",
         mandatory=False,
         default=False,
         requires=["--output"],
-        envname="ARTIFACTORY_CLEANUP_SAVE_REMOVED_ARTIFACTS_LIST",
+        envname="ARTIFACTORY_OUTPUT_ARTIFACTS",
     )
 
     @property
@@ -172,7 +171,7 @@ class ArtifactoryCleanupCLI(cli.Application):
             destroy=self._destroy,
             today=today,
             ignore_not_found=self._ignore_not_found,
-            save_removed_artifacts_list=self._save_removed_artifacts_list,
+            save_removed_artifacts_list=self._output_artifacts,
         )
 
         # Filter policies by name
@@ -190,14 +189,14 @@ class ArtifactoryCleanupCLI(cli.Application):
                 continue
             total_size += summary.artifacts_size
 
-            result["policies"].append(
-                {
-                    "name": summary.policy_name,
-                    "file_count": summary.artifacts_removed,
-                    "size": summary.artifacts_size,
-                    **({"removed_artifacts_list": summary.removed_artifacts_list} if summary.removed_artifacts_list is not None else {})
-                }
-            )
+            policy = {
+                "name": summary.policy_name,
+                "file_count": summary.artifacts_removed,
+                "size": summary.artifacts_size
+            }
+            if summary.removed_artifacts_list is not None:
+                policy["artifacts_list"] = summary.removed_artifacts_list
+            result["policies"].append(policy)
         result["total_size"] = total_size
 
         self._print_table(result)
