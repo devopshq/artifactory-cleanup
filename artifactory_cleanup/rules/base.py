@@ -321,5 +321,6 @@ class CleanupPolicy(object):
         except HTTPError as e:
             if e.response.status_code == 404 and ignore_not_found:
                 print(f"NOT FOUND - '{artifact_path}' was not found, so not deleted.")
+                return
             raise
 
