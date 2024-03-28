@@ -1,5 +1,7 @@
+import json
+import os.path
 from datetime import date
-from typing import List, Iterator
+from typing import List, Iterator, Optional
 
 from attr import dataclass
 from requests import Session
@@ -13,6 +15,7 @@ class CleanupSummary:
     policy_name: str
     artifacts_removed: int
     artifacts_size: int
+    removed_artifacts_list: Optional[dict] = None
 
 
 class ArtifactoryCleanup:
@@ -23,11 +26,14 @@ class ArtifactoryCleanup:
         destroy: bool,
         today: date,
         ignore_not_found: bool,
+        save_removed_artifacts_list: bool,
+
     ):
         self.session = session
         self.policies = policies
         self.destroy = destroy
         self.ignore_not_found = ignore_not_found
+        self.save_removed_artifacts_list = save_removed_artifacts_list
 
         self._init_policies(today)
 
@@ -65,12 +71,14 @@ class ArtifactoryCleanup:
             try:
                 artifacts_size = sum([x["size"] for x in artifacts_to_remove])
                 print("Summary size: {}".format(artifacts_size))
-                yield CleanupSummary(
+                summary = CleanupSummary(
                     policy_name=policy.name,
                     artifacts_size=artifacts_size,
                     artifacts_removed=len(artifacts_to_remove),
                 )
-
+                if self.save_removed_artifacts_list:
+                    summary.removed_artifacts_list = artifacts_to_remove
+                yield summary
             except KeyError:
                 print("Summary size not defined")
                 yield None
