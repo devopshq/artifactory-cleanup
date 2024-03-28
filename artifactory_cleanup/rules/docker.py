@@ -45,9 +45,8 @@ class RuleForDocker(Rule):
             # already done it or it's just a folder
             if "name" not in artifact or artifact["name"] != self.MANIFEST_FILENAME:
                 continue
-
-            artifact["path"], docker_tag = artifact["path"].rsplit("/", 1)
-            artifact["name"] = docker_tag
+            artifact["path"] = artifact["properties"]["docker.repoName"]
+            artifact["name"] = artifact["properties"]["docker.manifest"]
             # We're going to collect docker size later
             if "size" in artifact:
                 del artifact["size"]
