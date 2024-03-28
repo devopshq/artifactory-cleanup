@@ -94,25 +94,25 @@ class TestKeepLatestNVersionImagesByProperty:
             {
                 "name": "0.1.83",
                 "path": "baz",
-                "properties": {"docker.manifest": "0.1.83"},
+                "properties": {"docker.manifest": "0.1.83", "docker.repoName": "baz"},
                 "stats": {},
             },
             {
                 "name": "0.1.99",
                 "path": "foobar",
-                "properties": {"docker.manifest": "0.1.99"},
+                "properties": {"docker.manifest": "0.1.99", "docker.repoName": "foobar"},
                 "stats": {},
             },
             {
                 "name": "1.1.1",
                 "path": "foobar",
-                "properties": {"docker.manifest": "1.1.1"},
+                "properties": {"docker.manifest": "1.1.1", "docker.repoName": "foobar"},
                 "stats": {},
             },
             {
                 "name" : "v0.1.99",
                 "path": "qux",
-                "properties": {"docker.manifest": "v0.1.99"},
+                "properties": {"docker.manifest": "v0.1.99", "docker.repoName": "qux"},
                 "stats": {},
             },
         ]
