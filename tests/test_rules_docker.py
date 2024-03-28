@@ -14,67 +14,67 @@ class TestKeepLatestNVersionImagesByProperty:
 
         data = [
             {
-                "properties": {"docker.manifest": "0.1.100"},
+                "properties": {"docker.manifest": "0.1.100", "docker.repoName": "foobar"},
                 "path": "foobar/0.1.100",
                 "name": "manifest.json",
             },
             {
-                "properties": {"docker.manifest": "0.1.200"},
+                "properties": {"docker.manifest": "0.1.200", "docker.repoName": "foobar"},
                 "path": "foobar/0.1.200",
                 "name": "manifest.json",
             },
             {
-                "properties": {"docker.manifest": "0.1.99"},
+                "properties": {"docker.manifest": "0.1.99", "docker.repoName": "foobar"},
                 "path": "foobar/0.1.99",
                 "name": "manifest.json",
             },
             {
-                "properties": {"docker.manifest": "1.1.1"},
+                "properties": {"docker.manifest": "1.1.1", "docker.repoName": "foobar"},
                 "path": "foobar/1.1.1",
                 "name": "manifest.json",
             },
             {
-                "properties": {"docker.manifest": "1.2.1"},
+                "properties": {"docker.manifest": "1.2.1", "docker.repoName": "foobar"},
                 "path": "foobar/1.2.1",
                 "name": "manifest.json",
             },
             {
-                "properties": {"docker.manifest": "1.3.1"},
+                "properties": {"docker.manifest": "1.3.1", "docker.repoName": "foobar"},
                 "path": "foobar/1.3.1",
                 "name": "manifest.json",
             },
             {
-                "properties": {"docker.manifest": "2.1.1"},
+                "properties": {"docker.manifest": "2.1.1", "docker.repoName": "foobar"},
                 "path": "foobar/2.1.1",
                 "name": "manifest.json",
             },
             {
-                "properties": {"docker.manifest": "0.1.86"},
+                "properties": {"docker.manifest": "0.1.86", "docker.repoName": "baz"},
                 "path": "baz/0.1.86",
                 "name": "manifest.json",
             },
             {
-                "properties": {"docker.manifest": "0.1.87"},
+                "properties": {"docker.manifest": "0.1.87", "docker.repoName": "baz"},
                 "path": "baz/0.1.87",
                 "name": "manifest.json",
             },
             {
-                "properties": {"docker.manifest": "0.1.83"},
+                "properties": {"docker.manifest": "0.1.83", "docker.repoName": "baz"},
                 "path": "baz/0.1.83",
                 "name": "manifest.json",
             },
             {
-                "properties": {"docker.manifest": "v0.1.100"},
+                "properties": {"docker.manifest": "v0.1.100", "docker.repoName": "qux"},
                 "path": "qux/v0.1.100",
                 "name": "manifest.json",
             },
             {
-                "properties": {"docker.manifest": "v0.1.200"},
+                "properties": {"docker.manifest": "v0.1.200", "docker.repoName": "qux"},
                 "path": "qux/v0.1.200",
                 "name": "manifest.json",
             },
             {
-                "properties": {"docker.manifest": "v0.1.99"},
+                "properties": {"docker.manifest": "v0.1.99", "docker.repoName": "qux"},
                 "path": "qux/v0.1.99",
                 "name": "manifest.json",
             },
