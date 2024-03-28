@@ -58,7 +58,7 @@ class ArtifactoryCleanup:
                 # Delete artifacts
                 for artifact in artifacts_to_remove:
                     with test_ctx_mgr(get_name_for_ci(artifact)):
-                        policy.delete(artifact, destroy=self.destroy)
+                        policy.delete(artifact, destroy=self.destroy, ignore_not_found=self.ignore_not_found)
 
             # Show summary
             print(f"Deleted artifacts count: {len(artifacts_to_remove)}")
