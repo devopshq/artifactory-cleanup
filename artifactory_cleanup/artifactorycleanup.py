@@ -59,15 +59,13 @@ class ArtifactoryCleanup:
                 print(f"Found {len(artifacts_to_remove)} artifacts AFTER filtering")
 
                 # Delete artifacts
-                def _delete_with_context(artifact, policy, test_ctx_mgr, get_name_for_ci, destroy, ignore_not_found):
+                def _delete(artifact):
                     with test_ctx_mgr(get_name_for_ci(artifact)):
-                        return policy.delete(artifact, destroy=destroy, ignore_not_found=ignore_not_found)
+                        policy.delete(artifact, destroy=self.destroy)
 
                 with ThreadPoolExecutor(max_workers=int(self.worker_count)) as executor:
                     for artifact in artifacts_to_remove:
-                        executor.submit(
-                            _delete_with_context, artifact, policy, test_ctx_mgr, get_name_for_ci, self.destroy, self.ignore_not_found
-                        )
+                        executor.submit(_delete, artifact=artifact)
 
             # Show summary
             print(f"Deleted artifacts count: {len(artifacts_to_remove)}")
