@@ -18,13 +18,13 @@ class CleanupSummary:
 
 class ArtifactoryCleanup:
     def __init__(
-            self,
-            session: Session,
-            policies: List[CleanupPolicy],
-            destroy: bool,
-            today: date,
-            ignore_not_found: bool,
-            worker_count: int,
+        self,
+        session: Session,
+        policies: List[CleanupPolicy],
+        destroy: bool,
+        today: date,
+        ignore_not_found: bool,
+        worker_count: int,
     ):
         self.session = session
         self.policies = policies
