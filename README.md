@@ -117,6 +117,7 @@ artifactory-cleanup --help
   configuration for multiple repositories and some of them are not found.
 - Use `--worker-count=<WORKER_NUM>` to increase the number of workers. By default, it's 1. It's useful when you have a lot of
   artifacts and you want to speed up the process.
+- Use `--display-format` to customize the printed information when deleting a file. The default format is "'{path}' - {size}". Supported options are "{path}", "{size}" and "{hash}".
 
 ## Commands ##
 

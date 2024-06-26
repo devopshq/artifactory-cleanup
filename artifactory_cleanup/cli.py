@@ -95,6 +95,14 @@ class ArtifactoryCleanupCLI(cli.Application):
         mandatory=False,
     )
 
+    _display_format = cli.SwitchAttr(
+        "--display-format",
+        help="Set format of the printed message when deleting a file",
+        default="'{path}' - {size}",
+        mandatory=False,
+        envname="ARTIFACTORY_CLEANUP_DISPLAY_FORMAT",
+    )
+
     @property
     def VERSION(self):
         # To prevent circular imports
@@ -172,6 +180,7 @@ class ArtifactoryCleanupCLI(cli.Application):
             today=today,
             ignore_not_found=self._ignore_not_found,
             worker_count=self._worker_count,
+            display_format=self._display_format,
         )
 
         # Filter policies by name
