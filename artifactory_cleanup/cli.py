@@ -98,7 +98,7 @@ class ArtifactoryCleanupCLI(cli.Application):
     _display_format = cli.SwitchAttr(
         "--display-format",
         help="Set format of the printed message when deleting a file",
-        default="'{path}' - {size}",
+        default="'{path}' ({hash}) - {size}",
         mandatory=False,
         envname="ARTIFACTORY_CLEANUP_DISPLAY_FORMAT",
     )

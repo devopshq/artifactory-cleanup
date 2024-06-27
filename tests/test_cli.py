@@ -187,7 +187,7 @@ def test_display_format_default(capsys, shared_datadir, requests_mock):
     print(stdout)
     assert code == 0, stdout
     assert (
-            "DEBUG - we would delete 'repo-name-here/path/to/file/filename1.json' - 528B"
+            "DEBUG - we would delete 'repo-name-here/path/to/file/filename1.json' (11827853eed40e8b60f5d7e45f2a730915d7704d) - 528B\n"
             in stdout
     )
 
@@ -202,7 +202,7 @@ def test_display_format(capsys, shared_datadir, requests_mock):
             "--load-rules",
             str(shared_datadir / "myrule.py"),
             "--display-format",
-            "'{path}' ({hash}) - {size}",
+            "'{path}'",
         ],
         exit=False,
     )
@@ -210,6 +210,6 @@ def test_display_format(capsys, shared_datadir, requests_mock):
     print(stdout)
     assert code == 0, stdout
     assert (
-            "DEBUG - we would delete 'repo-name-here/path/to/file/filename1.json' (11827853eed40e8b60f5d7e45f2a730915d7704d) - 528B"
+            "DEBUG - we would delete 'repo-name-here/path/to/file/filename1.json'\n"
             in stdout
     )
