@@ -27,6 +27,7 @@ def attach_requests_mock_to(mock, server):
                     "modified": "2021-03-21T13:54:32.000+02:00",
                     "modified_by": "admin",
                     "updated": "2021-03-21T13:54:52.384+02:00",
+                    "actual_sha1": "11827853eed40e8b60f5d7e45f2a730915d7704d",
                     "properties": [
                         {"key": "property-1", "value": "property-value-1"},
                         {"key": "property-2", "value": "property-value-2"},

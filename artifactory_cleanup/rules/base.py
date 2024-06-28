@@ -25,6 +25,7 @@ class ArtifactDict(TypedDict):
     properties: dict
     stats: dict
     size: int
+    actual_sha1: str
 
 
 class ArtifactsList(List[ArtifactDict]):
@@ -299,6 +300,7 @@ class CleanupPolicy(object):
         Delete the artifact
         :param artifact: artifact to remove
         :param destroy: if False - just log the action, do not actually remove the artifact
+        :param display_format: specify the format string for the file to delete, for example "'{path}' - {size}"
         :param ignore_not_found: if True - do not raise an error if the artifact is not found
         """
 
@@ -310,11 +312,12 @@ class CleanupPolicy(object):
         artifact_path = path.format(**artifact)
         artifact_path = quote(artifact_path)
         artifact_size = artifact.get("size", 0) or 0
+        artifact_hash = artifact.get("actual_sha1", "")
 
         if not destroy:
-            print(f"DEBUG - we would delete '{artifact_path}' - {size(artifact_size)}")
+            print(f"DEBUG - we would delete '{artifact_path}' ({artifact_hash}) - {size(artifact_size)}")
             return
-        print(f"DESTROY MODE - delete '{artifact_path} - {size(artifact_size)}'")
+        print(f"DESTROY MODE - delete '{artifact_path}' ({artifact_hash}) - {size(artifact_size)}")
         r = self.session.delete(artifact_path)
         try:
             r.raise_for_status()
