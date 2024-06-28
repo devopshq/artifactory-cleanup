@@ -25,14 +25,12 @@ class ArtifactoryCleanup:
         today: date,
         ignore_not_found: bool,
         worker_count: int,
-        display_format: str,
     ):
         self.session = session
         self.policies = policies
         self.destroy = destroy
         self.ignore_not_found = ignore_not_found
         self.worker_count = worker_count
-        self.display_format = display_format
 
         self._init_policies(today)
 
@@ -63,7 +61,7 @@ class ArtifactoryCleanup:
                 # Delete artifacts
                 def _delete(artifact):
                     with test_ctx_mgr(get_name_for_ci(artifact)):
-                        policy.delete(artifact, destroy=self.destroy, display_format=self.display_format, ignore_not_found=self.ignore_not_found)
+                        policy.delete(artifact, destroy=self.destroy, ignore_not_found=self.ignore_not_found)
 
                 with ThreadPoolExecutor(max_workers=int(self.worker_count)) as executor:
                     for artifact in artifacts_to_remove:

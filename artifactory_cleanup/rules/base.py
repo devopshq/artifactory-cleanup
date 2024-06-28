@@ -295,7 +295,7 @@ class CleanupPolicy(object):
                 print()
         return artifacts
 
-    def delete(self, artifact: ArtifactDict, destroy: bool, display_format: str, ignore_not_found: bool = False) -> None:
+    def delete(self, artifact: ArtifactDict, destroy: bool, ignore_not_found: bool = False) -> None:
         """
         Delete the artifact
         :param artifact: artifact to remove
@@ -314,12 +314,10 @@ class CleanupPolicy(object):
         artifact_size = artifact.get("size", 0) or 0
         artifact_hash = artifact.get("actual_sha1", "")
 
-        file_string = display_format.replace("{path}", artifact_path).replace("{size}", size(artifact_size)).replace("{hash}", artifact_hash)
-
         if not destroy:
-            print(f"DEBUG - we would delete {file_string}")
+            print(f"DEBUG - we would delete '{artifact_path}' ({artifact_hash}) - {size(artifact_size)}")
             return
-        print(f"DESTROY MODE - delete {file_string}")
+        print(f"DESTROY MODE - delete '{artifact_path}' ({artifact_hash}) - {size(artifact_size)}")
         r = self.session.delete(artifact_path)
         try:
             r.raise_for_status()
