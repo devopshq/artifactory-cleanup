@@ -190,6 +190,7 @@ class YamlConfigLoader:
         user = config["artifactory-cleanup"]["user"]
         password = config["artifactory-cleanup"]["password"]
 
+        server = os.path.expandvars(server)
         user = os.path.expandvars(user)
         password = os.path.expandvars(password)
         return server, user, password
