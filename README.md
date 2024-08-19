@@ -153,10 +153,10 @@ docker run -v "$(pwd)":/app devopshq/artifactory-cleanup artifactory-cleanup --l
 # Save the table summary in a file
 artifactory-cleanup --output=myfile.txt
 
-# Save the summary in a Json file
+# Save the summary in a json file
 artifactory-cleanup --output=myfile.txt --output-format=json
 
-# Save the summary in a json file and append a list with removed artifacts
+# Save the summary in a json file and append the list of all removed artifacts
 artifactory-cleanup --output=myfile.json --output-format json --output-artifacts
 ```
 

@@ -96,7 +96,8 @@ class ArtifactoryCleanupCLI(cli.Application):
     )
 
     _output_artifacts = cli.Flag(
-        "--output-artifacts", help="When --output-format is json, append the list of all deleted artifacts to --output.",
+        "--output-artifacts",
+        help="When --output-format is json, append the list of all removed artifacts to output",
         mandatory=False,
         default=False,
     )
@@ -143,13 +144,13 @@ class ArtifactoryCleanupCLI(cli.Application):
         print(self._format_table(result))
 
     def _create_output_file(self, result, filename, format):
-        text = None
+        text = ""
         if format == "table":
             text = self._format_table(result).get_string()
         elif format == "json":
-            text = json.dumps(result)
+            text = json.dumps(result, indent=4)
 
-        with open(filename, "w") as file:
+        with open(filename, "w", encoding="utf-8") as file:
             file.write(text)
 
     def main(self):
@@ -178,8 +179,6 @@ class ArtifactoryCleanupCLI(cli.Application):
             today=today,
             ignore_not_found=self._ignore_not_found,
             worker_count=self._worker_count,
-            output_format=self._output_format,
-            output_artifacts=self._output_artifacts,
         )
 
         # Filter policies by name
@@ -202,8 +201,8 @@ class ArtifactoryCleanupCLI(cli.Application):
                 "file_count": summary.artifacts_removed,
                 "size": summary.artifacts_size
             }
-            if summary.removed_artifacts_list is not None:
-                policy["artifacts_list"] = summary.removed_artifacts_list
+            if summary.removed_artifacts is not None and self._output_artifacts:
+                policy["removed_artifacts"] = summary.removed_artifacts
             result["policies"].append(policy)
         result["total_size"] = total_size
 
