@@ -201,7 +201,7 @@ class ArtifactoryCleanupCLI(cli.Application):
                 "file_count": summary.artifacts_removed,
                 "size": summary.artifacts_size
             }
-            if summary.removed_artifacts is not None and self._output_artifacts:
+            if self._output_artifacts:
                 policy["removed_artifacts"] = summary.removed_artifacts
             result["policies"].append(policy)
         result["total_size"] = total_size
