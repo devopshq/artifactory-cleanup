@@ -14,12 +14,12 @@ from artifactory_cleanup.artifactorycleanup import (
     ArtifactoryCleanup,
 )
 from artifactory_cleanup.base_url_session import BaseUrlSession
+from artifactory_cleanup.context_managers import get_context_managers
 from artifactory_cleanup.errors import InvalidConfigError
 from artifactory_cleanup.loaders import (
     PythonLoader,
     YamlConfigLoader,
 )
-from artifactory_cleanup.context_managers import get_context_managers
 
 requests.packages.urllib3.disable_warnings()
 
@@ -95,6 +95,13 @@ class ArtifactoryCleanupCLI(cli.Application):
         mandatory=False,
     )
 
+    _output_artifacts = cli.Flag(
+        "--output-artifacts",
+        help="When --output-format is json, append the list of all removed artifacts to output",
+        mandatory=False,
+        default=False,
+    )
+
     @property
     def VERSION(self):
         # To prevent circular imports
@@ -137,13 +144,13 @@ class ArtifactoryCleanupCLI(cli.Application):
         print(self._format_table(result))
 
     def _create_output_file(self, result, filename, format):
-        text = None
+        text = ""
         if format == "table":
             text = self._format_table(result).get_string()
-        else:
-            text = json.dumps(result)
+        elif format == "json":
+            text = json.dumps(result, indent=4)
 
-        with open(filename, "w") as file:
+        with open(filename, "w", encoding="utf-8") as file:
             file.write(text)
 
     def main(self):
@@ -189,14 +196,14 @@ class ArtifactoryCleanupCLI(cli.Application):
                 continue
             total_size += summary.artifacts_size
 
-            result["policies"].append(
-                {
-                    "name": summary.policy_name,
-                    "file_count": summary.artifacts_removed,
-                    "size": summary.artifacts_size,
-                }
-            )
-
+            policy = {
+                "name": summary.policy_name,
+                "file_count": summary.artifacts_removed,
+                "size": summary.artifacts_size
+            }
+            if self._output_artifacts:
+                policy["removed_artifacts"] = summary.removed_artifacts
+            result["policies"].append(policy)
         result["total_size"] = total_size
 
         self._print_table(result)

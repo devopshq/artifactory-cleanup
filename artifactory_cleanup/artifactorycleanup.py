@@ -1,12 +1,12 @@
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date
-from typing import List, Iterator
+from typing import List, Iterator, Optional
 
 from attr import dataclass
 from requests import Session
 
 from artifactory_cleanup.errors import ArtifactoryCleanupException
-from artifactory_cleanup.rules.base import CleanupPolicy, ArtifactDict
+from artifactory_cleanup.rules.base import ArtifactsList, CleanupPolicy, ArtifactDict
 
 
 @dataclass
@@ -14,6 +14,7 @@ class CleanupSummary:
     policy_name: str
     artifacts_removed: int
     artifacts_size: int
+    removed_artifacts: ArtifactsList
 
 
 class ArtifactoryCleanup:
@@ -38,7 +39,7 @@ class ArtifactoryCleanup:
         for policy in self.policies:
             policy.init(self.session, today)
 
-    def cleanup(self, block_ctx_mgr, test_ctx_mgr) -> Iterator[CleanupSummary]:
+    def cleanup(self, block_ctx_mgr, test_ctx_mgr) -> Iterator[Optional[CleanupSummary]]:
         for policy in self.policies:
             with block_ctx_mgr(policy.name):
                 # Prepare
@@ -72,12 +73,13 @@ class ArtifactoryCleanup:
             try:
                 artifacts_size = sum([x["size"] for x in artifacts_to_remove])
                 print("Summary size: {}".format(artifacts_size))
-                yield CleanupSummary(
+                summary = CleanupSummary(
                     policy_name=policy.name,
                     artifacts_size=artifacts_size,
                     artifacts_removed=len(artifacts_to_remove),
+                    removed_artifacts=artifacts_to_remove
                 )
-
+                yield summary
             except KeyError:
                 print("Summary size not defined")
                 yield None
