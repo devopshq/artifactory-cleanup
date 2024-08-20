@@ -77,7 +77,7 @@ class ArtifactoryCleanup:
                     policy_name=policy.name,
                     artifacts_size=artifacts_size,
                     artifacts_removed=len(artifacts_to_remove),
-                    artifacts=artifacts_to_remove
+                    removed_artifacts=artifacts_to_remove
                 )
                 yield summary
             except KeyError:
