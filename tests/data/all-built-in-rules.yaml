@@ -2,6 +2,7 @@ artifactory-cleanup:
   server: https://repo.example.com/artifactory
   user: $ARTIFACTORY_USERNAME
   password: $ARTIFACTORY_PASSWORD
+  apikey: $ARTIFACTORY_APIKEY
 
   policies:
     - name: repo-without-name

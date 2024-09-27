@@ -166,9 +166,17 @@ class ArtifactoryCleanupCLI(cli.Application):
             print(str(err), file=sys.stderr)
             sys.exit(1)
 
-        server, user, password = loader.get_connection()
+        server, user, password, apikey = loader.get_connection()
         session = BaseUrlSession(server)
-        session.auth = HTTPBasicAuth(user, password)
+        if apikey != "":
+            print("Using API Key")
+            headers = {
+                "X-JFrog-Art-Api": apikey
+            }
+            session.headers = headers
+        else:
+            print("Using user and password")
+            session.auth = HTTPBasicAuth(user, password)
 
         self._destroy_or_verbose()
         print(f"Using {self._worker_count} workers")
