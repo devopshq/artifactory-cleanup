@@ -168,7 +168,7 @@ class ArtifactoryCleanupCLI(cli.Application):
 
         server, user, password, apikey = loader.get_connection()
         session = BaseUrlSession(server)
-        if apikey != "":
+        if apikey:
             print("Using API Key")
             headers = {
                 "X-JFrog-Art-Api": apikey
