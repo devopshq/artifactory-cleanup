@@ -94,10 +94,11 @@ class SchemaBuilder:
         config_schema = cfgv.Map(
             "Config",
             None,
-            cfgv.NoAdditionalKeys(["server", "user", "password", "policies"]),
+            cfgv.NoAdditionalKeys(["server", "user", "password", "policies", "apikey"]),
             cfgv.Required("server", cfgv.check_string),
-            cfgv.Required("user", cfgv.check_string),
-            cfgv.Required("password", cfgv.check_string),
+            # User and password required, if apikey missing
+            cfgv.Conditional("user", cfgv.check_string, "apikey", cfgv.MISSING, False),
+            cfgv.Conditional("password", cfgv.check_string, "apikey", cfgv.MISSING, False),
             cfgv.RequiredRecurse("policies", cfgv.Array(policy_schema)),
         )
 
@@ -184,16 +185,18 @@ class YamlConfigLoader:
             filename, schema, yaml.safe_load, InvalidConfigError
         )
 
-    def get_connection(self) -> Tuple[str, str, str]:
+    def get_connection(self) -> Tuple[str, str, str, str]:
         config = self.load(self.filepath)
         server = config["artifactory-cleanup"]["server"]
-        user = config["artifactory-cleanup"]["user"]
-        password = config["artifactory-cleanup"]["password"]
+        user = config.get("artifactory-cleanup", {}).get("user", "")
+        password = config.get("artifactory-cleanup", {}).get("password", "")
+        apikey = config.get("artifactory-cleanup", {}).get("apikey", "")
 
         server = os.path.expandvars(server)
         user = os.path.expandvars(user)
         password = os.path.expandvars(password)
-        return server, user, password
+        apikey = os.path.expandvars(apikey)
+        return server, user, password, apikey
 
 
 class PythonLoader:
