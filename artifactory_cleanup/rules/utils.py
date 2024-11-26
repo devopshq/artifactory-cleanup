@@ -3,7 +3,7 @@ from typing import Dict, List, Tuple, Optional, Union
 
 from treelib import Node, Tree
 
-from artifactory_cleanup.rules.base import ArtifactsList
+from artifactory_cleanup.rules.base import ArtifactDict, ArtifactsList
 
 
 def is_repository(data):
@@ -188,3 +188,10 @@ def to_masks(masks: Union[str, List[str]]):
         return masks
     else:
         raise AttributeError("'masks' argument must by list of string OR string")
+
+
+def sort_by_usage(artifact: ArtifactDict) -> str:
+    try:
+        return artifact["stats"]["downloaded"]
+    except:
+        return artifact["created"]
