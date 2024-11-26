@@ -261,6 +261,13 @@ policies:
   regex_pattern: "\d"
 ```
 
+- `DeleteLeastRecentlyUsedFiles` - delete the least recently used files until the total kept size is greater than passed value
+
+```yaml
+- rule: DeleteLeastRecentlyUsedFiles
+  keep_at_most_mb: 512
+```
+
 ## Keep
 
 - `KeepLatestNFiles` - Leaves the last (by creation time) files in the amount of N pieces. WITHOUT accounting
@@ -562,4 +569,3 @@ In order to provide a new release of `artifactory-cleanup`, there are two steps 
 1. Bump the version in the [setup.py](setup.py)
 2. Bump the version in the [__init__.py](./artifactory_cleanup/__init__.py)
 3. Create a Git release tag (in format `1.0.1`) by creating a release on GitHub
-
