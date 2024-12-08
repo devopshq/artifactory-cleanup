@@ -350,6 +350,14 @@ policies:
   custom_regexp: "[^\\d][\\._]((\\d+\\.)+\\d+)"
 ```
 
+- `KeepLatestNDockerImages(count=N)` - Leaves N
+  most recently updated Docker image digests. This ensures all tags matching the same digest is kept.
+
+```yaml
+- rule: KeepLatestNDockerImages
+  count: 1
+```
+
 - `DeleteDockerImageIfNotContainedInProperties(docker_repo='docker-local', properties_prefix='my-prop', image_prefix=None, full_docker_repo_name=None)`
   \- Remove Docker image, if it is not found in the properties of the artifact repository.
 

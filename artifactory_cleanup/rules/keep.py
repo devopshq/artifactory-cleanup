@@ -136,7 +136,6 @@ class KeepLatestNFilesInFolder(Rule):
 
         return artifacts
 
-
 class KeepLatestVersionNFilesInFolder(Rule):
     r"""Leaves the latest (by version) files in each folder.
 

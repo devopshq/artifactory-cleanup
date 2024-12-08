@@ -97,6 +97,8 @@ artifactory-cleanup:
           masks:
             - "*production*"
             - "*release*"
+        - rule: KeepLatestNDockerImages
+          count: 1
         - rule: KeepLatestNVersionImagesByProperty
           count: 1
           custom_regexp: "[^\\d][\\._]((\\d+\\.)+\\d+)"

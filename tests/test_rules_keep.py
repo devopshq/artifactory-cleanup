@@ -2,6 +2,7 @@ from artifactory_cleanup.rules import (
     KeepLatestNFiles,
     ArtifactsList,
     KeepLatestNFilesInFolder,
+    KeepLatestNDockerImages,
     KeepLatestVersionNFilesInFolder,
 )
 from tests.utils import makeas
@@ -90,7 +91,6 @@ def test_KeepLatestNFilesInFolder():
         {"name": "0.0.1.zip", "path": "folder2"},
     ]
     assert makeas(remove_these, expected) == expected
-
 
 def test_KeepLatestVersionNFilesInFolderDefault():
     data = [
