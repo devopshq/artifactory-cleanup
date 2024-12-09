@@ -92,6 +92,7 @@ def test_KeepLatestNFilesInFolder():
     ]
     assert makeas(remove_these, expected) == expected
 
+
 def test_KeepLatestVersionNFilesInFolderDefault():
     data = [
         {
