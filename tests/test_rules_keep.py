@@ -2,7 +2,6 @@ from artifactory_cleanup.rules import (
     KeepLatestNFiles,
     ArtifactsList,
     KeepLatestNFilesInFolder,
-    KeepLatestNDockerImages,
     KeepLatestVersionNFilesInFolder,
 )
 from tests.utils import makeas
