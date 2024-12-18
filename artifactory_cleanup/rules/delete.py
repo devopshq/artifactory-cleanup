@@ -113,12 +113,36 @@ class DeleteByRegexpName(Rule):
     def __init__(self, regex_pattern):
         self.regex_pattern = rf"{regex_pattern}"
 
-    def aql_add_filter(self, filters):
-        print("Here's filters that we get\n", filters)
-        return filters
-
     def filter(self, artifacts: ArtifactsList) -> ArtifactsList:
         for artifact in artifacts[:]:
             if re.match(self.regex_pattern, artifact["name"]) is None:
                 artifacts.remove(artifact)
+        return artifacts
+
+
+class DeleteLeastRecentlyUsedFiles(Rule):
+    """
+    Delete the least recently used files until the total kept size is greater than ``keep_at_most_mb`` megabytes.
+    Creation is interpreted as a first usage.
+    """
+
+    def __init__(self, keep_at_most_mb: int):
+        self.keepAtMostBytes = keep_at_most_mb * 1024 * 1024
+
+    def filter(self, artifacts: ArtifactsList) -> ArtifactsList:
+        # List will contain fresh files at the beginning
+        artifacts.sort(key=utils.sort_by_usage, reverse=True)
+
+        keptSize = 0
+        keptArtifacts = []
+        for artifact in artifacts:
+            keptSize += artifact["size"]
+            if keptSize > self.keepAtMostBytes:
+                # No need to keep files if overflow occurs
+                break
+
+            keptArtifacts.append(artifact)
+
+        artifacts.keep(keptArtifacts)
+
         return artifacts
