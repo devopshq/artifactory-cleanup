@@ -85,12 +85,12 @@ class DeleteNotUsedSince(Rule):
                 {
                     "$and": [
                         {"stat.downloaded": {"$lte": str(last_day)}},
-                        {"stat.remote_downloaded": {"$eq": None}},
+                        {"stat.remote_downloads": {"$eq": None}},
                     ]
                 },
                 {
                     "$and": [
-                        {"stat.downloaded": {"$eq": None}},
+                        {"stat.downloads": {"$eq": None}},
                         {"stat.remote_downloaded": {"$lte": str(last_day)}},
                     ]
                 },

@@ -141,12 +141,12 @@ class DeleteDockerImagesNotUsed(RuleForDocker):
                 {
                     "$and": [
                         {"stat.downloaded": {"$lte": last_day.isoformat()}},
-                        {"stat.remote_downloaded": {"$eq": None}},
+                        {"stat.remote_downloads": {"$eq": None}},
                     ]
                 },
                 {
                     "$and": [
-                        {"stat.downloaded": {"$eq": None}},
+                        {"stat.downloads": {"$eq": None}},
                         {"stat.remote_downloaded": {"$lte": last_day.isoformat()}},
                     ]
                 },
