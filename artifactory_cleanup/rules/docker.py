@@ -114,6 +114,7 @@ class DeleteDockerImagesOlderThanNDaysWithoutDownloads(RuleForDocker):
         last_day = self.today - self.days
         filter_ = [
             {"stat.downloads": {"$eq": None}},
+            {"stat.remote_downloads": {"$eq": None}},
             {"created": {"$lte": last_day.isoformat()}},
         ]
         filters.extend(filter_)
@@ -131,10 +132,28 @@ class DeleteDockerImagesNotUsed(RuleForDocker):
         print("Delete docker images not used from {}".format(last_day.isoformat()))
         filter_ = {
             "$or": [
-                {"stat.downloaded": {"$lte": last_day.isoformat()}},
+                {
+                    "$and": [
+                        {"stat.downloaded": {"$lte": last_day.isoformat()}},
+                        {"stat.remote_downloaded": {"$lte": last_day.isoformat()}},
+                    ]
+                },
+                {
+                    "$and": [
+                        {"stat.downloaded": {"$lte": last_day.isoformat()}},
+                        {"stat.remote_downloads": {"$eq": None}},
+                    ]
+                },
                 {
                     "$and": [
                         {"stat.downloads": {"$eq": None}},
+                        {"stat.remote_downloaded": {"$lte": last_day.isoformat()}},
+                    ]
+                },
+                {
+                    "$and": [
+                        {"stat.downloads": {"$eq": None}},
+                        {"stat.remote_downloads": {"$eq": None}},
                         {"created": {"$lte": last_day.isoformat()}},
                     ]
                 },

@@ -31,7 +31,12 @@ class DeleteWithoutDownloads(Rule):
     """
 
     def aql_add_filter(self, filters):
-        filter_ = {"stat.downloads": {"$eq": None}}
+        filter_ = {
+            "$and": [
+                {"stat.downloads": {"$eq": None}},
+                {"stat.remote_downloads":{"$eq": None}},
+            ],
+        }
         filters.append(filter_)
         return filters
 
@@ -49,6 +54,7 @@ class DeleteOlderThanNDaysWithoutDownloads(Rule):
         filter_ = {
             "$and": [
                 {"stat.downloads": {"$eq": None}},
+                {"stat.remote_downloads":{"$eq": None}},
                 {"created": {"$lte": last_day.isoformat()}},
             ],
         }
@@ -70,10 +76,28 @@ class DeleteNotUsedSince(Rule):
 
         filter_ = {
             "$or": [
-                {"stat.downloaded": {"$lte": str(last_day)}},
+                {
+                    "$and": [
+                        {"stat.downloaded": {"$lte": str(last_day)}},
+                        {"stat.remote_downloaded": {"$lte": str(last_day)}},
+                    ]
+                },
+                {
+                    "$and": [
+                        {"stat.downloaded": {"$lte": str(last_day)}},
+                        {"stat.remote_downloads": {"$eq": None}},
+                    ]
+                },
                 {
                     "$and": [
                         {"stat.downloads": {"$eq": None}},
+                        {"stat.remote_downloaded": {"$lte": str(last_day)}},
+                    ]
+                },
+                {
+                    "$and": [
+                        {"stat.downloads": {"$eq": None}},
+                        {"stat.remote_downloads": {"$eq": None}},
                         {"created": {"$lte": str(last_day)}},
                     ]
                 },
