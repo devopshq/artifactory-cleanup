@@ -132,6 +132,6 @@ class DeleteLeastRecentlyUsedFiles(Rule):
     def filter(self, artifacts: ArtifactsList) -> ArtifactsList:
         # List will contain fresh files at the beginning
         artifacts.sort(key=utils.sort_by_usage, reverse=True)
-        keptArtifacts = artifacts[:self.keep]
-        artifacts.keep(keptArtifacts)
+        kept_artifacts = artifacts[:self.keep]
+        artifacts.keep(kept_artifacts)
         return artifacts
