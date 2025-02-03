@@ -1,5 +1,5 @@
 from artifactory_cleanup.rules.utils import to_masks
-from artifactory_cleanup.rules.base import Rule
+from artifactory_cleanup.rules.base import ArtifactsList, Rule
 
 
 class FilterRule(Rule):
@@ -68,3 +68,18 @@ class ExcludeFilename(FilterRule):
     attribute_name = "name"
     operator = "$nmatch"
     boolean_operator = "$and"
+
+
+class FilterByRegexpPath(Rule):
+    """
+    Filter artifacts paths by regex pattern.
+    """
+
+    def init(self, path):
+        self.path = rf"{path}"
+
+    def filter(self, artifacts: ArtifactsList) -> ArtifactsList:
+        for artifact in artifacts[:]:
+            if re.match(self.path, artifact["path"]) is None:
+                artifacts.remove(artifact)
+        return artifacts

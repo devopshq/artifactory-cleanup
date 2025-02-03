@@ -411,6 +411,13 @@ policies:
     - "*.zip"
 ```
 
+- `FilterByRegexpPath` - delete artifacts whose path matches the specified regexp
+
+```yaml
+- rule: DeleteByRegexpPath
+  path: "\d"
+```
+
 ## Create your own rule
 
 If you want to create your own rule, you can do it!
