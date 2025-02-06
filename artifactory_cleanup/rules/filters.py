@@ -81,5 +81,5 @@ class FilterByRegexpPath(Rule):
     def filter(self, artifacts: ArtifactsList) -> ArtifactsList:
         for artifact in artifacts[:]:
             if re.match(self.path, artifact["path"]) is None:
-                artifacts.remove(artifact)
+                artifacts.keep(artifact)
         return artifacts
