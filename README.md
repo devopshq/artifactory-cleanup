@@ -414,7 +414,7 @@ policies:
 - `FilterByRegexpPath` - delete artifacts whose path matches the specified regexp
 
 ```yaml
-- rule: DeleteByRegexpPath
+- rule: FilterByRegexpPath
   path: "\d"
 ```
 
