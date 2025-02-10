@@ -198,7 +198,7 @@ policies:
   mask: "*.banned"
 ```
 
-- `PropertyEq`- Delete repository artifacts only with a specific property value (property_key is the name of the
+- `PropertyEq` - Delete repository artifacts only with a specific property value (property_key is the name of the
   parameter, property_value is the value)
 
 ```yaml
@@ -207,7 +207,7 @@ policies:
   property_value: 1
 ```
 
-- `PropertyNeq`- Delete repository artifacts only if the value != specified. If there is no value, delete it anyway.
+- `PropertyNeq` - Delete repository artifacts only if the value != specified. If there is no value, delete it anyway.
   Allows you to specify the deletion flag `do_not_delete = 1`
 
 ```yaml
@@ -258,7 +258,7 @@ policies:
 
 ```yaml
 - rule: DeleteByRegexpName
-  regex_pattern: "\d"
+  regex_pattern: '\d'
 ```
 
 - `DeleteLeastRecentlyUsedFiles` - delete the least recently used files and keep at most requested number of files. Creation is interpreted as a first usage
@@ -270,24 +270,21 @@ policies:
 
 ## Keep
 
-- `KeepLatestNFiles` - Leaves the last (by creation time) files in the amount of N pieces. WITHOUT accounting
-  subfolders
+- `KeepLatestNFiles` - Leaves the last (by creation time) files in the amount of N pieces. WITHOUT accounting subfolders
 
 ```yaml
 - rule: KeepLatestNFiles
   count: 1
 ```
 
-- `KeepLatestNFilesInFolder` - Leaves the last (by creation time) files in the number of N pieces in each
-  folder
+- `KeepLatestNFilesInFolder` - Leaves the last (by creation time) files in the number of N pieces in each folder
 
 ```yaml
 - rule: KeepLatestNFilesInFolder
   count: 1
 ```
 
-- `KeepLatestVersionNFilesInFolder` - Leaves the latest N (by version) files in each
-  folder. The definition of the version is using regexp. By default it parses [semver](https://semver.org/) using the regex - `([\d]+\.[\d]+\.[\d]+)")`
+- `KeepLatestVersionNFilesInFolder` - Leaves the latest N (by version) files in each folder. The definition of the version is using regexp. By default it parses [semver](https://semver.org/) using the regex - `([\d]+\.[\d]+\.[\d]+)")`
 
 ```yaml
 - rule: KeepLatestVersionNFilesInFolder
@@ -415,7 +412,7 @@ policies:
 
 ```yaml
 - rule: FilterByRegexpPath
-  path: "\d"
+  path: '\d'
 ```
 
 ## Create your own rule
