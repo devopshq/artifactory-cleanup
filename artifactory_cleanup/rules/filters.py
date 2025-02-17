@@ -75,7 +75,7 @@ class FilterByRegexpPath(Rule):
     Filter artifacts paths by regex pattern.
     """
 
-    def init(self, path):
+    def __init__(self, path):
         self.path = rf"{path}"
 
     def filter(self, artifacts: ArtifactsList) -> ArtifactsList:
