@@ -185,3 +185,136 @@ class TestKeepLatestNVersionImagesByProperty:
                 "stats": {},
             },
         ]
+    def test_filter_version_with_prefix(self):
+        # Skip collecting docker size
+        RuleForDocker._collect_docker_size = lambda self, x: x
+
+        data = [
+            {
+                "properties": {"docker.manifest": "uat-0.1.100"},
+                "path": "foobar/uat-0.1.100",
+                "name": "manifest.json",
+            },
+            {
+                "properties": {"docker.manifest": "uat-0.1.200"},
+                "path": "foobar/uat-0.1.200",
+                "name": "manifest.json",
+            },
+            {
+                "properties": {"docker.manifest": "uat-0.1.99"},
+                "path": "foobar/uat-0.1.99",
+                "name": "manifest.json",
+            },
+            {
+                "properties": {"docker.manifest": "uat-1.1.1"},
+                "path": "foobar/uat-1.1.1",
+                "name": "manifest.json",
+            },
+            {
+                "properties": {"docker.manifest": "uat-1.2.1"},
+                "path": "foobar/uat-1.2.1",
+                "name": "manifest.json",
+            },
+            {
+                "properties": {"docker.manifest": "uat-1.3.1"},
+                "path": "foobar/uat-1.3.1",
+                "name": "manifest.json",
+            },
+            {
+                "properties": {"docker.manifest": "uat-2.1.1"},
+                "path": "foobar/uat-2.1.1",
+                "name": "manifest.json",
+            },
+        ]
+        artifacts = ArtifactsList.from_response(data)
+        policy = CleanupPolicy(
+            "test",
+            # DeleteDockerImagesOlderThan here just to test how KeepLatestNVersionImagesByProperty works together
+            DeleteDockerImagesOlderThan(days=1),
+            KeepLatestNVersionImagesByProperty(
+                count=2,
+                number_of_digits_in_version=1,
+                custom_regexp=r"^uat-(\d+\.\d+\.\d+$)",
+            ),
+        )
+        assert policy.filter(artifacts) == [
+            {
+                "name": "uat-0.1.99",
+                "path": "foobar",
+                "properties": {"docker.manifest": "uat-0.1.99"},
+                "stats": {},
+            },
+            {
+                "name": "uat-1.1.1",
+                "path": "foobar",
+                "properties": {"docker.manifest": "uat-1.1.1"},
+                "stats": {},
+            },
+        ]
+    def test_filter_custom_version(self):
+        # Skip collecting docker size
+        RuleForDocker._collect_docker_size = lambda self, x: x
+
+        # example data uses an overly custom version to ensure it will match any usecase
+        data = [
+            {
+                "properties": {"docker.manifest": "uat-0-XXX-1-100"},
+                "path": "foobar/uat-0-XXX-1-100",
+                "name": "manifest.json",
+            },
+            {
+                "properties": {"docker.manifest": "uat-0-XXX-1-200"},
+                "path": "foobar/uat-0-XXX-1-200",
+                "name": "manifest.json",
+            },
+            {
+                "properties": {"docker.manifest": "uat-0-XXX-1-99"},
+                "path": "foobar/uat-0-XXX-1-99",
+                "name": "manifest.json",
+            },
+            {
+                "properties": {"docker.manifest": "uat-1-XXX-1-1"},
+                "path": "foobar/uat-1-XXX-1-1",
+                "name": "manifest.json",
+            },
+            {
+                "properties": {"docker.manifest": "uat-1-XXX-2-1"},
+                "path": "foobar/uat-1-XXX-2-1",
+                "name": "manifest.json",
+            },
+            {
+                "properties": {"docker.manifest": "uat-1-XXX-3-1"},
+                "path": "foobar/uat-1-XXX-3-1",
+                "name": "manifest.json",
+            },
+            {
+                "properties": {"docker.manifest": "uat-2-XXX-1-1"},
+                "path": "foobar/uat-2-XXX-1-1",
+                "name": "manifest.json",
+            },
+        ]
+        artifacts = ArtifactsList.from_response(data)
+        policy = CleanupPolicy(
+            "test",
+            # DeleteDockerImagesOlderThan here just to test how KeepLatestNVersionImagesByProperty works together
+            DeleteDockerImagesOlderThan(days=1),
+            KeepLatestNVersionImagesByProperty(
+                count=2,
+                number_of_digits_in_version=1,
+                custom_regexp=r"^uat-(\d+)-XXX-(\d+)-(\d+)$",
+            ),
+        )
+        assert policy.filter(artifacts) == [
+            {
+                "name": "uat-0-XXX-1-99",
+                "path": "foobar",
+                "properties": {"docker.manifest": "uat-0-XXX-1-99"},
+                "stats": {},
+            },
+            {
+                "name": "uat-1-XXX-1-1",
+                "path": "foobar",
+                "properties": {"docker.manifest": "uat-1-XXX-1-1"},
+                "stats": {},
+            },
+        ]
