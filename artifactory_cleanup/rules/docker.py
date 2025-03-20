@@ -263,7 +263,8 @@ class KeepLatestNVersionImagesByProperty(RuleForDocker):
         match = re.match(self.custom_regexp, value)
         if not match:
             raise ValueError(f"Can not find version in '{artifact}'")
-        version_str = match.group()
+        version_str = '.'.join(map(str, match.groups()))
+        version_str = re.sub(r'\.+', '.', version_str)
         if version_str.startswith("v"):
             version_str = version_str[1:]
             return tuple(["v"] + list(map(int, version_str.split("."))))
