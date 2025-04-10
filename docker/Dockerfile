@@ -1,4 +1,4 @@
-FROM python:3.9.12-slim-buster
+FROM python:3.9.22-slim-bookworm
 
 # set CERT paths for python libraries, necessary for self-signed certificates
 #  - Requests Library
