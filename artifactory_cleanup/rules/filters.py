@@ -1,6 +1,6 @@
 from artifactory_cleanup.rules.utils import to_masks
 from artifactory_cleanup.rules.base import ArtifactsList, Rule
-
+import re
 
 class FilterRule(Rule):
     attribute_name = None
