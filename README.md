@@ -126,7 +126,7 @@ artifactory-cleanup --help
 artifactory-cleanup
 
 # Debug run only for policytestname.
-artifactory-cleanup --policy-name policytestname
+artifactory-cleanup --policy policytestname
 
 # REMOVE
 # For remove artifacts use --destroy
