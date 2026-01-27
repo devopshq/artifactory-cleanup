@@ -10,6 +10,8 @@ from artifactory_cleanup.rules import Rule
 from artifactory_cleanup.rules.base import ArtifactsList
 from artifactory_cleanup.rules.utils import to_masks
 
+import os
+
 ctx_mgr_block, ctx_mgr_test = get_context_managers()
 
 
@@ -20,6 +22,7 @@ class RuleForDocker(Rule):
 
     MANIFEST_FILENAME = "manifest.json"
     FAT_MANIFEST_FILENAME = "list.manifest.json"
+    BATCH_SIZE = int(os.getenv("ARTIFACTORY_CLEANUP_DOCKER_RULE_BATCH_SIZE", 40))
 
     def get_docker_images_list(self, docker_repo):
         url = f"/api/docker/{docker_repo}/v2/_catalog"
@@ -60,21 +63,40 @@ class RuleForDocker(Rule):
         if sizes_collected:
             return
 
-        docker_repos = list(set(x["repo"] for x in artifacts))
-        if docker_repos:
-            aql = ArtifactoryPath(self.session.base_url, session=self.session)
-            args = ["items.find", {"$or": [{"repo": repo} for repo in docker_repos]}]
-            artifacts_list = aql.aql(*args)
+        images_sizes = defaultdict(int)
+        print("Fetching docker image sizes...")
+        for i in range(0, len(artifacts), self.BATCH_SIZE):
 
-            images_sizes = defaultdict(int)
+            slice = artifacts[i : i + self.BATCH_SIZE]
+            paths = {
+                "$or": [
+                    {
+                        "$and": [
+                            {
+                                "repo": artifact["repo"],
+                                "path": f"{artifact['path']}/{artifact['name']}",
+                            }
+                        ]
+                    }
+                    for artifact in slice
+                ]
+            }
+
+            aql = ArtifactoryPath(self.session.base_url, session=self.session)
+            args = [
+                "items.find",
+                paths,
+            ]
+
+            artifacts_list = aql.aql(*args)
             for docker_layer in artifacts_list:
                 image_key = (docker_layer["repo"], docker_layer["path"])
                 images_sizes[image_key] += docker_layer["size"]
 
-            for artifact in artifacts:
-                image = f"{artifact['path']}/{artifact['name']}"
-                image_key = (artifact["repo"], image)
-                artifact["size"] = images_sizes.get(image_key, 0)
+        for artifact in artifacts:
+            image = f"{artifact['path']}/{artifact['name']}"
+            image_key = (artifact["repo"], image)
+            artifact["size"] = images_sizes.get(image_key, 0)
 
     def aql_add_filter(self, filters):
         filters.append({'$or': [{'name': {'$match': self.MANIFEST_FILENAME}}, {'name': {'$match': self.FAT_MANIFEST_FILENAME}}]})
