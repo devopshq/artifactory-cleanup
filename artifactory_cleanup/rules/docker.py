@@ -38,13 +38,23 @@ class RuleForDocker(Rule):
 
     def _manifest_to_docker_images(self, artifacts: ArtifactsList):
         """
-        Convert manifest.json or list.manifest.json path to folder path
+        Convert manifest.json or list.manifest.json path to folder path.
         Docker rules get path to MANIFEST_FILENAME file or FAT_MANIFEST_FILENAME for multiarch images,
-        in order to remove the whole image we have to "up" one level
+        in order to remove the whole image we have to "up" one level.
+
+        Multi-arch tags can contain both manifest.json and list.manifest.json in the same tag directory.
+        After conversion both would map to the same docker image (repo/path/tag), so deduplicate them.
         """
+        seen = set()
+        deduped = ArtifactsList()
+
         for artifact in artifacts:
             # already done it or it's just a folder
             if "name" not in artifact or artifact["name"] not in [self.MANIFEST_FILENAME, self.FAT_MANIFEST_FILENAME]:
+                key = (artifact.get("repo"), artifact.get("path"), artifact.get("name"))
+                if key not in seen:
+                    seen.add(key)
+                    deduped.append(artifact)
                 continue
 
             artifact["path"], docker_tag = artifact["path"].rsplit("/", 1)
@@ -52,7 +62,14 @@ class RuleForDocker(Rule):
             # We're going to collect docker size later
             if "size" in artifact:
                 del artifact["size"]
-        return artifacts
+
+            key = (artifact.get("repo"), artifact.get("path"), artifact.get("name"))
+            if key in seen:
+                continue
+            seen.add(key)
+            deduped.append(artifact)
+
+        return deduped
 
     def _collect_docker_size(self, artifacts):
         # skip if already get the size
