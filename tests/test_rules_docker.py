@@ -76,6 +76,30 @@ class TestKeepLatestNDockerImages:
             },
         ]
 
+class TestRuleForDocker:
+    def test_manifest_to_docker_images_ignores_unsplittable_root_path(self):
+        artifacts = ArtifactsList.from_response([
+            {
+                "path": "latest",
+                "name": "manifest.json",
+                "repo": "docker",
+            },
+            {
+                "path": "foo/bar",
+                "name": "manifest.json",
+                "repo": "docker",
+            },
+        ])
+
+        rule = RuleForDocker()
+        converted = rule._manifest_to_docker_images(artifacts)
+
+        assert converted[0]["path"] == "latest"
+        assert converted[0]["name"] == "manifest.json"
+        assert converted[1]["path"] == "foo"
+        assert converted[1]["name"] == "bar"
+
+
 class TestKeepLatestNVersionImagesByProperty:
     def test_filter(self):
         # Skip collecting docker size
