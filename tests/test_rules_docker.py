@@ -9,6 +9,48 @@ from artifactory_cleanup.rules import (
 
 
 class TestKeepLatestNDockerImages:
+    def test_deduplicate_multiarch_manifests(self):
+        data = [
+            {
+                "repo": "docker-local",
+                "path": "foobar/latest",
+                "name": "manifest.json",
+                "updated": "2026-01-01T00:00:00.000+00:00",
+                "sha256": "sha-a",
+                "properties": {"docker.manifest": "v1.0.0"},
+            },
+            {
+                "repo": "docker-local",
+                "path": "foobar/latest",
+                "name": "list.manifest.json",
+                "updated": "2026-01-01T00:00:00.000+00:00",
+                "sha256": "sha-a",
+                "properties": {"docker.manifest": "v1.0.0"},
+            },
+            {
+                "repo": "docker-local",
+                "path": "foobar/prev",
+                "name": "manifest.json",
+                "updated": "2025-12-31T00:00:00.000+00:00",
+                "sha256": "sha-b",
+                "properties": {"docker.manifest": "v0.9.0"},
+            },
+        ]
+
+        artifacts = ArtifactsList.from_response(data)
+        policy = CleanupPolicy("test", KeepLatestNDockerImages(count=1))
+        assert policy.filter(artifacts) == [
+            {
+                "repo": "docker-local",
+                "path": "foobar",
+                "name": "prev",
+                "updated": "2025-12-31T00:00:00.000+00:00",
+                "sha256": "sha-b",
+                "properties": {"docker.manifest": "v0.9.0"},
+                "stats": {},
+            },
+        ]
+
     def test_filter(self):
         data = [
             {
