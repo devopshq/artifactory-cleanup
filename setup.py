@@ -10,6 +10,8 @@ from pathlib import Path
 this_directory = Path(__file__).parent
 long_description = (this_directory / "README.md").read_text()
 
+tests_require = (this_directory / "requirements-dev.txt").read_text().splitlines()
+
 setup(
     name="artifactory-cleanup",
     version="1.0.18",
@@ -51,4 +53,5 @@ setup(
     ],
     python_requires=">=3.6",
     include_package_data=True,
+    extras_require={"tests": tests_require},
 )
