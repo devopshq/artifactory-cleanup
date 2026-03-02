@@ -47,7 +47,13 @@ class RuleForDocker(Rule):
             if "name" not in artifact or artifact["name"] not in [self.MANIFEST_FILENAME, self.FAT_MANIFEST_FILENAME]:
                 continue
 
-            artifact["path"], docker_tag = artifact["path"].rsplit("/", 1)
+            path, _, docker_tag = artifact["path"].rpartition("/")
+            if not path:
+                # Some registries may return root-level manifest paths without '/'.
+                # Keep those untouched instead of crashing the whole cleanup run.
+                continue
+
+            artifact["path"] = path
             artifact["name"] = docker_tag
             # We're going to collect docker size later
             if "size" in artifact:
