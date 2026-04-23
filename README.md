@@ -23,6 +23,7 @@ Everything must be as a code, even cleanup policies!
   - [Filters](#filters)
   - [Create your own rule](#create-your-own-rule)
 - [How to](#how-to)
+  - [How to send cleanup report to Slack and Telegram?](#how-to-send-cleanup-report-to-slack-and-telegram)
   - [How to connect self-signed certificates for docker?](#how-to-connect-self-signed-certificates-for-docker)
   - [How to clean up Conan repository?](#how-to-clean-up-conan-repository)
   - [How to keep latest N docker images?](#how-to-keep-latest-n-docker-images)
@@ -490,6 +491,58 @@ artifactory-cleanup --load-rules=myrule.py
 ```
 
 # How to
+
+## How to send cleanup report to Slack and Telegram?
+
+`artifactory-cleanup` can upload the generated report file to Slack, Telegram, or both at once.
+Report upload requires `--output`.
+
+### Option 1 - CLI flags
+
+#### Slack + Telegram
+
+```bash
+artifactory-cleanup \
+  --config artifactory-cleanup.yaml \
+  --output result.json \
+  --output-format json \
+  --output-artifacts \
+  --slack-token "$ARTIFACTORY_CLEANUP_SLACK_TOKEN" \
+  --slack-channel-id C0123456789 \
+  --telegram-token "$ARTIFACTORY_CLEANUP_TELEGRAM_TOKEN" \
+  --telegram-chat-id -1001234567890 \
+  --notify-comment "Artifactory cleanup report"
+```
+
+### Option 2 - YAML config
+
+```yaml
+# artifactory-cleanup.yaml
+artifactory-cleanup:
+  server: https://repo.example.com/artifactory
+  user: $ARTIFACTORY_USERNAME
+  password: $ARTIFACTORY_PASSWORD
+
+  slack_token: $ARTIFACTORY_CLEANUP_SLACK_TOKEN
+  slack_channel_id: C0123456789
+  telegram_token: $ARTIFACTORY_CLEANUP_TELEGRAM_TOKEN
+  telegram_chat_id: "-1001234567890"
+  notify_comment: "Artifactory cleanup report"
+
+  policies:
+    - name: cleanup policy
+      rules:
+        - rule: Repo
+          name: "docker-local"
+        - rule: DeleteOlderThan
+          days: 30
+```
+
+Then run:
+
+```bash
+artifactory-cleanup --config artifactory-cleanup.yaml --output result.json --output-format json --output-artifacts
+```
 
 ## How to connect self-signed certificates for docker?
 

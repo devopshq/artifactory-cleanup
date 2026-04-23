@@ -3,6 +3,7 @@ import pytest
 from filecmp import cmp
 
 from artifactory_cleanup import ArtifactoryCleanupCLI
+from artifactory_cleanup.notifiers import ReportNotifier
 
 
 def test_help(capsys):
@@ -190,3 +191,81 @@ def test_display_format_default(capsys, shared_datadir, requests_mock):
             "DEBUG - we would delete 'repo-name-here/path/to/file/filename1.json' (11827853eed40e8b60f5d7e45f2a730915d7704d) - 528B\n"
             in stdout
     )
+
+
+@pytest.mark.usefixtures("requests_repo_name_here")
+def test_send_report_to_notifiers(capsys, shared_datadir, requests_mock, tmp_path, monkeypatch):
+    output_file = tmp_path / "output.json"
+    call_args = {}
+
+    def _send_file(self, filename: str, comment=None):
+        call_args["filename"] = filename
+        call_args["comment"] = comment
+
+    monkeypatch.setattr(ReportNotifier, "send_file", _send_file)
+    _, code = ArtifactoryCleanupCLI.run(
+        [
+            "ArtifactoryCleanupCLI",
+            "--config",
+            str(shared_datadir / "cleanup.yaml"),
+            "--load-rules",
+            str(shared_datadir / "myrule.py"),
+            "--output-format",
+            "json",
+            "--output",
+            str(output_file),
+            "--slack-token",
+            "xoxb-token",
+            "--slack-channel-id",
+            "C1234567890",
+            "--notify-comment",
+            "cleanup report",
+        ],
+        exit=False,
+    )
+    stdout, stderr = capsys.readouterr()
+    assert code == 0, stdout
+    assert call_args == {"filename": str(output_file), "comment": "cleanup report"}
+
+
+@pytest.mark.usefixtures("requests_repo_name_here")
+def test_send_report_to_notifiers_from_config(
+    capsys, shared_datadir, requests_mock, tmp_path, monkeypatch
+):
+    output_file = tmp_path / "output.json"
+    config_file = tmp_path / "cleanup-with-notifiers.yaml"
+    config_file.write_text(
+        (
+            shared_datadir / "cleanup.yaml"
+        ).read_text()
+        + "\n"
+        + "  slack_token: $SLACK_TOKEN\n"
+        + "  slack_channel_id: C1234567890\n"
+        + "  notify_comment: from-config\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("SLACK_TOKEN", "xoxb-token")
+    call_args = {}
+
+    def _send_file(self, filename: str, comment=None):
+        call_args["filename"] = filename
+        call_args["comment"] = comment
+
+    monkeypatch.setattr(ReportNotifier, "send_file", _send_file)
+    _, code = ArtifactoryCleanupCLI.run(
+        [
+            "ArtifactoryCleanupCLI",
+            "--config",
+            str(config_file),
+            "--load-rules",
+            str(shared_datadir / "myrule.py"),
+            "--output-format",
+            "json",
+            "--output",
+            str(output_file),
+        ],
+        exit=False,
+    )
+    stdout, stderr = capsys.readouterr()
+    assert code == 0, stdout
+    assert call_args == {"filename": str(output_file), "comment": "from-config"}

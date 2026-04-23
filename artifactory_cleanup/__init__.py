@@ -7,4 +7,4 @@ def register(rule):
     registry.register(rule)
 
 
-__version__ = "1.0.18"
+__version__ = "1.1.0"

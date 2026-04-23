@@ -4,3 +4,7 @@ class ArtifactoryCleanupException(Exception):
 
 class InvalidConfigError(ArtifactoryCleanupException):
     pass
+
+
+class NotificationError(ArtifactoryCleanupException):
+    pass

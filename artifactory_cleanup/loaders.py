@@ -94,11 +94,29 @@ class SchemaBuilder:
         config_schema = cfgv.Map(
             "Config",
             None,
-            cfgv.NoAdditionalKeys(["server", "user", "password", "policies", "apikey"]),
+            cfgv.NoAdditionalKeys(
+                [
+                    "server",
+                    "user",
+                    "password",
+                    "policies",
+                    "apikey",
+                    "slack_token",
+                    "slack_channel_id",
+                    "telegram_token",
+                    "telegram_chat_id",
+                    "notify_comment",
+                ]
+            ),
             cfgv.Required("server", cfgv.check_string),
             # User and password required, if apikey missing
             cfgv.Conditional("user", cfgv.check_string, "apikey", cfgv.MISSING, False),
             cfgv.Conditional("password", cfgv.check_string, "apikey", cfgv.MISSING, False),
+            cfgv.Optional("slack_token", cfgv.check_string, ""),
+            cfgv.Optional("slack_channel_id", cfgv.check_string, ""),
+            cfgv.Optional("telegram_token", cfgv.check_string, ""),
+            cfgv.Optional("telegram_chat_id", cfgv.check_string, ""),
+            cfgv.Optional("notify_comment", cfgv.check_string, ""),
             cfgv.RequiredRecurse("policies", cfgv.Array(policy_schema)),
         )
 
@@ -197,6 +215,21 @@ class YamlConfigLoader:
         password = os.path.expandvars(password)
         apikey = os.path.expandvars(apikey)
         return server, user, password, apikey
+
+    def get_notifications(self) -> Dict[str, str]:
+        config = self.load(self.filepath)
+        notifications = config.get("artifactory-cleanup", {})
+        return {
+            "slack_token": os.path.expandvars(notifications.get("slack_token", "")),
+            "slack_channel_id": os.path.expandvars(
+                notifications.get("slack_channel_id", "")
+            ),
+            "telegram_token": os.path.expandvars(notifications.get("telegram_token", "")),
+            "telegram_chat_id": os.path.expandvars(
+                notifications.get("telegram_chat_id", "")
+            ),
+            "notify_comment": os.path.expandvars(notifications.get("notify_comment", "")),
+        }
 
 
 class PythonLoader:

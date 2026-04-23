@@ -15,11 +15,12 @@ from artifactory_cleanup.artifactorycleanup import (
 )
 from artifactory_cleanup.base_url_session import BaseUrlSession
 from artifactory_cleanup.context_managers import get_context_managers
-from artifactory_cleanup.errors import InvalidConfigError
+from artifactory_cleanup.errors import InvalidConfigError, NotificationError
 from artifactory_cleanup.loaders import (
     PythonLoader,
     YamlConfigLoader,
 )
+from artifactory_cleanup.notifiers import ReportNotifier, SlackConfig, TelegramConfig
 
 requests.packages.urllib3.disable_warnings()
 
@@ -102,6 +103,44 @@ class ArtifactoryCleanupCLI(cli.Application):
         default=False,
     )
 
+    _slack_token = cli.SwitchAttr(
+        "--slack-token",
+        help="Slack bot token for report upload",
+        mandatory=False,
+        envname="ARTIFACTORY_CLEANUP_SLACK_TOKEN",
+        requires=["--slack-channel-id", "--output"],
+    )
+
+    _slack_channel_id = cli.SwitchAttr(
+        "--slack-channel-id",
+        help="Slack channel id for report upload",
+        mandatory=False,
+        envname="ARTIFACTORY_CLEANUP_SLACK_CHANNEL_ID",
+        requires=["--slack-token", "--output"],
+    )
+
+    _telegram_token = cli.SwitchAttr(
+        "--telegram-token",
+        help="Telegram bot token for report upload",
+        mandatory=False,
+        envname="ARTIFACTORY_CLEANUP_TELEGRAM_TOKEN",
+        requires=["--telegram-chat-id", "--output"],
+    )
+
+    _telegram_chat_id = cli.SwitchAttr(
+        "--telegram-chat-id",
+        help="Telegram chat id for report upload",
+        mandatory=False,
+        envname="ARTIFACTORY_CLEANUP_TELEGRAM_CHAT_ID",
+        requires=["--telegram-token", "--output"],
+    )
+
+    _notify_comment = cli.SwitchAttr(
+        "--notify-comment",
+        help="Comment attached to uploaded report",
+        mandatory=False,
+    )
+
     @property
     def VERSION(self):
         # To prevent circular imports
@@ -153,6 +192,36 @@ class ArtifactoryCleanupCLI(cli.Application):
         with open(filename, "w", encoding="utf-8") as file:
             file.write(text)
 
+    def _has_notifiers(self) -> bool:
+        return any(
+            [
+                self._slack_token,
+                self._slack_channel_id,
+                self._telegram_token,
+                self._telegram_chat_id,
+            ]
+        )
+
+    def _build_notifier(self) -> ReportNotifier:
+        slack = None
+        if self._slack_token and self._slack_channel_id:
+            slack = SlackConfig(
+                token=self._slack_token, channel_id=self._slack_channel_id
+            )
+        telegram = None
+        if self._telegram_token and self._telegram_chat_id:
+            telegram = TelegramConfig(
+                token=self._telegram_token, chat_id=self._telegram_chat_id
+            )
+        return ReportNotifier(slack=slack, telegram=telegram)
+
+    def _apply_notifier_config(self, config):
+        self._slack_token = self._slack_token or config.get("slack_token", "")
+        self._slack_channel_id = self._slack_channel_id or config.get("slack_channel_id", "")
+        self._telegram_token = self._telegram_token or config.get("telegram_token", "")
+        self._telegram_chat_id = self._telegram_chat_id or config.get("telegram_chat_id", "")
+        self._notify_comment = self._notify_comment or config.get("notify_comment", "")
+
     def main(self):
         today = self._get_today()
         if self._load_rules:
@@ -165,6 +234,8 @@ class ArtifactoryCleanupCLI(cli.Application):
             print("Failed to load config file")
             print(str(err), file=sys.stderr)
             sys.exit(1)
+
+        self._apply_notifier_config(loader.get_notifications())
 
         server, user, password, apikey = loader.get_connection()
         session = BaseUrlSession(server)
@@ -218,6 +289,13 @@ class ArtifactoryCleanupCLI(cli.Application):
 
         if self._output_file:
             self._create_output_file(result, self._output_file, self._output_format)
+            if self._has_notifiers():
+                try:
+                    notifier = self._build_notifier()
+                    notifier.send_file(self._output_file, comment=self._notify_comment)
+                except NotificationError as err:
+                    print(str(err), file=sys.stderr)
+                    sys.exit(1)
 
 
 if __name__ == "__main__":

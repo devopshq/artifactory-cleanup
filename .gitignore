@@ -103,3 +103,6 @@ ENV/
 # docker/helm
 docker/certificates/**/*
 rules.py
+
+# config file
+artifactory-cleanup.yaml
