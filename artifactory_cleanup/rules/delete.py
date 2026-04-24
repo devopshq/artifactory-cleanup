@@ -153,6 +153,11 @@ class DeleteLeastRecentlyUsedFiles(Rule):
     def __init__(self, keep: int):
         self.keep = keep
 
+    def aql_add_include(self, includes: set) -> set:
+        # Reads artifact["stats"]["downloaded"] via sort_by_usage() in filter()
+        includes.add("stat")
+        return includes
+
     def filter(self, artifacts: ArtifactsList) -> ArtifactsList:
         # List will contain fresh files at the beginning
         artifacts.sort(key=utils.sort_by_usage, reverse=True)

@@ -126,6 +126,15 @@ class Rule(object):
         """
         return filters
 
+    def aql_add_include(self, includes: set) -> set:
+        """
+        Declare which extra AQL fields this rule needs in `.include()`.
+
+        The field `*` (all basic fields: repo, path, name, size, created, etc.) is always included.
+        Override this method and add `property` or `stat` only when your filter actually reads those fields.
+        """
+        return includes
+
     def aql_add_text(self, aql: str) -> str:
         """
         You can change AQL text after applying all rules filters.
@@ -167,7 +176,7 @@ class CleanupPolicy(object):
     session: Optional[BaseUrlSession] = None
     today: date = None
 
-    def __init__(self, name: str, *rules: Rule):
+    def __init__(self, name: str, *rules: Rule, page_size: Optional[int] = None):
         if not isinstance(name, str):
             raise ValueError(
                 "Bad CleanupPolicy, first argument must be name.\n"
@@ -177,6 +186,7 @@ class CleanupPolicy(object):
         self.name = name
         self.rules = list(rules)
         self.aql_text = None
+        self.page_size = page_size
 
         # init object if passed not initialized class
         # for `rules.repo` rule, see above in the docstring
@@ -252,8 +262,16 @@ class CleanupPolicy(object):
         """
         Collect from all rules additional texts of requests
         """
+        includes = {"*",}
+        for rule in self.rules:
+            includes = rule.aql_add_include(includes)
+
+        include_fields = sorted(includes)
+        include_str = ", ".join(f'"{f}"' for f in include_fields)
+        print(f"AQL include fields: {include_str}")
+
         filters_text = json.dumps(find_filters)
-        aql = f'{self.DOMAIN}.find({filters_text}).include("*", "property", "stat")'
+        aql = f'{self.DOMAIN}.find({filters_text}).include({include_str})'
 
         for rule in self.rules:
             before_aql = aql
@@ -267,15 +285,45 @@ class CleanupPolicy(object):
 
     def get_artifacts(self) -> ArtifactsList:
         """
-        Get artifacts from Artifactory by AQL filters that we collect from all rules in the policy
+        Get artifacts from Artifactory by AQL filters that we collect from all rules in the policy.
+
+        By default all artifacts are fetched in a single request.  Pass ``page_size`` to
+        ``CleanupPolicy`` to enable paginated fetching, which can avoid timeouts on large
+        repositories.
+
         :return list of artifacts
         """
         assert self.aql_text, "Call build_aql_query before calling get_artifacts"
-        r = self.session.post("/api/search/aql", data=self.aql_text)
-        r.raise_for_status()
-        content = r.json()
-        artifacts = content["results"]
-        return ArtifactsList.from_response(artifacts)
+
+        if self.page_size is None:
+            r = self.session.post("/api/search/aql", data=self.aql_text)
+            r.raise_for_status()
+            content = r.json()
+            artifacts = content["results"]
+            return ArtifactsList.from_response(artifacts)
+
+        all_artifacts: List[Dict] = []
+        offset = 0
+
+        while True:
+            paginated_aql = (
+                '{aql}.sort({{"$asc": ["created"]}}).offset({offset}).limit({limit})'
+                .format(aql=self.aql_text, offset=offset, limit=self.page_size)
+            )
+            r = self.session.post("/api/search/aql", data=paginated_aql)
+            r.raise_for_status()
+            content = r.json()
+            page = content["results"]
+            all_artifacts.extend(page)
+            print(
+                f"Fetched page: {len(page)} artifacts (offset={offset}), "
+                f"total so far: {len(all_artifacts)}"
+            )
+            if len(page) < self.page_size:
+                break
+            offset += self.page_size
+
+        return ArtifactsList.from_response(all_artifacts)
 
     def filter(self, artifacts: ArtifactsList) -> ArtifactsList:
         """

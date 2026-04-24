@@ -86,8 +86,9 @@ class SchemaBuilder:
         policy_schema = cfgv.Map(
             "Policy",
             "name",
-            cfgv.NoAdditionalKeys(["name", "rules"]),
+            cfgv.NoAdditionalKeys(["name", "page_size", "rules"]),
             cfgv.Required("name", cfgv.check_string),
+            cfgv.Optional("page_size", cfgv.check_int, None),
             cfgv.RequiredRecurse("rules", cfgv.Array(rule_schema)),
         )
 
@@ -151,6 +152,7 @@ class YamlConfigLoader:
 
         for policy_data in config["artifactory-cleanup"]["policies"]:
             policy_name = policy_data["name"]
+            page_size = policy_data.get("page_size")
             rules = []
             for rule_data in policy_data["rules"]:
                 try:
@@ -164,7 +166,7 @@ class YamlConfigLoader:
                     sys.exit(1)
 
                 rules.append(rule)
-            policy = CleanupPolicy(policy_name, *rules)
+            policy = CleanupPolicy(policy_name, *rules, page_size=page_size)
             policies.append(policy)
         return policies
 

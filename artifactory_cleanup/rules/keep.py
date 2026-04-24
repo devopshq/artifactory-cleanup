@@ -12,6 +12,11 @@ class KeepLatestNupkgNVersions(Rule):
     def __init__(self, count: int):
         self.count = count
 
+    def aql_add_include(self, includes: set) -> set:
+        # Reads nuget.id and nuget.version from artifact properties in filter()
+        includes.add("property")
+        return includes
+
     def filter(self, artifacts):
         artifact_grouped = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
 

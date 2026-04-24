@@ -117,6 +117,18 @@ artifactory-cleanup --help
   configuration for multiple repositories and some of them are not found.
 - Use `--worker-count=<WORKER_NUM>` to increase the number of workers. By default, it's 1. It's useful when you have a lot of
   artifacts and you want to speed up the process.
+- Use `page_size` on a policy to fetch artifacts in pages instead of a single request. This can prevent timeouts on
+  large repositories. By default all artifacts are fetched at once.
+
+```yaml
+    - name: Remove all files from repo-name-here older than 7 days
+      page_size: 5000   # fetch 5000 artifacts per request
+      rules:
+        - rule: Repo
+          name: "reponame"
+        - rule: DeleteOlderThan
+          days: 7
+```
 
 ## Commands ##
 

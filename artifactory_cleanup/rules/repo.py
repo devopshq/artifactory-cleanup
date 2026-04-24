@@ -120,6 +120,11 @@ class PropertyNeq(Rule):
         self.property_key = property_key
         self.property_value = str(property_value)
 
+    def aql_add_include(self, includes: set) -> set:
+        # Reads artifact["properties"] in filter()
+        includes.add("property")
+        return includes
+
     def filter(self, artifacts):
         good_artifact = [
             x
