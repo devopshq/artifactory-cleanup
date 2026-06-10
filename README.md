@@ -581,3 +581,19 @@ In order to provide a new release of `artifactory-cleanup`, there are two steps 
 1. Bump the version in the [setup.py](setup.py)
 2. Bump the version in the [__init__.py](./artifactory_cleanup/__init__.py)
 3. Create a Git release tag (in format `1.0.1`) by creating a release on GitHub
+
+## Multi-Arch Buildx Images Support
+
+This release introduces support for cleaning up multi-architecture Docker images built with `buildx`. When using `buildx` for multi-arch images, Docker often pushes a manifest list (e.g., `list.manifest.json`) that points to individual architecture-specific images. This feature ensures that these manifest lists are handled correctly during cleanup.
+
+### How it works:
+
+When the `artifactory-cleanup` tool encounters a multi-arch image, it will:
+
+1.  Identify the `list.manifest.json` file associated with the image tag.
+2.  Parse this manifest to get a list of all referenced image SHAs.
+3.  When applying `ExcludeDockerImages` or `ExcludePath` rules, it will check if any of the SHAs listed in the manifest are excluded.
+4.  If the `list.manifest.json` itself is to be deleted (e.g., because all its referenced images are eligible for deletion), it will be removed.
+5.  Crucially, if an image SHA is *not* excluded, it will be preserved, even if the `list.manifest.json` is removed. This ensures that valid, non-excluded images are not accidentally deleted.
+
+This functionality is essential for maintaining clean Artifactory repositories when dealing with modern Docker build practices that leverage multi-architecture support.
