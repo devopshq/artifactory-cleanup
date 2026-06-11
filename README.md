@@ -362,6 +362,23 @@ policies:
   count: 1
 ```
 
+- `KeepLatestNDockerImagesAllVersions(count=N)` - Like `KeepLatestNDockerImages`, but the latest N
+  digests are computed over **all** tags currently in the repository via its own AQL query, independently
+  of the other rules in the policy. Use this when the policy also contains a filtering `Delete*` rule
+  (e.g. `DeleteDockerImagesNotUsed`): because all rules share a single AQL `find` combined with `$and`,
+  `KeepLatestNDockerImages` only sees the artifacts left after the delete filter and cannot protect the
+  truly latest N versions. This rule makes the common "delete unused, but always keep the latest N"
+  intent expressible in a single policy
+  (see [#183](https://github.com/devopshq/artifactory-cleanup/issues/183)).
+
+```yaml
+# Delete images not downloaded for 120 days, but always keep the latest 5 versions of each image
+- rule: DeleteDockerImagesNotUsed
+  days: 120
+- rule: KeepLatestNDockerImagesAllVersions
+  count: 5
+```
+
 - `DeleteDockerImageIfNotContainedInProperties(docker_repo='docker-local', properties_prefix='my-prop', image_prefix=None, full_docker_repo_name=None)`
   \- Remove Docker image, if it is not found in the properties of the artifact repository.
 

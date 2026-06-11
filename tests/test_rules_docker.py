@@ -1,6 +1,7 @@
 from artifactory_cleanup import CleanupPolicy
 from artifactory_cleanup.rules import (
     KeepLatestNDockerImages,
+    KeepLatestNDockerImagesAllVersions,
     KeepLatestNVersionImagesByProperty,
     ArtifactsList,
     RuleForDocker,
@@ -317,4 +318,80 @@ class TestKeepLatestNVersionImagesByProperty:
                 "properties": {"docker.manifest": "uat-1-XXX-1-1"},
                 "stats": {},
             },
+        ]
+
+
+class TestKeepLatestNDockerImagesAllVersions:
+    def test_keeps_latest_n_over_all_versions_not_just_candidates(self):
+        # Skip collecting docker size (it would hit Artifactory)
+        RuleForDocker._collect_docker_size = lambda self, x: x
+
+        # The independent query returns ALL tags of the image, newest `updated` first:
+        # 1.2.0 (newest), 1.1.0, 1.0.0 (oldest)
+        all_versions = ArtifactsList.from_response(
+            [
+                {
+                    "repo": "docker-local",
+                    "path": "foobar",
+                    "name": "1.2.0",
+                    "sha256": "ccc",
+                    "updated": "2021-03-22T13:54:52.383+02:00",
+                },
+                {
+                    "repo": "docker-local",
+                    "path": "foobar",
+                    "name": "1.1.0",
+                    "sha256": "bbb",
+                    "updated": "2021-03-21T13:54:52.383+02:00",
+                },
+                {
+                    "repo": "docker-local",
+                    "path": "foobar",
+                    "name": "1.0.0",
+                    "sha256": "aaa",
+                    "updated": "2021-03-20T13:54:52.383+02:00",
+                },
+            ]
+        )
+        KeepLatestNDockerImagesAllVersions._get_all_image_manifests = (
+            lambda self, repos: all_versions
+        )
+
+        # The policy's AQL query returned only the "stale" subset: imagine a Delete rule
+        # filtered out the recently-used newest tag 1.2.0. Candidates = 1.1.0 and 1.0.0.
+        candidates = ArtifactsList.from_response(
+            [
+                {
+                    "repo": "docker-local",
+                    "path": "foobar/1.1.0",
+                    "name": "manifest.json",
+                    "sha256": "bbb",
+                    "updated": "2021-03-21T13:54:52.383+02:00",
+                },
+                {
+                    "repo": "docker-local",
+                    "path": "foobar/1.0.0",
+                    "name": "manifest.json",
+                    "sha256": "aaa",
+                    "updated": "2021-03-20T13:54:52.383+02:00",
+                },
+            ]
+        )
+
+        policy = CleanupPolicy("test", KeepLatestNDockerImagesAllVersions(count=2))
+
+        # Latest 2 digests over ALL versions = {ccc (1.2.0), bbb (1.1.0)}.
+        # 1.1.0 (bbb) is protected even though it is a candidate; 1.0.0 (aaa) is not in the
+        # latest 2 -> only 1.0.0 is deleted. (Plain KeepLatestNDockerImages would keep both,
+        # because it only sees the 2-item stale subset.)
+        assert policy.filter(candidates) == [
+            {
+                "repo": "docker-local",
+                "path": "foobar",
+                "name": "1.0.0",
+                "sha256": "aaa",
+                "updated": "2021-03-20T13:54:52.383+02:00",
+                "properties": {},
+                "stats": {},
+            }
         ]
