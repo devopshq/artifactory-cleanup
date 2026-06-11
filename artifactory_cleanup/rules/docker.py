@@ -1,3 +1,4 @@
+import json
 import re
 from collections import defaultdict
 from datetime import timedelta
@@ -237,6 +238,78 @@ class KeepLatestNDockerImages(RuleForDocker):
                     artifacts.keep(artifact)
 
         return artifacts
+
+
+class KeepLatestNDockerImagesAllVersions(RuleForDocker):
+    """
+    Keeps the ``count`` latest Docker image digests for each image, evaluated over **all**
+    tags currently present in the repository - independently of the other rules in the policy.
+
+    Use this instead of ``KeepLatestNDockerImages`` when the policy also contains a filtering
+    ``Delete*`` rule (for example ``DeleteDockerImagesNotUsed``). All rules in a policy share a
+    single AQL ``find`` combined with ``$and``, so ``KeepLatestNDockerImages`` only sees the
+    artifacts that survived the ``Delete*`` rule's filter and therefore cannot protect the
+    truly latest N versions. This rule issues its own AQL query for every manifest, so the
+    common "delete unused, but always keep the latest N" intent becomes expressible in a single
+    policy. See https://github.com/devopshq/artifactory-cleanup/issues/183
+    """
+
+    def __init__(self, count: int):
+        self.count = count
+
+    def _get_all_image_manifests(self, repos) -> ArtifactsList:
+        """
+        Independent AQL query: every image manifest in ``repos``, regardless of the other rules
+        in the policy. Returned artifacts are converted to image-folder form (path=image,
+        name=tag), keeping ``sha256`` and ``updated``.
+        """
+        find = {
+            "$and": [
+                {"$or": [{"repo": repo} for repo in repos]},
+                {
+                    "$or": [
+                        {"name": {"$match": self.MANIFEST_FILENAME}},
+                        {"name": {"$match": self.FAT_MANIFEST_FILENAME}},
+                    ]
+                },
+            ]
+        }
+        aql_text = f'items.find({json.dumps(find)}).include("*")'
+        r = self.session.post("/api/search/aql", data=aql_text)
+        r.raise_for_status()
+        manifests = ArtifactsList.from_response(r.json()["results"])
+        return self._manifest_to_docker_images(manifests)
+
+    def _latest_digests(self, manifests) -> set:
+        """``(repo, path, sha256)`` of the latest ``count`` digests for each image."""
+        manifests_by_image = defaultdict(list)
+        for manifest in manifests:
+            manifests_by_image[(manifest["repo"], manifest["path"])].append(manifest)
+
+        protected = set()
+        for (repo, path), image_manifests in manifests_by_image.items():
+            image_manifests.sort(reverse=True, key=lambda x: x["updated"])
+            digests_to_keep = set()
+            for manifest in image_manifests:
+                if len(digests_to_keep) < self.count:
+                    digests_to_keep.add(manifest["sha256"])
+                if manifest["sha256"] in digests_to_keep:
+                    protected.add((repo, path, manifest["sha256"]))
+        return protected
+
+    def filter(self, artifacts):
+        artifacts = self._manifest_to_docker_images(artifacts)
+        repos = sorted(set(artifact["repo"] for artifact in artifacts))
+        if repos:
+            protected = self._latest_digests(self._get_all_image_manifests(repos))
+            to_keep = [
+                artifact
+                for artifact in artifacts
+                if (artifact["repo"], artifact["path"], artifact["sha256"]) in protected
+            ]
+            artifacts.keep(to_keep)
+        return super().filter(artifacts)
+
 
 class KeepLatestNVersionImagesByProperty(RuleForDocker):
     r"""
