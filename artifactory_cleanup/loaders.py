@@ -98,17 +98,6 @@ class SchemaBuilder:
                 ["server", "user", "password", "policies", "apikey", "access_token"]
             ),
             cfgv.Required("server", cfgv.check_string),
-            # User and password required, if apikey or access_token missing
-            cfgv.Conditional("user", cfgv.check_string, "apikey", cfgv.MISSING, False),
-            cfgv.Conditional(
-                "password", cfgv.check_string, "apikey", cfgv.MISSING, False
-            ),
-            cfgv.Conditional(
-                "user", cfgv.check_string, "access_token", cfgv.MISSING, False
-            ),
-            cfgv.Conditional(
-                "password", cfgv.check_string, "access_token", cfgv.MISSING, False
-            ),
             cfgv.RequiredRecurse("policies", cfgv.Array(policy_schema)),
         )
 
@@ -208,6 +197,12 @@ class YamlConfigLoader:
         password = os.path.expandvars(password)
         apikey = os.path.expandvars(apikey)
         access_token = os.path.expandvars(access_token)
+
+        if not access_token and not apikey and not (user and password):
+            raise InvalidConfigError(
+                "Authentication is required. Provide either 'access_token', 'apikey', or both 'user' and 'password'."
+            )
+
         return server, user, password, apikey, access_token
 
 
