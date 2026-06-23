@@ -166,14 +166,14 @@ class ArtifactoryCleanupCLI(cli.Application):
             print(str(err), file=sys.stderr)
             sys.exit(1)
 
-        server, user, password, apikey = loader.get_connection()
+        server, user, password, apikey, access_token = loader.get_connection()
         session = BaseUrlSession(server)
         if apikey:
             print("Using API Key")
-            headers = {
-                "X-JFrog-Art-Api": apikey
-            }
-            session.headers = headers
+            session.headers.update({"X-JFrog-Art-Api": apikey})
+        elif access_token:
+            print("Using Token")
+            session.headers.update({"Authorization": f"Bearer {access_token}"})
         else:
             print("Using user and password")
             session.auth = HTTPBasicAuth(user, password)
@@ -207,7 +207,7 @@ class ArtifactoryCleanupCLI(cli.Application):
             policy = {
                 "name": summary.policy_name,
                 "file_count": summary.artifacts_removed,
-                "size": summary.artifacts_size
+                "size": summary.artifacts_size,
             }
             if self._output_artifacts:
                 policy["removed_artifacts"] = summary.removed_artifacts

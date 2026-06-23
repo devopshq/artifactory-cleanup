@@ -3,6 +3,7 @@ artifactory-cleanup:
   user: $ARTIFACTORY_USERNAME
   password: $ARTIFACTORY_PASSWORD
   apikey: $ARTIFACTORY_APIKEY
+  access_token: $ARTIFACTORY_ACCESS_TOKEN
 
   policies:
     - name: repo-without-name

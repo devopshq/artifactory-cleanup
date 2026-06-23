@@ -11,11 +11,13 @@ class TestYamlLoader:
         monkeypatch.setenv("ARTIFACTORY_USERNAME", "UserName")
         monkeypatch.setenv("ARTIFACTORY_PASSWORD", "P@ssw0rd")
         monkeypatch.setenv("ARTIFACTORY_APIKEY", "Ap1Key")
+        monkeypatch.setenv("ARTIFACTORY_ACCESS_TOKEN", "T0k3n")
 
         loader = YamlConfigLoader(shared_datadir / "all-built-in-rules.yaml")
-        server, user, password, apikey = loader.get_connection()
+        server, user, password, apikey, access_token = loader.get_connection()
 
         assert server == "https://repo.example.com/artifactory"
         assert user == "UserName"
         assert password == "P@ssw0rd"
         assert apikey == "Ap1Key"
+        assert access_token == "T0k3n"
