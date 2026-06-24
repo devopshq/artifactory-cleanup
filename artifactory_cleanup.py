@@ -1,33 +1,35 @@
 import os
 import json
 
-def clean_artifacts(repo, exclude=None):
-    # Check if the repository is a multi-arch buildx image
-    if os.path.exists(os.path.join(repo, 'list.manifest.json')):
-        # Load the manifest file
-        with open(os.path.join(repo, 'list.manifest.json'), 'r') as f:
-            manifest = json.load(f)
-        
-        # Get the SHA sums from the manifest
-        sha_sums = [item['digest'] for item in manifest['manifest']]
-        
-        # If an exclude list is provided, filter out the SHA sums
-        if exclude:
-            sha_sums = [sha_sum for sha_sum in sha_sums if sha_sum not in exclude]
-        
-        # Remove the list.manifest.json file
-        os.remove(os.path.join(repo, 'list.manifest.json'))
-        
-        # Remove the artifacts
-        for sha_sum in sha_sums:
-            # Remove the artifact directory
-            artifact_dir = os.path.join(repo, sha_sum)
-            if os.path.exists(artifact_dir):
-                shutil.rmtree(artifact_dir)
-    
-    # Call the original clean_artifacts function
-    super().clean_artifacts(repo, exclude)
+def cleanup_tags(repo, exclude_shas, dry_run):
+    # Check for the presence of list.manifest.json file in the tags
+    for tag in repo.tags():
+        manifest_path = os.path.join(repo.working_dir, 'list.manifest.json')
+        if os.path.exists(manifest_path):
+            with open(manifest_path, 'r') as manifest_file:
+                manifest_data = json.load(manifest_file)
+                for sha in manifest_data:
+                    if sha not in exclude_shas:
+                        # Remove the SHA from the exclude list
+                        exclude_shas.remove(sha)
+                        # Remove the list.manifest.json file
+                        os.remove(manifest_path)
+                        # Select the correct SHA from the manifest file
+                        for sha in manifest_data:
+                            if sha not in exclude_shas:
+                                # Remove the tag
+                                if not dry_run:
+                                    repo.delete_tag(tag, sha)
+                                # Print the removed tag
+                                print(f"Removed tag {tag} with SHA {sha}")
+                                break
+                        break
 
-class ArtifactoryCleanup:
-    def clean_artifacts(self, repo, exclude=None):
-        clean_artifacts(repo, exclude)
+def main():
+    repo = Repo()
+    exclude_shas = []
+    dry_run = False
+    cleanup_tags(repo, exclude_shas, dry_run)
+
+if __name__ == "__main__":
+    main()
