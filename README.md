@@ -20,6 +20,7 @@ Everything must be as a code, even cleanup policies!
   - [Delete](#delete)
   - [Keep](#keep)
   - [Docker](#docker)
+  - [Maven](#maven)
   - [Filters](#filters)
   - [Create your own rule](#create-your-own-rule)
 - [How to](#how-to)
@@ -367,6 +368,71 @@ policies:
 
 - `DeleteDockerImageIfNotContainedInPropertiesValue(docker_repo='docker-local', properties_prefix='my-prop', image_prefix=None, full_docker_repo_name=None)`
   \- Remove Docker image, if it is not found in the properties of the artifact repository.
+
+## Maven
+
+- `DeleteMavenArtifactsOlderThanNDays` - Maven-specific wrapper for `DeleteOlderThan`
+
+```yaml
+- rule: DeleteMavenArtifactsOlderThanNDays
+  days: 30
+```
+
+- `DeleteMavenArtifactsOlderThanNDaysWithoutDownloads` - Maven-specific wrapper for `DeleteOlderThanNDaysWithoutDownloads`
+
+```yaml
+- rule: DeleteMavenArtifactsOlderThanNDaysWithoutDownloads
+  days: 30
+```
+
+- `DeleteMavenArtifactsNotUsed` - Maven-specific wrapper for `DeleteNotUsedSince`
+
+```yaml
+- rule: DeleteMavenArtifactsNotUsed
+  days: 30
+```
+
+- `ExcludeMavenSnapshots` - Exclude SNAPSHOT artifacts from cleanup (keep only releases in scope)
+
+```yaml
+- rule: ExcludeMavenSnapshots
+```
+
+- `IncludeMavenSnapshots` - Apply the policy only to SNAPSHOT artifacts
+
+```yaml
+- rule: IncludeMavenSnapshots
+```
+
+- `KeepLatestNMavenArtifacts` - Keep the N most recently created versions of each Maven artifact. All files of a kept version (jar, pom, sources, ...) are preserved.
+
+```yaml
+- rule: KeepLatestNMavenArtifacts
+  count: 5
+```
+
+- `KeepLatestNVersionMavenArtifacts` - Keep the N highest versions of each Maven artifact, compared numerically so `0.1.200` is newer than `0.1.99`. Use `number_of_digits_in_version` to group by major (`1`, default), major.minor (`2`), or all versions together (`0`). Artifacts whose version cannot be parsed are always kept.
+
+```yaml
+# keep 3 versions per major (1.x and 2.x are counted independently, default):
+- rule: KeepLatestNVersionMavenArtifacts
+  count: 3
+
+# keep 3 versions per major.minor (1.0.x and 1.1.x are counted independently):
+- rule: KeepLatestNVersionMavenArtifacts
+  count: 3
+  number_of_digits_in_version: 2
+
+# no grouping — keep only the 3 globally highest versions:
+- rule: KeepLatestNVersionMavenArtifacts
+  count: 3
+  number_of_digits_in_version: 0
+
+# custom regexp for non-standard versions:
+- rule: KeepLatestNVersionMavenArtifacts
+  count: 3
+  custom_regexp: "^release-(\\d+\\.\\d+\\.\\d+)$"
+```
 
 ## Filters
 
