@@ -295,7 +295,7 @@ class CleanupPolicy(object):
                 print()
         return artifacts
 
-    def delete(self, artifact: ArtifactDict, destroy: bool, ignore_not_found: bool = False) -> None:
+    def delete(self, artifact: ArtifactDict, destroy: bool, ignore_not_found: bool = False) -> bool:
         """
         Delete the artifact
         :param artifact: artifact to remove
@@ -316,14 +316,15 @@ class CleanupPolicy(object):
 
         if not destroy:
             print(f"DEBUG - we would delete '{artifact_path}' ({artifact_hash}) - {size(artifact_size)}")
-            return
-        print(f"DESTROY MODE - delete '{artifact_path}' ({artifact_hash}) - {size(artifact_size)}")
+            return False
+        print(f"DESTROY MODE - deleting '{artifact_path}' ({artifact_hash}) - {size(artifact_size)}")
         r = self.session.delete(artifact_path)
         try:
             r.raise_for_status()
         except HTTPError as e:
             if e.response.status_code == 404 and ignore_not_found:
                 print(f"NOT FOUND - '{artifact_path}' was not found, so not deleted.")
-                return
+                return False
             raise
-
+        print(f"DELETED - '{artifact_path}'")
+        return True

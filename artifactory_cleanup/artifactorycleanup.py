@@ -62,22 +62,43 @@ class ArtifactoryCleanup:
                 # Delete artifacts
                 def _delete(artifact):
                     with test_ctx_mgr(get_name_for_ci(artifact)):
-                        policy.delete(artifact, destroy=self.destroy, ignore_not_found=self.ignore_not_found)
+                        return policy.delete(artifact, destroy=self.destroy, ignore_not_found=self.ignore_not_found)
 
                 with ThreadPoolExecutor(max_workers=int(self.worker_count)) as executor:
-                    for artifact in artifacts_to_remove:
-                        executor.submit(_delete, artifact=artifact)
+                    futures = [(artifact, executor.submit(_delete, artifact=artifact)) for artifact in artifacts_to_remove]
+
+                deleted_artifacts = []
+                failed_count = 0
+
+                for artifact, future in futures:
+                    try:
+                        if future.result():
+                            deleted_artifacts.append(artifact)
+                    except Exception as exc:
+                        failed_count += 1
+                        print(f"FAILED - {get_name_for_ci(artifact)}: {exc}")
 
             # Show summary
-            print(f"Deleted artifacts count: {len(artifacts_to_remove)}")
+            if self.destroy:
+                print(f"Deleted artifacts count: {len(deleted_artifacts)}")
+                summary_artifacts = deleted_artifacts
+            else:
+                print(f"Artifacts selected for deletion: {len(artifacts_to_remove)}")
+                summary_artifacts = artifacts_to_remove
+
+            print(f"Failed deletion count: {failed_count}")
+
+            if failed_count:
+                raise ArtifactoryCleanupException(f"{failed_count} artifact(s) failed to delete")
+
             try:
-                artifacts_size = sum([x["size"] for x in artifacts_to_remove])
+                artifacts_size = sum([x["size"] for x in summary_artifacts])
                 print("Summary size: {}".format(artifacts_size))
                 summary = CleanupSummary(
                     policy_name=policy.name,
                     artifacts_size=artifacts_size,
-                    artifacts_removed=len(artifacts_to_remove),
-                    removed_artifacts=artifacts_to_remove
+                    artifacts_removed=len(summary_artifacts),
+                    removed_artifacts=summary_artifacts,
                 )
                 yield summary
             except KeyError:
